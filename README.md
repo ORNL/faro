@@ -3,6 +3,8 @@ Face Recognition from Oak Ridge (FaRO) provides a well-defined server-client int
 
 ## Coming Soon ...
 
+This is a test change to test git access.
+
 ## Citing FaRO
 
 If you use FaRO in your research publications please make sure to cite it as:
