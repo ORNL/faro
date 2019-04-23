@@ -1,0 +1,1 @@
+SHA1 (models/face_vgg16_faster_rcnn.caffemodel) = 83e546bdcc3d47b3859d8ac167effb2d3a086c87

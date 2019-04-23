@@ -1,0 +1,69 @@
+FROM nvidia/digits
+
+    1  uname -a
+    2  nvidia-smi 
+    3  python
+    4  git
+    5  apt search grpc
+    6  pip install keras
+    7  python
+    8  ls
+    9  pwd
+   10  cd home/
+   11  ls
+   12  cd
+   13  ls
+   14  git clone --recursive https://github.com/rbgirshick/py-faster-rcnn.git
+   15  cd py-faster-rcnn/
+   16  ls
+   17  cd lib/
+   18  ls
+   19  make
+   20  pip install cython
+   21  make
+   22  nvcc
+   23  export NCCL_VERSION=2.2.13
+   24  apt-get update && apt-get install -y --no-install-recommends         cuda-libraries-$CUDA_PKG_VERSION         cuda-nvtx-$CUDA_PKG_VERSION         libnccl2=$NCCL_VERSION-1+cuda9.2
+   25  apt-get update && apt-get install -y --no-install-recommends         cuda-libraries-$CUDA_PKG_VERSION         cuda-nvtx-$CUDA_PKG_VERSION         libnccl2=$NCCL_VERSION-1+cuda9.2
+   26  apt-get update && apt-get install -y --no-install-recommends         cuda-libraries-$CUDA_PKG_VERSION         cuda-nvtx-$CUDA_PKG_VERSION         libnccl2
+   27  apt search cuda
+   28  cuda-toolkit-8-0
+   29  apt install cuda-toolkit-8-0
+   30  ls
+   31  make
+   32  make -j 8
+   33  cd ..
+   34  cd caffe-fast-rcnn/
+   35  make -j8 && make pycaffe
+   36  ls
+   37  cp Makefile.config.example Makefile.config
+   38  make -j8 && make pycaffe
+   39  apt search libboost
+   40  apt install libboost-dev
+   41  make -j8 && make pycaffe
+   42  apt search gflags
+   43  apt install libgflags-dev
+   44  make -j8 && make pycaffe
+   45  apt search libglog
+   46  apt search glog
+   47  apt install libgoogle-glog-dev
+   48  make -j8 && make pycaffe
+   49  apt install cblas
+   50  apt install atlas
+   51  apt search atlas
+   52  apt search libatlas-dev
+   53  apt install libatlas-dev
+   54  make -j8 && make pycaffe
+   55  apt search opencv
+   56  apt install libopencv-dev
+   57  make -j8 && make pycaffe
+   58  history
+   59  apt search leveldb
+   60  apt install libleveldb-dev
+   61  apt install python-opencv
+   62  make -j8 && make pycaffe
+   63  apt search lmdb
+   64  apt install liblmdb-dev
+   65  make -j8 && make pycaffe
+   
+   

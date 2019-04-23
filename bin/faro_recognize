@@ -1,0 +1,313 @@
+#! /usr/bin/env python
+
+'''
+MIT License
+
+Copyright (c) 2019 Oak Ridge National Laboratory
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Created on Jul 18, 2018
+
+@author: bolme
+'''
+
+
+
+import faro
+import sys
+import optparse
+import csv
+import pyvision as pv
+#import faro.proto.face_service_pb2_grpc as fs
+#import grpc
+#import skimage
+import skimage.io as skio
+#import skimage.draw as draw
+import faro.proto.proto_types as pt
+#import faro.proto.face_service_pb2 as fsd
+import os
+#import pyvision as pv
+import numpy as np
+#import FaceAlgorithms
+#import scipy.spatial as spat    
+#import grpc._cython.cygrpc as cygrpc                                                            
+import cv2
+
+
+
+
+def parseOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['probe_dir'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Scan a directory of images and recognize faces.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = "0.0.0"
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    # Here are some templates for standard option formats.
+    #parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
+    #                 help="Decrease the verbosity of the program")
+    
+    #parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
+    #                  help="don't print status messages to stdout")
+    
+    parser.add_option("-b", "--best", action="store_true", dest="best", default=False,
+                      help="Detect the 'best' highest scoring face in the image.")
+    
+    #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
+    #                  help="Choose an option.")
+
+    #parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
+    #                  help="A floating point value.")
+
+    parser.add_option( "--match-thresh", type="float", dest="match_thresh", default=None,
+                      help="The threshold for a match.")
+
+    parser.add_option( "--detect-thresh", type="float", dest="detect_thresh", default=None,
+                      help="The threshold for a detection.")
+
+    #parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
+    #                  help="An integer value.")
+
+    parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
+                      help="Process at N images and then stop.")
+
+    parser.add_option( "--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
+                      help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d"%(faro.DEFAULT_MAX_MESSAGE_SIZE))
+
+    parser.add_option( "--min-size", type="int", dest="min_size", default=64,
+                      help="Faces with a height less that this will be ignored.")
+    
+    parser.add_option( "--resample-size", type="int", dest="resample_size", default=None,
+                      help="Images will be scaled to have this maximum dimension.")
+    
+    #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
+    #                  help="A string value.")
+
+    parser.add_option( "--detect-log", type="str", dest="detect_log", default=None,
+                      help="A directory for detection images.")
+
+    parser.add_option( "-f","--face-log", type="str", dest="face_log", default=None,
+                      help="A directory for faces.")
+
+    parser.add_option( "-m","--match-log", type="str", dest="match_log", default=None,
+                      help="A directory to store matching faces.")
+
+    parser.add_option( "-p", "--port", type="str", dest="detect_port", default="localhost:50030",
+                      help="The port used for the recognition service.")
+
+    parser.add_option( "--detect-port", type="str", dest="detect_port", default="localhost:50030",
+                      help="The port used for the recognition service.")
+
+    parser.add_option( "--recognition-port", type="str", dest="rec_port", default="localhost:50030",
+                      help="The port used for the recognition service.")
+
+    parser.add_option( "--same-person", type="str", dest="same_person", default=None,
+                      help="Specifies a python function that returns true if the filenames indicate a match.  Example: lambda x,y: x[:5] == y[:5]")
+
+    parser.add_option( "-s","--scores-csv", type="str", dest="scores_csv", default=None,
+                      help="Save similarity scores to this file.")
+
+    parser.add_option( "-d","--detections-csv", type="str", dest="detections_csv", default=None,
+                      help="Save detection data to the file.")
+
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) != n_args:
+        parser.print_help()
+        print()
+        print(( "Please supply exactly %d arguments."%n_args ))
+        print()
+        exit(-1)
+        
+    return options,args
+
+
+    
+# the main function.
+if __name__ == '__main__':
+    options,args = parseOptions()
+
+    probe_dir = args[0]
+
+    detections_csv_file = None
+    detections_csv = None
+    scores_csv_file = None
+    scores_csv = None
+    
+        
+    
+    face_client = faro.FaceClient(options)
+    
+    print("Checking Service Status...")
+    is_ready,status = face_client.status(verbose=True)
+    if not is_ready:
+        print("ERROR: the face service is not ready.")
+        exit(-1)
+
+    if options.match_thresh == None:
+        options.match_thresh = status.match_threshold
+        
+    if options.match_thresh == None:
+        options.detect_thresh = status.detect_threshold
+        
+    # Check support for large messages        
+    #mat = face_client.echo(np.zeros((2000,2000),np.float32))
+    #print(mat)
+    #exit(0)
+    
+
+    
+    print("Extracting from probe directory:",probe_dir)
+    
+    
+    if options.detections_csv is not None:
+        detections_csv_file = open(options.detections_csv,'w')
+        detections_csv = csv.writer(detections_csv_file)
+        detections_csv.writerow(['path','detect_id','score','x','y','w','h'])
+        detections_csv_file.flush()
+
+
+    
+    face_records = []
+    face_features = []
+    
+    im_count = 0
+    for path,dirs,files in os.walk(probe_dir):
+        #print( path,files )
+        for filename in files:
+            if os.path.splitext(filename)[-1].lower() not in (".jpg",".png",".tif",".tiff",".gif",".ppm",".pgm",".bmp",) :
+                continue
+            if (options.max_images is not None) and (im_count >= options.max_images):
+                break
+            im_count += 1
+            full_path = os.path.join(path,filename)
+            print( "Processing",full_path)
+            im = cv2.imread(full_path)[:,:,::-1] # Convert to RGB
+            
+            # Resample
+            scale = 1.0
+            inv_scale = 1.0
+            if (options.resample_size is not None) and (options.resample_size < max(im.shape[0],im.shape[1])):
+                h,w,_ = im.shape
+                scale = options.resample_size/max(w,h)
+                inv_scale = 1.0/scale
+                w = int(scale*w)
+                h = int(scale*h)
+                im = cv2.resize(im,(w,h),cv2.INTER_AREA)
+                
+            
+            detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size)
+            templates = face_client.extract(im,detections)
+            
+            #print( detections)
+            if options.detect_log is not None:
+                try:
+                    os.makedirs(options.detect_log)
+                except:
+                    pass
+                vis = pv.Image(im[:,:,::-1])
+                for each in detections.face_records:
+                    rect = pt.rect_proto2pv(each.detection.location)
+                    vis.annotateRect(rect)
+                out_name = os.path.splitext(filename)[0]+'_detections.png'
+                out_path = os.path.join(options.detect_log,out_name)
+                print("    Saving Detections To:",out_path)
+                vis.asAnnotated().save(out_path)
+
+            i = 0
+            for face_record in templates.face_records:
+                
+                face_record.source = full_path
+                
+                print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
+                if detections_csv is not None:
+                    detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
+                                             inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
+                                             inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height])
+                    detections_csv_file.flush()
+                    
+                face_records.append(face_record)
+                face_features.append(pt.vector_proto2np(face_record.template.data))
+                
+                if options.face_log is not None:
+                    try:
+                        os.makedirs(options.face_log)
+                    except:
+                        pass
+                    tile = pt.image_proto2pv(face_record.view)
+
+                    out_name = os.path.splitext(filename)[0]+'_face%03d.png'%face_record.detection.detection_id
+                    out_path = os.path.join(options.face_log,out_name)
+                    print("    Saving Face To:",out_path)
+                    tile.save(out_path)
+    
+    
+    scores = face_client.score(face_records, face_records)
+    print(scores)
+    
+    if options.scores_csv is not None:
+        scores_csv_file = open(options.scores_csv,'w')
+        scores_csv = csv.writer(scores_csv_file)
+        scores_csv.writerow(['face_id1','filename1','detect1_id','detect1_score','face_id2','filename2','detect2_id','detect2_score','score','match'])
+        scores_csv_file.flush()
+
+    
+    r,c = scores.shape
+    for i in range(0,r):
+        for j in range(i+1,c):
+            filename1 = face_records[i].source
+            filename2 = face_records[j].source
+            det1 = face_records[i].detection
+            det2 = face_records[j].detection
+
+            print( filename1,det1.detection_id,filename2,det1.detection_id, i,j,scores[i,j]<options.match_thresh,scores[i,j])
+            if scores_csv is not None:
+                scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
+                scores_csv_file.flush()
+            if scores[i,j] < options.match_thresh:
+                tile1 = pt.image_proto2pv(face_records[i].view)
+                tile2 = pt.image_proto2pv(face_records[j].view)
+                cvim1 = tile1.asOpenCV2()
+                cvim2 = tile2.asOpenCV2()
+                cvim3 = np.concatenate([cvim1,cvim2],axis=1)
+                im = pv.Image(cvim3)
+                if options.match_log:
+                    try:
+                        os.makedirs(options.match_log)
+                    except:
+                        pass
+
+                    out_name = 'match_%05d_%05d_s%0.4f.png'%(i,j,scores[i,j])
+                    out_path = os.path.join(options.match_log,out_name)
+                    print("    Saving Match To:",out_path)
+                    im.save(out_path)
+
+    
+    print( "done")

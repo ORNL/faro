@@ -1,0 +1,276 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2019 Oak Ridge National Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+syntax = "proto3";
+
+
+import "faro/proto/image.proto";
+import "faro/proto/geometry.proto";
+
+
+
+
+enum ServiceStatus {
+	UNKNOWN = 0;
+	READY = 1;
+	ERROR = 2;
+	BUSY = 3;
+}
+
+
+enum DataType {
+    EMPTY = 0;
+    STRING = 1;
+    INT = 2; // stored as string
+    FLOAT = 3; // stored as string
+    BYTES = 4; // raw data
+    VECTOR = 5; // floating point values seperated by commas
+    PICKLE = 6;
+    XML = 7;
+    JSON = 8;
+  }
+  
+enum ScoreType{
+	SERVER = 0;
+	L1 = 1;
+	L2 = 2;
+	NEG_DOT = 3;
+}
+	 
+
+message Attribute{
+	//This is intended to support flexible encoding schemes in a dictionary like structure:
+	//Example encodings: MALE:0.975, AGE:35.2, RACE:WHITE 
+	
+	string key = 1;
+	string description = 2; // A text description on the content or type hint
+	
+	// Typically popualate only one of these values
+	bytes buffer = 3;
+	float fvalue = 4;
+	int32 ivalue = 5;
+	string text = 6;
+	bytes pickle = 7;
+	bytes json = 8;
+	Matrix matrix = 9;
+	Vector vector = 10;
+	Image image = 11;
+	Point2D point = 12;
+	Rect rect = 13;
+	bytes xml = 14;
+}
+
+message ErrorMessage{
+	int32 error_code = 3;
+	string error_message = 4;
+}
+
+message Detection{
+	float score = 1;
+	Rect location = 2;
+	int32 detection_id = 3;
+	string detection_class = 4;
+	repeated Attribute attributes = 5;
+}
+
+message Landmark{
+	string landmark_id = 1;
+	Point2D location = 2;
+}
+
+
+message DetectionOptions{
+	string algorithm_id = 1;
+	bool best = 2;
+	float threshold = 3;
+	
+	int32 scale_levels = 4; // number of times to reduce the image by half (pyrDown) before detection
+	int32 scan_levels = 5; // number of times to reduce the image by half and then scan using the detector
+	float scan_overlap = 6; // amount of overlap to use at each scan level.
+
+	int32 min_size = 7;
+}
+
+
+message DetectionList{
+	repeated Detection detections= 1;
+	float detection_time = 2;
+	int32 image_width = 3;
+	int32 image_height = 4;
+	int32 detection_count = 5;
+	DetectionOptions options = 6;
+}
+
+
+message DetectionRequest{
+	Image image = 1;
+	DetectionOptions options = 2;
+	string image_id = 3;
+}
+
+
+message MatchList{
+	repeated MatchInfo match_list = 1;
+}
+
+message MatchInfo{
+	float score = 1;
+	string image_id = 2;
+	string detection_id = 3;
+	string subject_id = 4;
+	string subject_name = 5;
+	Image face = 6;
+}
+
+message TemplateInput{
+	Image im = 1;
+	repeated Rect detections = 2;
+}
+
+
+message FaceTemplate{
+    // Typically just populate one of these fields.
+	Vector data = 1; // A standard floating point feature vector.
+	bytes buffer = 2; // General storage.  Can be used for raw data templates from commercial systems.
+}
+
+
+message TemplateList{
+	repeated FaceTemplate templates = 1;
+}
+
+
+
+message FaceRecord{
+	string subject_id = 1;
+	string name = 5;
+	string source = 4;
+	string notes = 6;
+
+	Image view = 7; // A cropped and scaled image to be viewed by humans.
+	Image aligned = 9; // An aligned image used for template extraction.
+
+	Detection detection = 2; // The detection rectangle etc.
+	repeated Landmark landmarks = 8; // eyes, nose, mouth, etc
+	repeated Attribute attributes = 10; // smiling, glasses, gender, race, ...
+	repeated Attribute internal_data = 11; // a dictionary used to store algorithm specific data about the face.
+	FaceTemplate template = 3; // A small encoding used for fast face matching.
+}
+
+
+message FaceRecordList{
+	repeated FaceRecord face_records = 1;
+}
+
+
+message VerificationRequest{
+	string gallery = 1;
+	string subject_id = 2;
+	repeated FaceRecord face_record = 3;
+}
+
+message VerificationResponse{
+	int32 error_code = 4;
+	string error_message = 5;
+	bool success = 1;
+	float confidence = 2;
+	repeated FaceRecord matches = 3;
+}
+
+message SearchRequest{
+	string gallery_name = 1;
+	FaceRecord face_record = 3;
+	int32 max_results = 4;
+}
+
+message SearchResponse{
+	ErrorMessage message = 1;
+	repeated FaceRecord matches = 2;
+}
+
+message EnrollRequest{
+	string gallery_name = 1;
+	FaceRecordList records = 2;
+}
+
+message ExtractRequest{
+	Image image = 1;
+	FaceRecordList records = 2;
+}
+
+
+message ScoreRequest{
+	// suggested : typically use TemplateLists because they are smaller. Then
+	//             FaceRecordLists should be left empty.
+	// 
+	// FaceRecordsList can be used as a convieniance but may be too large, 
+	// slow, or use to much band with.
+	
+	FaceRecordList face_probes 		= 1;
+	FaceRecordList face_gallery 	= 2;
+	TemplateList   template_probes 	= 3;
+	TemplateList   template_gallery = 4;
+}
+
+
+message FaceStatusRequest{
+	
+}
+
+message FaceServiceInfo{
+	ServiceStatus  	status 				= 1;
+	int32          	worker_count 		= 2;
+	bool    		detection_support 	= 3;
+	bool    		extract_support 	= 4;
+	bool    		score_support 		= 5;
+	bool           	attribute_support 	= 6;
+	ScoreType 		score_type 			= 7;
+	float 			detection_threshold = 8;
+	float 			match_threshold 	= 9;
+	string 			algorithm 			= 10;
+	string 			notes 				= 11;
+}
+
+message Empty{
+
+}
+
+service FaceRecognition{
+	// Service info and defaults
+	rpc status(FaceStatusRequest) returns (FaceServiceInfo){};
+	
+	// Simple operations
+	rpc detect(DetectionRequest) returns (FaceRecordList){}; // Run face detection on an image
+	rpc extract(ExtractRequest) returns (FaceRecordList){}; // Extract face templates for matching
+	rpc score(ScoreRequest) returns (Matrix){}; // returns a distance matrix of size (probeXgallery)
+	//rpc enroll(EnrollRequest) returns (ErrorMessage){}; // Enroll faces in a gallery
+	//rpc search(SearchRequest) returns (SearchResponse){}; // Search a gallery
+	
+	// Combined opperations
+	//rpc detectExtract(DetectionRequest) returns (FaceRecordList){};
+
+	rpc echo(Matrix) returns (Matrix){}; // test large messages
+
+    //rpc cleanexit(Empty) returns (Empty){}; // TODO: This needs to go away.
+}
