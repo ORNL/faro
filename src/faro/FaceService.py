@@ -498,7 +498,7 @@ class FaceService(fs.FaceRecognitionServicer):
         worker_result = self.workers.apply_async(worker_cleanexit,[])
         worker_result.get()
   
-def parseOptions():
+def parseOptions(face_workers_list):
     '''
     Parse command line arguments.
     '''
@@ -585,6 +585,12 @@ def parseOptions():
 
     #parser.add_option( "-r","--recognition-port", type="str", dest="rec_port", default="localhost:50035",
     #                  help="The port used for the recognition service.")
+    
+    for key in face_workers_list:
+        if face_workers_list[key][1] is not None:
+            face_workers_list[key][1](parser)
+
+
 
     port = socket.gethostname() + ":50030"
 
@@ -612,6 +618,7 @@ def serve():
     
     print('Detecting Workers...')
     
+    # Scan for faro workers
     import_dir = faro.__path__[0]
     scripts = os.listdir(os.path.join(import_dir,'face_workers'))
     scripts = filter(lambda x: x.endswith('FaceWorker.py'),scripts)
@@ -620,15 +627,35 @@ def serve():
     scripts = list(scripts)
     scripts.sort()
     
+    print('scripts1',scripts)
+    
+    # Scan for other workers
+    if 'FARO_WORKER_PATH' in os.environ:
+        worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
+        print("Workers Dirs:",worker_dirs)
+        for worker_dir in worker_dirs:
+    
+            #import_dir = faro.__path__[0]
+            worker_scripts = os.listdir(worker_dir)
+            print worker_scripts
+            worker_scripts = list(filter(lambda x: x.endswith('FaceWorker.py'),worker_scripts))
+            sys.path.append(worker_dir)
+            scripts += list(worker_scripts)
+            scripts.sort()
+            
+    print('scripts2',scripts)
+    
     for each in scripts:
         module = importlib.import_module(each[:-3])
         class_obj = getattr(module,each[:-3])
         name = each[:-13].lower()
         print("    Loaded: ",name,'-',class_obj)
        
-        FACE_WORKER_LIST[name] = [class_obj]
+        FACE_WORKER_LIST[name] = [class_obj,None]
+        if 'getOptionsGroup' in dir(module):
+            FACE_WORKER_LIST[name][1] = module.getOptionsGroup
     
-    options,_ = parseOptions()
+    options,_ = parseOptions(FACE_WORKER_LIST)
     
     
     print("storage",os.environ['HOME'])
