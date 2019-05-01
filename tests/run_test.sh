@@ -29,7 +29,7 @@ if [ ! -d data ]; then
 
 fi
 
-../bin/faro_recognize -m matches -f faces -d detections.csv -s scores.csv data
+../bin/faro_recognize -m matches -f faces -d detections.csv -a attributes.csv -s scores.csv data
 
 
 

@@ -135,6 +135,9 @@ def parseOptions():
     parser.add_option( "-d","--detections-csv", type="str", dest="detections_csv", default=None,
                       help="Save detection data to the file.")
 
+    parser.add_option( "-a","--attributes-csv", type="str", dest="attributes_csv", default=None,
+                      help="Save attributes data to the file.")
+
 
     # Parse the arguments and return the results.
     (options, args) = parser.parse_args()
@@ -158,6 +161,8 @@ if __name__ == '__main__':
 
     detections_csv_file = None
     detections_csv = None
+    attributes_csv_file = None
+    attributes_csv = None
     scores_csv_file = None
     scores_csv = None
     
@@ -192,6 +197,12 @@ if __name__ == '__main__':
         detections_csv = csv.writer(detections_csv_file)
         detections_csv.writerow(['path','detect_id','score','x','y','w','h'])
         detections_csv_file.flush()
+
+    if options.attributes_csv is not None:
+        attributes_csv_file = open(options.attributes_csv,'w')
+        attributes_csv = csv.writer(attributes_csv_file)
+        attributes_csv.writerow(['path','detect_id','score','x','y','w','h','attribute','value'])
+        attributes_csv_file.flush()
 
 
     
@@ -252,6 +263,15 @@ if __name__ == '__main__':
                                              inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
                                              inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height])
                     detections_csv_file.flush()
+                    
+                if attributes_csv is not None:
+                    for each in face_record.attributes:
+                        key = each.key
+                        value = each.fvalue
+                        attributes_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
+                                                 inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
+                                                 inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height,key,value])
+                    attributes_csv_file.flush()
                     
                 face_records.append(face_record)
                 face_features.append(pt.vector_proto2np(face_record.template.data))
