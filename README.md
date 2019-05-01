@@ -119,9 +119,25 @@ Additional options can be found using the --help option:
 $ faro_recognize --help
 ```
 
+## Install With PIP
+This is a simple way to add faro to the environment.  It should install everything needed to run client api calls, but it may not provide all the configurations or models needed to run services.
+
+```
+$ pip install git+https://github.com/ORNL/faro.git
+```
+
+## Run a Service Command Line
+Starting python services can be done with a simple command line.  This will start the service specifying the port, the number of workers and the algorithm.
+
+```
+$ python -m faro.FaceService --port=localhost:50030 --worker-count=2 --algorithm=dlib
+```
+
 ## Using the Client API
 
-*Coming Soon*
+Examples can be found in the Notebooks directory.  The best place to start is the [FaRO Client Usage notebook](https://github.com/ORNL/faro/blob/master/Notebooks/FaRO%20Client%20Usage.ipynb).
+
+
 
 ## Getting Help
 
