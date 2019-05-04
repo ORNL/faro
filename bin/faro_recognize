@@ -266,10 +266,11 @@ if __name__ == '__main__':
                 os.makedirs(options.detect_log)
             except:
                 pass
-            vis = pv.Image(im[:,:,::-1])
-            for each in detections.face_records:
+            vis = pv.Image(full_path)
+            for each in templates.face_records:
                 rect = pt.rect_proto2pv(each.detection.location)
                 vis.annotateRect(rect)
+            filename = os.path.split(full_path)[-1]
             out_name = os.path.splitext(filename)[0]+'_detections.png'
             out_path = os.path.join(options.detect_log,out_name)
             print("    Saving Detections To:",out_path)
