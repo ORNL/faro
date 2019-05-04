@@ -28,20 +28,11 @@ Created on Jul 18, 2018
 @author: bolme
 '''
 
-
-#import sys
-#import optparse
-
-#import pyvision as pv
 import faro.proto.face_service_pb2_grpc as fs
 import grpc
-#import skimage
-#import skimage.io
 import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
-#from faro import FaceAlgorithms
-
-#import faro
+import time
 
 class FaceClient(object):
     '''
@@ -52,6 +43,16 @@ class FaceClient(object):
         channel_options = [("grpc.max_send_message_length", max_message_length),
                            ("grpc.max_receive_message_length", max_message_length)]
 
+        
+        try:
+            self.max_async_jobs = 8 # TODO: This needs to come from options
+            self.max_async_jobs = options.max_async_jobs
+        except:
+            pass
+        
+        self.max_async_jobs = max(self.max_async_jobs,1)
+        self.running_async_jobs = []
+        
         channel = grpc.insecure_channel(options.detect_port,
                                         options=channel_options)
         
@@ -65,7 +66,7 @@ class FaceClient(object):
         print (self.status)
         
 
-    def detect(self,im,best=False,threshold=None,min_size=None):
+    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False):
         request = fsd.DetectionRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
@@ -78,8 +79,11 @@ class FaceClient(object):
         else: 
             request.options.threshold = float(threshold)
             
-        face_records = self.detect_stub.detect(request,None)
-        
+        if run_async == False:
+            face_records = self.detect_stub.detect(request,None)
+        elif run_async == True:
+            face_records = self.detect_stub.detect.future(request,None)
+            face_records = face_records.result()
         
         if min_size is not None:
             # iterate through the list in reverse order because we are deleting as we go

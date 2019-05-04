@@ -54,7 +54,43 @@ LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s"
 
 FACE_ALG = None
         
-FACE_WORKER_LIST = {}        
+FACE_WORKER_LIST = {}     
+
+def filterDetectMinSize(face_records, min_size):
+    if min_size is not None:
+        # iterate through the list in reverse order because we are deleting as we go
+        for i in range(len(face_records.face_records))[::-1]:
+            if face_records.face_records[i].detection.location.width < min_size:
+                del face_records.face_records[i]
+    return face_records
+        
+def filterDetectBest(face_records, im, best):
+    # TODO: This is a temporary fix.
+    if best and len(face_records.face_records) > 1:
+        print( "WARNING: detector service does not seem to support best mode.  To many faces returned." )
+        face_records.face_records.sort(key=lambda x: -x.detection.score)
+        #print(detections.detections)
+        while len(face_records.face_records) > 1:
+            del face_records.face_records[-1]
+            
+        assert len(face_records.face_records) == 1
+    
+    if best and len(face_records.face_records) == 0:
+        print( "WARNING: detector service does not seem to support best mode.  No faces returned." )
+        
+        # in this case select the center of the image
+        det = face_records.face_records.add().detection
+        h,w = im.shape[:2]
+        s = 0.8*min(w,h)
+        det.location.CopyFrom(pt.rect_val2proto(0.5*w-0.5*s,0.5*h-0.5*s, s, s))
+        det.score = -1.0 
+        
+        det.detection_id = 1
+        
+        assert len(face_records.face_records) == 1     
+        
+    return face_records       
+   
 
 def worker_init(options):
     ''' Initalize the worker processes. '''
@@ -109,6 +145,9 @@ def worker_detect(mat,options):
         # skimage.io.imsave('/tmp/test.png', mat)
         face_record_list = FaceRecordList()
         FACE_ALG.detect(mat,face_record_list,options)
+        
+        filterDetectMinSize(face_record_list, options.min_size)
+        filterDetectBest(face_record_list, mat, options.best)
         return face_record_list
     except:
         print("ERROR in worker executing detect method.")
@@ -224,87 +263,6 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
     
-    def detectAndExtract(self,request,context):
-        ''' runs the face detector and returns face extracted faces. '''
-        '''
-        I am assuming this funtion does both detection and feature extraction
-        and returns a list of face records.
-        I feel like we should discuss about some design issues going forward.
-        And this is because Commercial Algorithms gives us access to templates/
-        feature vectors in custom data structure formats
-        '''
-        
-       # try:
-       #     
-       #     start = time.time()
-       #     mat = pt.image_proto2np(request.image)
-       #     options = request.options
-       #     notes = "Image Size %s"%(mat.shape,)
-       #     
-       #     worker_result = self.workers.apply_async(worker_detect_extract,[mat,options])
-       #     face_records_list = worker_result.get()
-       #     
-       #     notes += ", Detections %s"%(len(face_records_list.face_records),)
-       #     
-       #     #date = request.image.date
-       #     #time_ = request.image.time
-       #     #module = request.image.module
-       #     #camera = request.image.camera
-       #     #event = request.image.event
-       #     #image_num = request.image.image_num
-
-       #     stop = time.time()
-       #     global LOG_FORMAT
-       #     print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes)))
-    
-       #     #print (face_records_list)
-       #     return face_records_list
-       # 
-       # except:
-       #     traceback.print_exc()
-       #     raise
-
-
-
-        #try:
-        #    start = time.time()
-        #    
-        #    display = False
-        #    #print 'Calling stuff\n'
-        #    mat = pt.image_proto2pv(request.image)
-        #    #print 'Returned from proto2pv\n'
-        #    detections = self.detect(request,context)
-        #    #print 'Returned from detect\n'
-        #    result = fsd.FaceRecordList()
-        #    
-        #    templates = []
-        #    for detect in detections.detections:
-        #        temp = self.extract(mat, detect)
-        #        rect = pt.rect_proto2pv(detect.location)
-        #        view = mat.crop(rect).thumbnail((256,256))
-        #        #view.show(delay=10)
-        #        templates.append(temp)
-        #        face_record = result.face_records.add()
-        #        face_record.subject_id = 'unknown'
-        #        face_record.source = 'unknown'
-        #        face_record.detection.CopyFrom(detect)
-        #        face_record.template.CopyFrom(pt.vector_np2proto(temp))
-        #        face_record.view.CopyFrom(pt.image_pv2proto(view))
-        #        if display:
-        #            mat.annotateRect(rect, 'red')
-        #    
-        #    if display:
-        #        mat.show(delay=10000)
-        #        
-        #    stop = time.time()
-        #    notes = "None"
-        #    print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detectAndExtract()",notes)))
-    
-        #    return result
-    
-        #except:
-        #    traceback.print_exc()
-        #    raise
 
 
     def extract(self,request,context):
@@ -637,7 +595,6 @@ def serve():
     
             #import_dir = faro.__path__[0]
             worker_scripts = os.listdir(worker_dir)
-            print worker_scripts
             worker_scripts = list(filter(lambda x: x.endswith('FaceWorker.py'),worker_scripts))
             sys.path.append(worker_dir)
             scripts += list(worker_scripts)
