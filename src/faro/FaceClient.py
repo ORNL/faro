@@ -84,36 +84,8 @@ class FaceClient(object):
         elif run_async == True:
             face_records = self.detect_stub.detect.future(request,None)
             face_records = face_records.result()
-        
-        if min_size is not None:
-            # iterate through the list in reverse order because we are deleting as we go
-            for i in range(len(face_records.face_records))[::-1]:
-                if face_records.face_records[i].detection.location.width < min_size:
-                    del face_records.face_records[i]
-        
-        # TODO: This is a temporary fix.
-        if best and len(face_records.face_records) > 1:
-            print( "WARNING: detector service does not seem to support best mode.  To many faces returned." )
-            face_records.face_records.sort(key=lambda x: -x.detection.score)
-            #print(detections.detections)
-            while len(face_records.face_records) > 1:
-                del face_records.face_records[-1]
-                
-            assert len(face_records.face_records) == 1
-        
-        if best and len(face_records.face_records) == 0:
-            print( "WARNING: detector service does not seem to support best mode.  No faces returned." )
-            
-            # in this case select the center of the image
-            det = face_records.face_records.add().detection
-            h,w = im.shape[:2]
-            s = 0.8*min(w,h)
-            det.location.CopyFrom(pt.rect_val2proto(0.5*w-0.5*s,0.5*h-0.5*s, s, s))
-            det.score = -1.0 
-            
-            det.detection_id = 1
-            
-            assert len(face_records.face_records) == 1            
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
                                 
         return face_records
     

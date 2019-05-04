@@ -292,6 +292,18 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
+    def detectAndExtract(self,request,context):
+        ''' runs the face detector and returns face extracted faces. '''
+        '''
+        I am assuming this funtion does both detection and feature extraction
+        and returns a list of face records.
+        I feel like we should discuss about some design issues going forward.
+        And this is because Commercial Algorithms gives us access to templates/
+        feature vectors in custom data structure formats
+        '''
+        
+
+
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
         try:
