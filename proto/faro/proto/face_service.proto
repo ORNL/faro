@@ -110,8 +110,20 @@ message DetectionOptions{
 	float scan_overlap = 6; // amount of overlap to use at each scan level.
 
 	int32 min_size = 7;
+
+	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 
+message ExtractOptions{
+	string algorithm_id = 1;
+
+	repeated Attribute attributes = 8; // Used for passing algorithm specific options
+}
+
+message EnrollOptions{
+
+	repeated Attribute attributes = 8; // Used for passing algorithm specific options
+}
 
 message DetectionList{
 	repeated Detection detections= 1;
@@ -123,11 +135,6 @@ message DetectionList{
 }
 
 
-message DetectionRequest{
-	Image image = 1;
-	DetectionOptions options = 2;
-	string image_id = 3;
-}
 
 
 message MatchList{
@@ -212,11 +219,27 @@ message SearchResponse{
 message EnrollRequest{
 	string gallery_name = 1;
 	FaceRecordList records = 2;
+	EnrollOptions enroll_options = 10;
+}
+
+message DetectRequest{
+	Image image = 1;
+	string image_id = 2;
+	DetectionOptions detect_options = 8;
 }
 
 message ExtractRequest{
 	Image image = 1;
-	FaceRecordList records = 2;
+	FaceRecordList records = 4;
+	ExtractOptions extract_options = 9;
+}
+
+message DetectExtractRequest{
+	Image image = 1;
+	string image_id = 2;
+	//FaceRecordList records = 4;
+	DetectionOptions detect_options = 8;
+	ExtractOptions extract_options = 9;
 }
 
 
@@ -261,14 +284,14 @@ service FaceRecognition{
 	rpc status(FaceStatusRequest) returns (FaceServiceInfo){};
 	
 	// Simple operations
-	rpc detect(DetectionRequest) returns (FaceRecordList){}; // Run face detection on an image
+	rpc detect(DetectRequest) returns (FaceRecordList){}; // Run face detection on an image
 	rpc extract(ExtractRequest) returns (FaceRecordList){}; // Extract face templates for matching
 	rpc score(ScoreRequest) returns (Matrix){}; // returns a distance matrix of size (probeXgallery)
 	//rpc enroll(EnrollRequest) returns (ErrorMessage){}; // Enroll faces in a gallery
 	//rpc search(SearchRequest) returns (SearchResponse){}; // Search a gallery
 	
 	// Combined opperations
-	//rpc detectExtract(DetectionRequest) returns (FaceRecordList){};
+	rpc detectExtract(DetectExtractRequest) returns (FaceRecordList){};
 
 	rpc echo(Matrix) returns (Matrix){}; // test large messages
 

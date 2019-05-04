@@ -35,7 +35,7 @@ import traceback
 import time
 #import dlib
 import faro.proto.proto_types as pt
-from faro.proto.face_service_pb2 import DetectionRequest,FaceRecordList
+from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList
 import csv
 #from faro import FaceAlgorithms
 import multiprocessing as mp
@@ -236,7 +236,7 @@ class FaceService(fs.FaceRecognitionServicer):
             
             start = time.time()
             mat = pt.image_proto2np(request.image)
-            options = request.options
+            options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
             
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
@@ -292,17 +292,21 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
-    def detectAndExtract(self,request,context):
-        ''' runs the face detector and returns face extracted faces. '''
-        '''
-        I am assuming this funtion does both detection and feature extraction
-        and returns a list of face records.
-        I feel like we should discuss about some design issues going forward.
-        And this is because Commercial Algorithms gives us access to templates/
-        feature vectors in custom data structure formats
-        '''
+    def detectExtract(self,request,context):
+        ''' runs the face detector and extraction in one call and returns extracted faces. '''
+        # Run detection
+        face_records_list = self.detect(request,context)
         
-
+        # Run extract
+        extract_request = fsd.ExtractRequest()
+        extract_request.image.CopyFrom( request.image )
+        extract_request.records.CopyFrom(face_records_list)
+        extract_request.extract_options.CopyFrom(request.extract_options)
+        
+        face_records_list = self.extract(extract_request, context)
+        
+        return face_records_list
+    
 
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
@@ -431,10 +435,10 @@ class FaceService(fs.FaceRecognitionServicer):
         for each in loadinfo:
             image_count += 1
             #print each
-            request = DetectionRequest()
+            request = DetectRequest()
             im = pv.Image(each['image_path'])
             request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()))#[:,:,::-1]))
-            request.options.best=False
+            request.detect_options.best=False
             
             detected_faces = self.detectAndExtract(request, None)
             

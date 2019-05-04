@@ -33,6 +33,7 @@ import grpc
 import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
 import time
+import faro
 
 class FaceClient(object):
     '''
@@ -45,12 +46,13 @@ class FaceClient(object):
 
         
         try:
-            self.max_async_jobs = 8 # TODO: This needs to come from options
-            self.max_async_jobs = options.max_async_jobs
+            self.max_async_jobs = faro.DEFAULT_MAX_ASYNC # TODO: This needs to come from options
+            self.max_async_jobs = options.max_async
         except:
             pass
         
         self.max_async_jobs = max(self.max_async_jobs,1)
+        self.async_sleep_time = 0.001
         self.running_async_jobs = []
         
         channel = grpc.insecure_channel(options.detect_port,
@@ -65,31 +67,39 @@ class FaceClient(object):
         self.is_ready,self.info = self.status(False)
         print (self.status)
         
+    def waitOnResults(self):
+        if len(self.running_async_jobs) >= self.max_async_jobs:
+            print("Waiting:",len(self.running_async_jobs))
+        while len(self.running_async_jobs) >= self.max_async_jobs:
+            self.running_async_jobs = list(filter(lambda x: x.running(),self.running_async_jobs))
+            if len(self.running_async_jobs) >= self.max_async_jobs: 
+                time.sleep(self.async_sleep_time)
 
     def detect(self,im,best=False,threshold=None,min_size=None, run_async=False):
-        request = fsd.DetectionRequest()
+        request = fsd.DetectRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
         except:
             request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
-        request.options.best=best
+        request.detect_options.best=best
         
         if threshold == None:
-            request.options.threshold = self.info.detection_threshold
+            request.detect_options.threshold = self.info.detection_threshold
         else: 
-            request.options.threshold = float(threshold)
+            request.detect_options.threshold = float(threshold)
             
         if run_async == False:
             face_records = self.detect_stub.detect(request,None)
         elif run_async == True:
+            self.waitOnResults()
             face_records = self.detect_stub.detect.future(request,None)
-            face_records = face_records.result()
+            self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
                                 
         return face_records
     
-    def extract(self,im,face_records):
+    def extract(self, im, face_records, run_async=False):
         request = fsd.ExtractRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
@@ -98,10 +108,41 @@ class FaceClient(object):
             
         request.records.CopyFrom(face_records)
         
-        #request.options.threshold = 0.9
+        if run_async == False:
+            face_records = self.rec_stub.extract(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            face_records = self.rec_stub.extract.future(request,None)
+            self.running_async_jobs.append(face_records)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
         
-        face_records = self.rec_stub.extract(request,None)
         return face_records
+
+    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False):
+        request = fsd.DetectExtractRequest()
+        try:
+            request.image.CopyFrom( pt.image_np2proto(im))
+        except:
+            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+        request.detect_options.best=best
+        
+        if threshold == None:
+            request.detect_options.threshold = self.info.detection_threshold
+        else: 
+            request.detect_options.threshold = float(threshold)
+            
+        if run_async == False:
+            face_records = self.detect_stub.detectExtract(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            face_records = self.detect_stub.detectExtract.future(request,None)
+            self.running_async_jobs.append(face_records)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
+                                
+        return face_records
+    
 
     #def detectAndExtract(self,im,best=False,threshold=0.9):
     #    request = fsd.DetectionRequest()

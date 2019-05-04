@@ -24,6 +24,7 @@ SOFTWARE.
 
 DEFAULT_PORT = "localhost:50030"
 DEFAULT_MAX_MESSAGE_SIZE = 64*1024*1024 # 64MB
+DEFAULT_MAX_ASYNC = 8 # The maximum number of async client calls at a time.
 
 
 

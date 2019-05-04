@@ -49,6 +49,7 @@ import numpy as np
 #import scipy.spatial as spat    
 #import grpc._cython.cygrpc as cygrpc                                                            
 import cv2
+import time
 
 
 
@@ -78,6 +79,9 @@ def parseOptions():
     parser.add_option("-b", "--best", action="store_true", dest="best", default=False,
                       help="Detect the 'best' highest scoring face in the image.")
     
+    parser.add_option("--matches-only", action="store_true", dest="matches_only", default=False,
+                      help="Only save files to the match file if they meet the threshold.")
+    
     #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
     #                  help="Choose an option.")
 
@@ -95,6 +99,9 @@ def parseOptions():
 
     parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
                       help="Process at N images and then stop.")
+
+    parser.add_option( "--max-async", type="int", dest="max_async", default=faro.DEFAULT_MAX_ASYNC,
+                      help="The maximum number of asyncronous call to make at a time. Default=%d"%faro.DEFAULT_MAX_ASYNC)
 
     parser.add_option( "--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
                       help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d"%(faro.DEFAULT_MAX_MESSAGE_SIZE))
@@ -209,6 +216,8 @@ if __name__ == '__main__':
     face_records = []
     face_features = []
     
+    extract_start = time.time()
+    extraction_results = []
     im_count = 0
     for path,dirs,files in os.walk(probe_dir):
         #print( path,files )
@@ -234,63 +243,77 @@ if __name__ == '__main__':
                 im = cv2.resize(im,(w,h),cv2.INTER_AREA)
                 
             
-            detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size)
-            templates = face_client.extract(im,detections)
+            #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
+            #templates = face_client.extract(im,detections.result(),run_async=True).result()
+            templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
+            #templates.result()
+            extraction_results.append((templates,full_path))
             
-            #print( detections)
-            if options.detect_log is not None:
+    # Make sure the extraction finishes processing.
+    tmp = []
+    for templates,full_path in extraction_results:
+        templates = templates.result()
+        tmp.append((templates,full_path))
+    extraction_results = tmp
+    del tmp
+    extract_stop = time.time()
+    
+    for templates,full_path in extraction_results:
+        #templates = templates.result() # Wait for calls to finish and then get the result of the async request
+        #print( detections)
+        if options.detect_log is not None:
+            try:
+                os.makedirs(options.detect_log)
+            except:
+                pass
+            vis = pv.Image(im[:,:,::-1])
+            for each in detections.face_records:
+                rect = pt.rect_proto2pv(each.detection.location)
+                vis.annotateRect(rect)
+            out_name = os.path.splitext(filename)[0]+'_detections.png'
+            out_path = os.path.join(options.detect_log,out_name)
+            print("    Saving Detections To:",out_path)
+            vis.asAnnotated().save(out_path)
+
+        i = 0
+        for face_record in templates.face_records:
+            
+            face_record.source = full_path
+            
+            print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
+            if detections_csv is not None:
+                detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
+                                         inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
+                                         inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height])
+                detections_csv_file.flush()
+                
+            if attributes_csv is not None:
+                for each in face_record.attributes:
+                    key = each.key
+                    value = each.fvalue
+                    attributes_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
+                                             inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
+                                             inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height,key,value])
+                attributes_csv_file.flush()
+                
+            face_records.append(face_record)
+            face_features.append(pt.vector_proto2np(face_record.template.data))
+            
+            if options.face_log is not None:
                 try:
-                    os.makedirs(options.detect_log)
+                    os.makedirs(options.face_log)
                 except:
                     pass
-                vis = pv.Image(im[:,:,::-1])
-                for each in detections.face_records:
-                    rect = pt.rect_proto2pv(each.detection.location)
-                    vis.annotateRect(rect)
-                out_name = os.path.splitext(filename)[0]+'_detections.png'
-                out_path = os.path.join(options.detect_log,out_name)
-                print("    Saving Detections To:",out_path)
-                vis.asAnnotated().save(out_path)
+                tile = pt.image_proto2pv(face_record.view)
 
-            i = 0
-            for face_record in templates.face_records:
-                
-                face_record.source = full_path
-                
-                print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
-                if detections_csv is not None:
-                    detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
-                                             inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
-                                             inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height])
-                    detections_csv_file.flush()
-                    
-                if attributes_csv is not None:
-                    for each in face_record.attributes:
-                        key = each.key
-                        value = each.fvalue
-                        attributes_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
-                                                 inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
-                                                 inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height,key,value])
-                    attributes_csv_file.flush()
-                    
-                face_records.append(face_record)
-                face_features.append(pt.vector_proto2np(face_record.template.data))
-                
-                if options.face_log is not None:
-                    try:
-                        os.makedirs(options.face_log)
-                    except:
-                        pass
-                    tile = pt.image_proto2pv(face_record.view)
-
-                    out_name = os.path.splitext(filename)[0]+'_face%03d.png'%face_record.detection.detection_id
-                    out_path = os.path.join(options.face_log,out_name)
-                    print("    Saving Face To:",out_path)
-                    tile.save(out_path)
+                out_name = os.path.splitext(filename)[0]+'_face%03d.png'%face_record.detection.detection_id
+                out_path = os.path.join(options.face_log,out_name)
+                print("    Saving Face To:",out_path)
+                tile.save(out_path)
     
-    
+    score_start = time.time()
     scores = face_client.score(face_records, face_records)
-    print(scores)
+    score_stop = time.time()
     
     if options.scores_csv is not None:
         scores_csv_file = open(options.scores_csv,'w')
@@ -307,10 +330,13 @@ if __name__ == '__main__':
             det1 = face_records[i].detection
             det2 = face_records[j].detection
 
-            print( filename1,det1.detection_id,filename2,det1.detection_id, i,j,scores[i,j]<options.match_thresh,scores[i,j])
+            if (not options.matches_only) or (scores[i,j] < options.match_thresh):
+                print( filename1,det1.detection_id,filename2,det1.detection_id, i,j,scores[i,j]<options.match_thresh,scores[i,j])
             if scores_csv is not None:
-                scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
-                scores_csv_file.flush()
+                if (not options.matches_only) or (scores[i,j] < options.match_thresh):
+                    scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
+                    scores_csv_file.flush()
+                    
             if scores[i,j] < options.match_thresh:
                 tile1 = pt.image_proto2pv(face_records[i].view)
                 tile2 = pt.image_proto2pv(face_records[j].view)
@@ -329,5 +355,11 @@ if __name__ == '__main__':
                     print("    Saving Match To:",out_path)
                     im.save(out_path)
 
-    
+    extract_time = extract_stop - extract_start
+    template_count = len(face_records)
+    score_time = score_stop - score_start
+    score_count = scores.shape[0]*scores.shape[1]
+    print("Images: %d @ %0.1f"%(im_count,im_count/extract_time))
+    print("Templates: %d @ %0.1f"%(template_count,template_count/extract_time))
+    print("Comparisons: %d @ %0.1f per sec"%(score_count, score_count/score_time,))
     print( "done")
