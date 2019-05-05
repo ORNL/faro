@@ -68,8 +68,8 @@ class FaceClient(object):
         print (self.status)
         
     def waitOnResults(self):
-        if len(self.running_async_jobs) >= self.max_async_jobs:
-            print("Waiting:",len(self.running_async_jobs))
+        #if len(self.running_async_jobs) >= self.max_async_jobs:
+            #print("Waiting:",len(self.running_async_jobs))
         while len(self.running_async_jobs) >= self.max_async_jobs:
             self.running_async_jobs = list(filter(lambda x: x.running(),self.running_async_jobs))
             if len(self.running_async_jobs) >= self.max_async_jobs: 
