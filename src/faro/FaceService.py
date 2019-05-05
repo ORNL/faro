@@ -479,7 +479,7 @@ def parseOptions(face_workers_list):
     args = [] # Add the names of arguments here.
     n_args = len(args)
     args = " ".join(args)
-    description = '''Scan a directory of images and recognize faces.'''
+    description = '''Scan a directory of images and recognize faces.  To scan for new face workers add python files ending with FaceWorker.py to a directory and add the directory to an environment variable called FARO_WORKER_PATH. '''
     epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
     
     version = "0.0.0"

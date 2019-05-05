@@ -82,6 +82,9 @@ def parseOptions():
     parser.add_option("--matches-only", action="store_true", dest="matches_only", default=False,
                       help="Only save files to the match file if they meet the threshold.")
     
+    parser.add_option("--detect-only", action="store_true", dest="detect_only", default=False,
+                      help="Only run detection.  Do not run template extraction or matching.")
+    
     #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
     #                  help="Choose an option.")
 
@@ -245,7 +248,10 @@ if __name__ == '__main__':
             
             #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
             #templates = face_client.extract(im,detections.result(),run_async=True).result()
-            templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
+            if options.detect_only:
+                templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
+            else:
+                templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
             #templates.result()
             extraction_results.append((templates,full_path))
             
@@ -312,55 +318,57 @@ if __name__ == '__main__':
                 print("    Saving Face To:",out_path)
                 tile.save(out_path)
     
-    score_start = time.time()
-    scores = face_client.score(face_records, face_records)
-    score_stop = time.time()
+    if not options.detect_only:
+        score_start = time.time()
+        scores = face_client.score(face_records, face_records)
+        score_stop = time.time()
     
-    if options.scores_csv is not None:
-        scores_csv_file = open(options.scores_csv,'w')
-        scores_csv = csv.writer(scores_csv_file)
-        scores_csv.writerow(['face_id1','filename1','detect1_id','detect1_score','face_id2','filename2','detect2_id','detect2_score','score','match'])
-        scores_csv_file.flush()
-
+        if options.scores_csv is not None:
+            scores_csv_file = open(options.scores_csv,'w')
+            scores_csv = csv.writer(scores_csv_file)
+            scores_csv.writerow(['face_id1','filename1','detect1_id','detect1_score','face_id2','filename2','detect2_id','detect2_score','score','match'])
+            scores_csv_file.flush()
     
-    r,c = scores.shape
-    for i in range(0,r):
-        for j in range(i+1,c):
-            filename1 = face_records[i].source
-            filename2 = face_records[j].source
-            det1 = face_records[i].detection
-            det2 = face_records[j].detection
-
-            if (not options.matches_only) or (scores[i,j] < options.match_thresh):
-                print( filename1,det1.detection_id,filename2,det1.detection_id, i,j,scores[i,j]<options.match_thresh,scores[i,j])
-            if scores_csv is not None:
+    
+        r,c = scores.shape
+        for i in range(0,r):
+            for j in range(i+1,c):
+                filename1 = face_records[i].source
+                filename2 = face_records[j].source
+                det1 = face_records[i].detection
+                det2 = face_records[j].detection
+    
                 if (not options.matches_only) or (scores[i,j] < options.match_thresh):
-                    scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
-                    scores_csv_file.flush()
-                    
-            if scores[i,j] < options.match_thresh:
-                tile1 = pt.image_proto2pv(face_records[i].view)
-                tile2 = pt.image_proto2pv(face_records[j].view)
-                cvim1 = tile1.asOpenCV2()
-                cvim2 = tile2.asOpenCV2()
-                cvim3 = np.concatenate([cvim1,cvim2],axis=1)
-                im = pv.Image(cvim3)
-                if options.match_log:
-                    try:
-                        os.makedirs(options.match_log)
-                    except:
-                        pass
-
-                    out_name = 'match_%05d_%05d_s%0.4f.png'%(i,j,scores[i,j])
-                    out_path = os.path.join(options.match_log,out_name)
-                    print("    Saving Match To:",out_path)
-                    im.save(out_path)
+                    print( filename1,det1.detection_id,filename2,det1.detection_id, i,j,scores[i,j]<options.match_thresh,scores[i,j])
+                if scores_csv is not None:
+                    if (not options.matches_only) or (scores[i,j] < options.match_thresh):
+                        scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
+                        scores_csv_file.flush()
+                        
+                if scores[i,j] < options.match_thresh:
+                    tile1 = pt.image_proto2pv(face_records[i].view)
+                    tile2 = pt.image_proto2pv(face_records[j].view)
+                    cvim1 = tile1.asOpenCV2()
+                    cvim2 = tile2.asOpenCV2()
+                    cvim3 = np.concatenate([cvim1,cvim2],axis=1)
+                    im = pv.Image(cvim3)
+                    if options.match_log:
+                        try:
+                            os.makedirs(options.match_log)
+                        except:
+                            pass
+    
+                        out_name = 'match_%05d_%05d_s%0.4f.png'%(i,j,scores[i,j])
+                        out_path = os.path.join(options.match_log,out_name)
+                        print("    Saving Match To:",out_path)
+                        im.save(out_path)
 
     extract_time = extract_stop - extract_start
     template_count = len(face_records)
-    score_time = score_stop - score_start
-    score_count = scores.shape[0]*scores.shape[1]
     print("Images: %d @ %0.1f"%(im_count,im_count/extract_time))
     print("Templates: %d @ %0.1f"%(template_count,template_count/extract_time))
-    print("Comparisons: %d @ %0.1f per sec"%(score_count, score_count/score_time,))
+    if not options.detect_only:
+        score_time = score_stop - score_start
+        score_count = scores.shape[0]*scores.shape[1]
+        print("Comparisons: %d @ %0.1f per sec"%(score_count, score_count/score_time,))
     print( "done")
