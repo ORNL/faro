@@ -28,7 +28,7 @@ Created on Jul 18, 2018
 @author: bolme
 '''
 
-
+from __future__ import print_function, division
 
 import faro
 import sys
@@ -72,6 +72,9 @@ def parseOptions():
     # Here are some templates for standard option formats.
     #parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
     #                 help="Decrease the verbosity of the program")
+
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                     help="Print out more program information.")
     
     #parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
     #                  help="don't print status messages to stdout")
@@ -180,12 +183,14 @@ if __name__ == '__main__':
     
     face_client = faro.FaceClient(options)
     
-    print("Checking Service Status...")
-    is_ready,status = face_client.status(verbose=True)
+    is_ready,status = face_client.status(verbose=options.verbose)
     if not is_ready:
         print("ERROR: the face service is not ready.")
+        print(status)
         exit(-1)
-
+    else:
+        print('Service Ready.')
+        
     if options.match_thresh == None:
         options.match_thresh = status.match_threshold
         
@@ -279,7 +284,8 @@ if __name__ == '__main__':
             filename = os.path.split(full_path)[-1]
             out_name = os.path.splitext(filename)[0]+'_detections.png'
             out_path = os.path.join(options.detect_log,out_name)
-            print("    Saving Detections To:",out_path)
+            if options.verbose:
+                print("    Saving Detections To:",out_path)
             vis.asAnnotated().save(out_path)
 
         i = 0
@@ -287,7 +293,8 @@ if __name__ == '__main__':
             
             face_record.source = full_path
             
-            print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
+            if options.verbose:
+                print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
             if detections_csv is not None:
                 detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
                                          inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
@@ -295,7 +302,9 @@ if __name__ == '__main__':
                 detections_csv_file.flush()
                 
             if attributes_csv is not None:
-                for each in face_record.attributes:
+                attributes = list(face_record.attributes)
+                attributes.sort(key=lambda x: x.key)
+                for each in attributes:
                     key = each.key
                     value = each.fvalue
                     attributes_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
@@ -315,7 +324,8 @@ if __name__ == '__main__':
 
                 out_name = os.path.splitext(filename)[0]+'_face%03d.png'%face_record.detection.detection_id
                 out_path = os.path.join(options.face_log,out_name)
-                print("    Saving Face To:",out_path)
+                if options.verbose:
+                    print("    Saving Face To:",out_path)
                 tile.save(out_path)
     
     if not options.detect_only:
@@ -371,4 +381,13 @@ if __name__ == '__main__':
         score_time = score_stop - score_start
         score_count = scores.shape[0]*scores.shape[1]
         print("Comparisons: %d @ %0.1f per sec"%(score_count, score_count/score_time,))
-    print( "done")
+    
+    if options.verbose:
+        print( "done")
+        
+        
+        
+        
+        
+        
+        
