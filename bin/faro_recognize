@@ -272,12 +272,14 @@ if __name__ == '__main__':
     for templates,full_path in extraction_results:
         #templates = templates.result() # Wait for calls to finish and then get the result of the async request
         #print( detections)
+        filename = os.path.split(full_path)[-1]
+        vis = pv.Image(full_path)
+
         if options.detect_log is not None:
             try:
                 os.makedirs(options.detect_log)
             except:
                 pass
-            vis = pv.Image(full_path)
             for each in templates.face_records:
                 rect = pt.rect_proto2pv(each.detection.location)
                 vis.annotateRect(rect)
@@ -290,7 +292,6 @@ if __name__ == '__main__':
 
         i = 0
         for face_record in templates.face_records:
-            
             face_record.source = full_path
             
             if options.verbose:
@@ -320,7 +321,20 @@ if __name__ == '__main__':
                     os.makedirs(options.face_log)
                 except:
                     pass
-                tile = pt.image_proto2pv(face_record.view)
+                rect = pt.rect_proto2pv(face_record.detection.location)
+                tile = pv.AffineFromRect(rect,(256,256))(vis)
+
+                # display the attributes if the output was requested.
+                loc = 0
+                if options.attributes_csv is not None:
+                    attributes = list(face_record.attributes)
+                    attributes.sort(key=lambda x: x.key)
+                    for each in attributes:
+                        key = each.key
+                        value = each.fvalue
+                        tile.annotateLabel(pv.Point(10,10+loc),"%s: %0.3f"%(key,value))
+                        loc += 10
+                    tile = pv.Image(tile.asAnnotated())
 
                 out_name = os.path.splitext(filename)[0]+'_face%03d.png'%face_record.detection.detection_id
                 out_path = os.path.join(options.face_log,out_name)
