@@ -1,4 +1,4 @@
-FROM nvidia/digits:latest 
+FROM  nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04 
 LABEL maintainer="bolmeds@ornl.gov"
 LABEL description="A container that runs a service for face-py-faster-rcnn from UMASS"
 
@@ -30,7 +30,6 @@ RUN apt-get update && apt-get install -y \
     python-dev \
     python-pip \
     libgflags-dev \
-    cuda-toolkit-8-0 \
     libcudnn4-dev \
     python-yaml \
     openssh-client \
@@ -40,6 +39,8 @@ RUN apt-get update && apt-get install -y \
     cython \
     unzip && \
     apt-get clean
+
+    #cuda-toolkit-8-0 \
     
 # Get python archives not avalible as apt packages
 RUN pip install easydict && \
