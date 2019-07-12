@@ -1622,193 +1622,193 @@ DESCRIPTOR.enum_types_by_name['DataType'] = _DATATYPE
 DESCRIPTOR.enum_types_by_name['ScoreType'] = _SCORETYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-Attribute = _reflection.GeneratedProtocolMessageType('Attribute', (_message.Message,), dict(
-  DESCRIPTOR = _ATTRIBUTE,
-  __module__ = 'faro.proto.face_service_pb2'
+Attribute = _reflection.GeneratedProtocolMessageType('Attribute', (_message.Message,), {
+  'DESCRIPTOR' : _ATTRIBUTE,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:Attribute)
-  ))
+  })
 _sym_db.RegisterMessage(Attribute)
 
-ErrorMessage = _reflection.GeneratedProtocolMessageType('ErrorMessage', (_message.Message,), dict(
-  DESCRIPTOR = _ERRORMESSAGE,
-  __module__ = 'faro.proto.face_service_pb2'
+ErrorMessage = _reflection.GeneratedProtocolMessageType('ErrorMessage', (_message.Message,), {
+  'DESCRIPTOR' : _ERRORMESSAGE,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:ErrorMessage)
-  ))
+  })
 _sym_db.RegisterMessage(ErrorMessage)
 
-Detection = _reflection.GeneratedProtocolMessageType('Detection', (_message.Message,), dict(
-  DESCRIPTOR = _DETECTION,
-  __module__ = 'faro.proto.face_service_pb2'
+Detection = _reflection.GeneratedProtocolMessageType('Detection', (_message.Message,), {
+  'DESCRIPTOR' : _DETECTION,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:Detection)
-  ))
+  })
 _sym_db.RegisterMessage(Detection)
 
-Landmark = _reflection.GeneratedProtocolMessageType('Landmark', (_message.Message,), dict(
-  DESCRIPTOR = _LANDMARK,
-  __module__ = 'faro.proto.face_service_pb2'
+Landmark = _reflection.GeneratedProtocolMessageType('Landmark', (_message.Message,), {
+  'DESCRIPTOR' : _LANDMARK,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:Landmark)
-  ))
+  })
 _sym_db.RegisterMessage(Landmark)
 
-DetectionOptions = _reflection.GeneratedProtocolMessageType('DetectionOptions', (_message.Message,), dict(
-  DESCRIPTOR = _DETECTIONOPTIONS,
-  __module__ = 'faro.proto.face_service_pb2'
+DetectionOptions = _reflection.GeneratedProtocolMessageType('DetectionOptions', (_message.Message,), {
+  'DESCRIPTOR' : _DETECTIONOPTIONS,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:DetectionOptions)
-  ))
+  })
 _sym_db.RegisterMessage(DetectionOptions)
 
-ExtractOptions = _reflection.GeneratedProtocolMessageType('ExtractOptions', (_message.Message,), dict(
-  DESCRIPTOR = _EXTRACTOPTIONS,
-  __module__ = 'faro.proto.face_service_pb2'
+ExtractOptions = _reflection.GeneratedProtocolMessageType('ExtractOptions', (_message.Message,), {
+  'DESCRIPTOR' : _EXTRACTOPTIONS,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:ExtractOptions)
-  ))
+  })
 _sym_db.RegisterMessage(ExtractOptions)
 
-EnrollOptions = _reflection.GeneratedProtocolMessageType('EnrollOptions', (_message.Message,), dict(
-  DESCRIPTOR = _ENROLLOPTIONS,
-  __module__ = 'faro.proto.face_service_pb2'
+EnrollOptions = _reflection.GeneratedProtocolMessageType('EnrollOptions', (_message.Message,), {
+  'DESCRIPTOR' : _ENROLLOPTIONS,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:EnrollOptions)
-  ))
+  })
 _sym_db.RegisterMessage(EnrollOptions)
 
-DetectionList = _reflection.GeneratedProtocolMessageType('DetectionList', (_message.Message,), dict(
-  DESCRIPTOR = _DETECTIONLIST,
-  __module__ = 'faro.proto.face_service_pb2'
+DetectionList = _reflection.GeneratedProtocolMessageType('DetectionList', (_message.Message,), {
+  'DESCRIPTOR' : _DETECTIONLIST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:DetectionList)
-  ))
+  })
 _sym_db.RegisterMessage(DetectionList)
 
-MatchList = _reflection.GeneratedProtocolMessageType('MatchList', (_message.Message,), dict(
-  DESCRIPTOR = _MATCHLIST,
-  __module__ = 'faro.proto.face_service_pb2'
+MatchList = _reflection.GeneratedProtocolMessageType('MatchList', (_message.Message,), {
+  'DESCRIPTOR' : _MATCHLIST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:MatchList)
-  ))
+  })
 _sym_db.RegisterMessage(MatchList)
 
-MatchInfo = _reflection.GeneratedProtocolMessageType('MatchInfo', (_message.Message,), dict(
-  DESCRIPTOR = _MATCHINFO,
-  __module__ = 'faro.proto.face_service_pb2'
+MatchInfo = _reflection.GeneratedProtocolMessageType('MatchInfo', (_message.Message,), {
+  'DESCRIPTOR' : _MATCHINFO,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:MatchInfo)
-  ))
+  })
 _sym_db.RegisterMessage(MatchInfo)
 
-TemplateInput = _reflection.GeneratedProtocolMessageType('TemplateInput', (_message.Message,), dict(
-  DESCRIPTOR = _TEMPLATEINPUT,
-  __module__ = 'faro.proto.face_service_pb2'
+TemplateInput = _reflection.GeneratedProtocolMessageType('TemplateInput', (_message.Message,), {
+  'DESCRIPTOR' : _TEMPLATEINPUT,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:TemplateInput)
-  ))
+  })
 _sym_db.RegisterMessage(TemplateInput)
 
-FaceTemplate = _reflection.GeneratedProtocolMessageType('FaceTemplate', (_message.Message,), dict(
-  DESCRIPTOR = _FACETEMPLATE,
-  __module__ = 'faro.proto.face_service_pb2'
+FaceTemplate = _reflection.GeneratedProtocolMessageType('FaceTemplate', (_message.Message,), {
+  'DESCRIPTOR' : _FACETEMPLATE,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:FaceTemplate)
-  ))
+  })
 _sym_db.RegisterMessage(FaceTemplate)
 
-TemplateList = _reflection.GeneratedProtocolMessageType('TemplateList', (_message.Message,), dict(
-  DESCRIPTOR = _TEMPLATELIST,
-  __module__ = 'faro.proto.face_service_pb2'
+TemplateList = _reflection.GeneratedProtocolMessageType('TemplateList', (_message.Message,), {
+  'DESCRIPTOR' : _TEMPLATELIST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:TemplateList)
-  ))
+  })
 _sym_db.RegisterMessage(TemplateList)
 
-FaceRecord = _reflection.GeneratedProtocolMessageType('FaceRecord', (_message.Message,), dict(
-  DESCRIPTOR = _FACERECORD,
-  __module__ = 'faro.proto.face_service_pb2'
+FaceRecord = _reflection.GeneratedProtocolMessageType('FaceRecord', (_message.Message,), {
+  'DESCRIPTOR' : _FACERECORD,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:FaceRecord)
-  ))
+  })
 _sym_db.RegisterMessage(FaceRecord)
 
-FaceRecordList = _reflection.GeneratedProtocolMessageType('FaceRecordList', (_message.Message,), dict(
-  DESCRIPTOR = _FACERECORDLIST,
-  __module__ = 'faro.proto.face_service_pb2'
+FaceRecordList = _reflection.GeneratedProtocolMessageType('FaceRecordList', (_message.Message,), {
+  'DESCRIPTOR' : _FACERECORDLIST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:FaceRecordList)
-  ))
+  })
 _sym_db.RegisterMessage(FaceRecordList)
 
-VerificationRequest = _reflection.GeneratedProtocolMessageType('VerificationRequest', (_message.Message,), dict(
-  DESCRIPTOR = _VERIFICATIONREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+VerificationRequest = _reflection.GeneratedProtocolMessageType('VerificationRequest', (_message.Message,), {
+  'DESCRIPTOR' : _VERIFICATIONREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:VerificationRequest)
-  ))
+  })
 _sym_db.RegisterMessage(VerificationRequest)
 
-VerificationResponse = _reflection.GeneratedProtocolMessageType('VerificationResponse', (_message.Message,), dict(
-  DESCRIPTOR = _VERIFICATIONRESPONSE,
-  __module__ = 'faro.proto.face_service_pb2'
+VerificationResponse = _reflection.GeneratedProtocolMessageType('VerificationResponse', (_message.Message,), {
+  'DESCRIPTOR' : _VERIFICATIONRESPONSE,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:VerificationResponse)
-  ))
+  })
 _sym_db.RegisterMessage(VerificationResponse)
 
-SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SEARCHREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:SearchRequest)
-  ))
+  })
 _sym_db.RegisterMessage(SearchRequest)
 
-SearchResponse = _reflection.GeneratedProtocolMessageType('SearchResponse', (_message.Message,), dict(
-  DESCRIPTOR = _SEARCHRESPONSE,
-  __module__ = 'faro.proto.face_service_pb2'
+SearchResponse = _reflection.GeneratedProtocolMessageType('SearchResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHRESPONSE,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:SearchResponse)
-  ))
+  })
 _sym_db.RegisterMessage(SearchResponse)
 
-EnrollRequest = _reflection.GeneratedProtocolMessageType('EnrollRequest', (_message.Message,), dict(
-  DESCRIPTOR = _ENROLLREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+EnrollRequest = _reflection.GeneratedProtocolMessageType('EnrollRequest', (_message.Message,), {
+  'DESCRIPTOR' : _ENROLLREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:EnrollRequest)
-  ))
+  })
 _sym_db.RegisterMessage(EnrollRequest)
 
-DetectRequest = _reflection.GeneratedProtocolMessageType('DetectRequest', (_message.Message,), dict(
-  DESCRIPTOR = _DETECTREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+DetectRequest = _reflection.GeneratedProtocolMessageType('DetectRequest', (_message.Message,), {
+  'DESCRIPTOR' : _DETECTREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:DetectRequest)
-  ))
+  })
 _sym_db.RegisterMessage(DetectRequest)
 
-ExtractRequest = _reflection.GeneratedProtocolMessageType('ExtractRequest', (_message.Message,), dict(
-  DESCRIPTOR = _EXTRACTREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+ExtractRequest = _reflection.GeneratedProtocolMessageType('ExtractRequest', (_message.Message,), {
+  'DESCRIPTOR' : _EXTRACTREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:ExtractRequest)
-  ))
+  })
 _sym_db.RegisterMessage(ExtractRequest)
 
-DetectExtractRequest = _reflection.GeneratedProtocolMessageType('DetectExtractRequest', (_message.Message,), dict(
-  DESCRIPTOR = _DETECTEXTRACTREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+DetectExtractRequest = _reflection.GeneratedProtocolMessageType('DetectExtractRequest', (_message.Message,), {
+  'DESCRIPTOR' : _DETECTEXTRACTREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:DetectExtractRequest)
-  ))
+  })
 _sym_db.RegisterMessage(DetectExtractRequest)
 
-ScoreRequest = _reflection.GeneratedProtocolMessageType('ScoreRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SCOREREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+ScoreRequest = _reflection.GeneratedProtocolMessageType('ScoreRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SCOREREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:ScoreRequest)
-  ))
+  })
 _sym_db.RegisterMessage(ScoreRequest)
 
-FaceStatusRequest = _reflection.GeneratedProtocolMessageType('FaceStatusRequest', (_message.Message,), dict(
-  DESCRIPTOR = _FACESTATUSREQUEST,
-  __module__ = 'faro.proto.face_service_pb2'
+FaceStatusRequest = _reflection.GeneratedProtocolMessageType('FaceStatusRequest', (_message.Message,), {
+  'DESCRIPTOR' : _FACESTATUSREQUEST,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:FaceStatusRequest)
-  ))
+  })
 _sym_db.RegisterMessage(FaceStatusRequest)
 
-FaceServiceInfo = _reflection.GeneratedProtocolMessageType('FaceServiceInfo', (_message.Message,), dict(
-  DESCRIPTOR = _FACESERVICEINFO,
-  __module__ = 'faro.proto.face_service_pb2'
+FaceServiceInfo = _reflection.GeneratedProtocolMessageType('FaceServiceInfo', (_message.Message,), {
+  'DESCRIPTOR' : _FACESERVICEINFO,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:FaceServiceInfo)
-  ))
+  })
 _sym_db.RegisterMessage(FaceServiceInfo)
 
-Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), dict(
-  DESCRIPTOR = _EMPTY,
-  __module__ = 'faro.proto.face_service_pb2'
+Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
+  'DESCRIPTOR' : _EMPTY,
+  '__module__' : 'faro.proto.face_service_pb2'
   # @@protoc_insertion_point(class_scope:Empty)
-  ))
+  })
 _sym_db.RegisterMessage(Empty)
 
 

@@ -19,7 +19,7 @@ USE_GPUS=0
 # USE_GPUS=0,1,1,2
 
 # Run in gpu mode.  On GPUs detection can take approximatly 0.2sec.
-docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 faro_face_rcnn --workers=$WORKER_COUNT --gpus=$USE_GPUS
+docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 faro_face_rcnn 
 
 # Run in cpu mode.  On CPUs detection can take approximatly 25sec.
 # docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 faro_face_rcnn --cpu --workers=$WORKER_COUNT
