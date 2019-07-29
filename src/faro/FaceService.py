@@ -33,11 +33,9 @@ import faro.proto.face_service_pb2 as fsd
 from concurrent import futures
 import traceback
 import time
-#import dlib
 import faro.proto.proto_types as pt
 from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList
 import csv
-#from faro import FaceAlgorithms
 import multiprocessing as mp
 import optparse
 import sys
@@ -238,11 +236,13 @@ class FaceService(fs.FaceRecognitionServicer):
             mat = pt.image_proto2np(request.image)
             options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
-            
+            print('time_check AA:',time.time()-start)
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
+            print('time_check BB:',time.time()-start)
             face_records_list = worker_result.get()
             
             notes += ", Detections %s"%(len(face_records_list.face_records),)
+            print('time_check CC:',time.time()-start)
             
             #date = request.image.date
             #time_ = request.image.time
@@ -311,6 +311,17 @@ class FaceService(fs.FaceRecognitionServicer):
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
         try:
+            print('enroll',request,context)
+            response = fsd.ErrorMessage()
+            return response
+        except:
+            traceback.print_exc()
+            raise
+
+    def search(self,request,context):
+        ''' Enrolls the faces in the gallery. '''
+        try:
+            print('search',request,context)
             name = request.gallery_name
             if name not in self.galleries:
                 self.galleries[name] = faro.Gallery()

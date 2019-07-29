@@ -210,7 +210,7 @@ if __name__ == '__main__':
     if options.detections_csv is not None:
         detections_csv_file = open(options.detections_csv,'w')
         detections_csv = csv.writer(detections_csv_file)
-        detections_csv.writerow(['path','detect_id','score','x','y','w','h'])
+        detections_csv.writerow(['path','detect_id','type','score','x','y','w','h'])
         detections_csv_file.flush()
 
     if options.attributes_csv is not None:
@@ -283,6 +283,7 @@ if __name__ == '__main__':
             for each in templates.face_records:
                 rect = pt.rect_proto2pv(each.detection.location)
                 vis.annotateRect(rect)
+                vis.annotateLabel(pv.Point(rect.x+5,rect.y+5),each.detection.detection_class)
             filename = os.path.split(full_path)[-1]
             out_name = os.path.splitext(filename)[0]+'_detections.png'
             out_path = os.path.join(options.detect_log,out_name)
@@ -297,7 +298,7 @@ if __name__ == '__main__':
             if options.verbose:
                 print("   ",face_record.source,face_record.detection.detection_id,face_record.detection.score)
             if detections_csv is not None:
-                detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.score,
+                detections_csv.writerow([face_record.source,face_record.detection.detection_id,face_record.detection.detection_class,face_record.detection.score,
                                          inv_scale*face_record.detection.location.x,inv_scale*face_record.detection.location.y,
                                          inv_scale*face_record.detection.location.width,inv_scale*face_record.detection.location.height])
                 detections_csv_file.flush()

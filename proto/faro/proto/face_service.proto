@@ -287,8 +287,8 @@ service FaceRecognition{
 	rpc detect(DetectRequest) returns (FaceRecordList){}; // Run face detection on an image
 	rpc extract(ExtractRequest) returns (FaceRecordList){}; // Extract face templates for matching
 	rpc score(ScoreRequest) returns (Matrix){}; // returns a distance matrix of size (probeXgallery)
-	//rpc enroll(EnrollRequest) returns (ErrorMessage){}; // Enroll faces in a gallery
-	//rpc search(SearchRequest) returns (SearchResponse){}; // Search a gallery
+	rpc enroll(EnrollRequest) returns (ErrorMessage){}; // Enroll faces in a gallery
+	rpc search(SearchRequest) returns (SearchResponse){}; // Search a gallery
 	
 	// Combined opperations
 	rpc detectExtract(DetectExtractRequest) returns (FaceRecordList){};

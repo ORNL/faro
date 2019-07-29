@@ -143,6 +143,23 @@ class FaceClient(object):
                                 
         return face_records
     
+    def enroll(self,faces,gallery_name,run_async=False,**kwargs):
+        request = fsd.EnrollRequest()
+        
+        request.gallery_name = gallery_name
+        request.records.CopyFrom(faces)
+    
+        if run_async == False:
+            error = self.rec_stub.enroll(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            error = self.rec_stub.enroll.future(request,None)
+            self.running_async_jobs.append(error)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
+
+        return error
+        
 
     #def detectAndExtract(self,im,best=False,threshold=0.9):
     #    request = fsd.DetectionRequest()
