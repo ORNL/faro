@@ -236,13 +236,13 @@ class FaceService(fs.FaceRecognitionServicer):
             mat = pt.image_proto2np(request.image)
             options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
-            print('time_check AA:',time.time()-start)
+            #print('time_check AA:',time.time()-start)
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
-            print('time_check BB:',time.time()-start)
+            #print('time_check BB:',time.time()-start)
             face_records_list = worker_result.get()
             
             notes += ", Detections %s"%(len(face_records_list.face_records),)
-            print('time_check CC:',time.time()-start)
+            #print('time_check CC:',time.time()-start)
             
             #date = request.image.date
             #time_ = request.image.time
@@ -621,7 +621,11 @@ def serve():
         for worker_dir in worker_dirs:
     
             #import_dir = faro.__path__[0]
-            worker_scripts = os.listdir(worker_dir)
+            try:
+                worker_scripts = os.listdir(worker_dir)
+            except:
+                print("ERROR - Could not read directory in FARO_WORKER_PATH:", worker_dir)
+                raise
             worker_scripts = list(filter(lambda x: x.endswith('FaceWorker.py'),worker_scripts))
             sys.path.append(worker_dir)
             scripts += list(worker_scripts)

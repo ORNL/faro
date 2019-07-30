@@ -55,10 +55,10 @@ dlib = None
 
 from ctypes import *
 import ctypes
-import math
+#import math
 import random
-import sys
-import time
+#import sys
+#import time
 
 def sample(probs):
     s = sum(probs)
@@ -103,52 +103,34 @@ class METADATA(Structure):
     
 
 
-# def classify(net, meta, im):
-#     out = predict_image(net, im)
-#     res = []
-#     for i in range(meta.classes):
-#         res.append((meta.names[i], out[i]))
-#     res = sorted(res, key=lambda x: -x[1])
-#     return res
-# 
-# def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
-#     im = load_image(image, 0, 0)
-#     num = c_int(0)
-#     pnum = pointer(num)
-#     predict_image(net, im)
-#     dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, None, 0, pnum)
-#     num = pnum[0]
-#     if (nms): do_nms_obj(dets, num, meta.classes, nms);
-# 
-#     res = []
-#     for j in range(num):
-#         for i in range(meta.classes):
-#             if dets[j].prob[i] > 0:
-#                 b = dets[j].bbox
-#                 res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-#     res = sorted(res, key=lambda x: -x[1])
-#     free_image(im)
-#     free_detections(dets, num)
-#     return res
-#     
-# if __name__ == "__main__":
-#     #net = load_net("cfg/densenet201.cfg", "/home/pjreddie/trained/densenet201.weights", 0)
-#     #im = load_image("data/wolf.jpg", 0, 0)
-#     #meta = load_meta("cfg/imagenet1k.data")
-#     #r = classify(net, meta, im)
-#     #print r[:10]
-#     net = load_net("cfg/yolov3-tiny.cfg".encode('ascii'), "yolov3-tiny.weights".encode('ascii'), 0)
-#     meta = load_meta("cfg/coco.data".encode('ascii'))
-#     for filename in sys.argv[1:]:
-#         start = time.time()
-#         r = detect(net, meta, filename.encode('ascii'))
-#         stop = time.time()
-#         print("%s: %f0.5s"%(filename,stop-start))
-#         for each in r:
-#             print("    %-12s - %10.5f   %s"%(each[0].decode("utf-8") ,each[1],each[2]))
-# #print(type(each[0]))
-# #print(each)
     
+MODELS = {
+    'yolov3-coco':      ('yolov3.cfg',                'yolov3.weights',                      'coco.data',             0.2, 0.0, 0.4),
+    'yolov3-spp-coco':      ('yolov3-spp.cfg',                'yolov3-spp.weights',          'coco.data',         0.2, 0.0, 0.4),
+    'yolov3-tiny-coco': ('yolov3-tiny.cfg',           'yolov3-tiny.weights',                 'coco.data',             0.2, 0.0, 0.4),
+    'azface':           ('tiny-yolo-azface-fddb.cfg', 'tiny-yolo-azface-fddb_82000.weights', 'azface.data',       0.2, 0.0, 0.4), # https://github.com/azmathmoosa/azFace
+    'yolov3-wider':     ('yolov3-wider.cfg',          'yolov3-wider_16000.weights',          'yolov3-wider.data', 0.2, 0.0, 0.4), # https://github.com/sthanhng/yoloface
+    # poor performance 'yolo-face':     ('yolo-face.cfg',             'yolo-face_final.weights',             'azface.data', 0.35, 0.35, 0.25), # https://github.com/dannyblueliu/YOLO-Face-detection
+    }
+    
+# Here are some darknet or yolo face related options
+# https://github.com/dannyblueliu/YOLO-Face-detection
+# https://github.com/sthanhng/yoloface
+# https://github.com/abars/YoloKerasFaceDetection
+# https://github.com/iitzco/faced
+# https://github.com/azmathmoosa/azFace
+# https://github.com/lincolnhard/facenet-darknet-inference
+# https://github.com/initialz/darknet-yolo-face-detection
+# https://github.com/xhuvom/darknetFaceID
+
+
+
+def getOptionsGroup(parser):
+    model_options = parser.add_option_group("Options for YOLO (darknet).")
+    model_options.add_option( "--yolo-model", type="choice", dest="yolo_model", default='yolov3-wider',
+                              choices=list(MODELS.keys()),
+                      help="Select Yolo model: %s"%(", ".join(MODELS.keys()),))
+
 
 class YoloFaceWorker(faro.FaceWorker):
     '''
@@ -232,11 +214,18 @@ class YoloFaceWorker(faro.FaceWorker):
         self.predict_image.argtypes = [c_void_p, IMAGE]
         self.predict_image.restype = POINTER(c_float)
 
-        self.net = load_net("yolov3-tiny.cfg".encode('ascii'), "yolov3-tiny.weights".encode('ascii'), 0)
-        self.meta = load_meta("coco.data".encode('ascii'))
+        # Load the model and other data
+        model_data = MODELS[options.yolo_model]
+        yolo_cfg = os.path.join('models',model_data[0])
+        yolo_weights = os.path.join('models',model_data[1])
+        yolo_data = os.path.join('models',model_data[2])
+        self.t1 = model_data[3]
+        self.t2 = model_data[4]
+        self.t_nms = model_data[5]
+        self.net = load_net(yolo_cfg.encode('ascii'), yolo_weights.encode('ascii'), 0)
+        self.meta = load_meta(yolo_data.encode('ascii'))
 
-
-        print("YOLO Models Loaded.")
+        print("YOLO Models Loaded.",self.t1,self.t2,self.t_nms)
 
         
     def detect(self,img,face_records,options):
@@ -245,11 +234,17 @@ class YoloFaceWorker(faro.FaceWorker):
         # TODO: Make this an option
         detection_threshold = options.threshold
         if options.best:
-            detection_threshold = -1.5
+            detection_threshold = 0.01
         
-        thresh=.5
-        hier_thresh=.5
-        nms=.45
+        
+        #thresh=.5
+        #hier_thresh=.5
+        #nms=.45
+
+        thresh=self.t1
+        hier_thresh=self.t2
+        #nms=self.t_nms
+        
         start = time.time()
         
         # Reformat the image for darknet
@@ -265,7 +260,7 @@ class YoloFaceWorker(faro.FaceWorker):
         self.predict_image(self.net, im)
         dets = self.get_network_boxes(self.net, im.w, im.h, thresh, hier_thresh, None, 0, pnum)
         num = pnum[0]
-        if (nms): self.do_nms_obj(dets, num, self.meta.classes, nms);
+        if (detection_threshold > 0.0): self.do_nms_obj(dets, num, self.meta.classes, detection_threshold);
 
         # print('time checkBB:',time.time()-start)
     
@@ -335,7 +330,7 @@ class YoloFaceWorker(faro.FaceWorker):
         status_message.score_type = self.scoreType()
         status_message.detection_threshold = self.recommendedDetectionThreshold();
         status_message.match_threshold = self.recommendedScoreThreshold();
-        status_message.algorithm = "YOLO_%s"%("0.0.0");
+        status_message.algorithm = "YOLO_%s"%("2018.09.14");
 
         
         return status_message
@@ -351,7 +346,7 @@ class YoloFaceWorker(faro.FaceWorker):
         DLIB recommends a value of 0.0 for LFW dataset    
         '''
         
-        return 0.0
+        return 0.2
 
     def recommendedScoreThreshold(self,far=-1):
         '''Return the method used to create a score from the template.
@@ -363,6 +358,6 @@ class YoloFaceWorker(faro.FaceWorker):
         DLIB recommends a value of 0.6 for LFW dataset    
         '''
         
-        return 0.60
+        return 0.0
 
 
