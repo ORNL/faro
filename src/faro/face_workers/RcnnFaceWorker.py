@@ -240,6 +240,7 @@ class RcnnFaceWorker(faro.FaceWorker):
     def detect(self,img,face_records,options):
         '''Run a face detector and return rectangles.'''
         
+        
         # Load the model
         mat = img
         #print('options<',options,'>')
@@ -274,8 +275,6 @@ class RcnnFaceWorker(faro.FaceWorker):
             while len(face_records.face_records) > 1:
                 del face_records.face_records[-1]
                 
-            
-
             
     def locate(self,img,face_records,options):
         '''Locate facial features.'''
@@ -314,8 +313,8 @@ class RcnnFaceWorker(faro.FaceWorker):
         status_message = fsd.FaceServiceInfo()
         status_message.status = fsd.READY
         status_message.detection_support = True
-        status_message.extract_support = True
-        status_message.score_support = True
+        status_message.extract_support = False
+        status_message.score_support = False
         status_message.score_type = self.scoreType()
         status_message.detection_threshold = self.recommendedDetectionThreshold();
         status_message.match_threshold = self.recommendedScoreThreshold();
@@ -347,6 +346,6 @@ class RcnnFaceWorker(faro.FaceWorker):
         DLIB recommends a value of 0.6 for LFW dataset    
         '''
         
-        return 0.60
+        return 0.0
 
 

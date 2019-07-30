@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [ ! -f models/face_vgg16_faster_rcnn.caffemodel ]; then
-
-	wget http://supermoe.cs.umass.edu/~hzjiang/data/vgg16_faster_rcnn_iter_80000.caffemodel
+	
+	wget http://supermoe.cs.umass.edu/~hzjiang/data/vgg16_faster_rcnn_iter_80000.caffemodel 
 	mv vgg16_faster_rcnn_iter_80000.caffemodel models/face_vgg16_faster_rcnn.caffemodel
 fi
 
@@ -21,7 +21,7 @@ pushd ../..
 	source env_faro/bin/activate
 
 	./build-proto.sh
-	cp -r src/faro docker/rcnn/face_rcnn/
+	cp -r src/faro services/rcnn/face_rcnn/
 popd 
 
 #echo Sudo access is required to start build the 
