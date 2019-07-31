@@ -33,7 +33,81 @@ if [ "$MODEL" == "azface" ]; then
         echo "Weights file failed verification."
         exit 1
     fi
+
+
+elif [ "$MODEL" == "yolov3-wider" ]; then
+    WEIGHTS_FILE=yolov3-wider_16000
+    
+    if [ ! -f models/$WEIGHTS_FILE.weights ]; then
+        echo These weights need to be installed manually.  Check this link: https://github.com/sthanhng/yoloface/tree/master/model-weights
+        exit
+    fi
+    
+    # Verify the model weights
+    if  shasum -a 256 -c models/${WEIGHTS_FILE}.sha256sum ; then
+        echo "Weights file verified."
+    else
+        echo "Weights file failed verification."
+        exit 1
+    fi
+
+
+
+elif [ "$MODEL" == "yolov3-coco" ]; then
+    WEIGHTS_FILE=yolov3
+    
+    if [ ! -f models/$WEIGHTS_FILE.weights ]; then
+        echo Downloading models/$WEIGHTS_FILE.weights
+        wget https://pjreddie.com/media/files/yolov3.weights -O models/$WEIGHTS_FILE.weights
+    fi
+    
+    # Verify the model weights
+    if  shasum -a 256 -c models/${WEIGHTS_FILE}.sha256sum ; then
+        echo "Weights file verified."
+    else
+        echo "Weights file failed verification."
+        exit 1
+    fi
+
+
+elif [ "$MODEL" == "yolov3-tiny-coco" ]; then
+    WEIGHTS_FILE=yolov3-tiny
+    
+    if [ ! -f models/$WEIGHTS_FILE.weights ]; then
+        echo Downloading models/$WEIGHTS_FILE.weights
+        wget https://pjreddie.com/media/files/yolov3-tiny.weights -O models/$WEIGHTS_FILE.weights
+    fi
+    
+    # Verify the model weights
+    if  shasum -a 256 -c models/${WEIGHTS_FILE}.sha256sum ; then
+        echo "Weights file verified."
+    else
+        echo "Weights file failed verification."
+        exit 1
+    fi
+
+
+elif [ "$MODEL" == "yolov3-spp-coco" ]; then
+    WEIGHTS_FILE=yolov3-spp
+    
+    if [ ! -f models/$WEIGHTS_FILE.weights ]; then
+        echo Downloading models/$WEIGHTS_FILE.weights
+        wget https://pjreddie.com/media/files/yolov3-spp.weights -O models/$WEIGHTS_FILE.weights
+    fi
+    
+    # Verify the model weights
+    if  shasum -a 256 -c models/${WEIGHTS_FILE}.sha256sum ; then
+        echo "Weights file verified."
+    else
+        echo "Weights file failed verification."
+        exit 1
+    fi
+
+else
+    echo ERROR Unknown model: $MODEL - Exiting...
+    exit 1
 fi
+
 
 python -m faro.FaceService --algorithm=yolo --yolo-model=$MODEL -p localhost:50030 -w $WORKER_COUNT
 
