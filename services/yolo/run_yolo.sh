@@ -10,5 +10,5 @@ export CUDA_DEVICE_ORDER=PCI_BUS_ID
 
 
 
-python -m faro.FaceService --algorithm=yolo --yolo-model=azface -p localhost:50050 -w 1
+python -m faro.FaceService --algorithm=yolo --yolo-model=azface -p localhost:50030 -w 4
 
