@@ -105,9 +105,14 @@ def worker_init(options):
     
     assert WORKER_INDEX >= 0
 
-    gpu_id = 0
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "%d"%gpu_id
+    if options.gpus is not "":
+        # This should rotate through the gpus selected for each worker
+        gpus = [each for each in options.gpus.split(',')]
+        
+        gpu_id = gpus[WORKER_INDEX%len(gpus)]
+        print('Worker', WORKER_INDEX, 'running on GPU', gpu_id)
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
     global FACE_ALG 
     
     try: 
@@ -529,6 +534,9 @@ def parseOptions(face_workers_list):
 
     #parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
     #                  help="An integer value.")
+
+    parser.add_option( "--gpus", type="str", dest="gpus", default="",
+                      help="Specify the gpus to use.")
 
     parser.add_option( "-w","--worker-count", type="int", dest="worker_count", default=1,
                       help="Specify the number of worker processes.")

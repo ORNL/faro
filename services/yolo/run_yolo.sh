@@ -2,8 +2,8 @@
 
 # For MODEL select one of yolov3-coco, yolov3-spp-coco, yolov3-tiny-coco, azface, yolov3-wider
 MODEL=azface
-WORKER_COUNT=1
-GPUS=3
+WORKER_COUNT=4
+GPUS=2,3
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`
 
@@ -109,5 +109,5 @@ else
 fi
 
 
-python -m faro.FaceService --algorithm=yolo --yolo-model=$MODEL -p localhost:50030 -w $WORKER_COUNT
+python -m faro.FaceService --algorithm=yolo --yolo-model=$MODEL -p localhost:50030 -w $WORKER_COUNT --gpus=$GPUS
 
