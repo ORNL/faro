@@ -35,6 +35,23 @@ import faro.proto.face_service_pb2 as fsd
 import time
 import faro
 
+class ClientOptions(object):
+    pass
+
+DEFAULT_MAX_ASYNC = 4
+
+def getDefaultClientOptions():
+    '''
+    Create an object containing good default options for the client.
+    '''
+    
+    options = ClientOptions()
+    options.max_async = 4
+    options.detect_port = 'localhost:50030'
+    options.rec_port = 'localhost:50030'
+    
+    return options
+
 class FaceClient(object):
     '''
     
@@ -44,9 +61,9 @@ class FaceClient(object):
         channel_options = [("grpc.max_send_message_length", max_message_length),
                            ("grpc.max_receive_message_length", max_message_length)]
 
+        self.max_async_jobs = DEFAULT_MAX_ASYNC # TODO: This needs to come from options
         
         try:
-            self.max_async_jobs = faro.DEFAULT_MAX_ASYNC # TODO: This needs to come from options
             self.max_async_jobs = options.max_async
         except:
             pass
