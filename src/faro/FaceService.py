@@ -676,7 +676,7 @@ def serve():
     except KeyboardInterrupt:
         face_client.cleanexit()
         server.stop(0)
-        print('Sever Stopped.')
+        print('Server Stopped.')
 
 
 if __name__ == '__main__': 
