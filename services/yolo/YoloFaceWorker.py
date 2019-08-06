@@ -108,8 +108,8 @@ MODELS = {
     'yolov3-coco':      ('yolov3.cfg',                'yolov3.weights',                      'coco.data',             0.2, 0.0, 0.4),
     'yolov3-spp-coco':      ('yolov3-spp.cfg',                'yolov3-spp.weights',          'coco.data',         0.2, 0.0, 0.4),
     'yolov3-tiny-coco': ('yolov3-tiny.cfg',           'yolov3-tiny.weights',                 'coco.data',             0.2, 0.0, 0.4),
-    'azface':           ('tiny-yolo-azface-fddb.cfg', 'tiny-yolo-azface-fddb_82000.weights', 'azface.data',       0.2, 0.0, 0.4), # https://github.com/azmathmoosa/azFace
-    'yolov3-wider':     ('yolov3-wider.cfg',          'yolov3-wider_16000.weights',          'yolov3-wider.data', 0.2, 0.0, 0.4), # https://github.com/sthanhng/yoloface
+    'azface':           ('tiny-yolo-azface-fddb.cfg', 'tiny-yolo-azface-fddb_82000.weights', 'azface.data',       0.5, 0.0, 0.4), # https://github.com/azmathmoosa/azFace
+    'yolov3-wider':     ('yolov3-wider.cfg',          'yolov3-wider_16000.weights',          'yolov3-wider.data', 0.5, 0.0, 0.4), # https://github.com/sthanhng/yoloface
     # poor performance 'yolo-face':     ('yolo-face.cfg',             'yolo-face_final.weights',             'azface.data', 0.35, 0.35, 0.25), # https://github.com/dannyblueliu/YOLO-Face-detection
     }
     
