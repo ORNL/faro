@@ -216,7 +216,7 @@ message SearchRequest{
 message SearchResponse{
 	ErrorMessage message = 1;
 	repeated FaceRecord matches = 2;
-	repeated float scores = 2;
+	repeated float scores = 3;
 }
 
 message EnrollRequest{
