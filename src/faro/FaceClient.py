@@ -92,12 +92,22 @@ class FaceClient(object):
             if len(self.running_async_jobs) >= self.max_async_jobs: 
                 time.sleep(self.async_sleep_time)
 
-    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False):
+    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None):
         request = fsd.DetectRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
         except:
             request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            
+        # Setup the source and subject information.
+        request.source='UNKNOWN_SOURCE'
+        request.subject_id='UNKNOWN_SUBJECT'
+        if source is not None:
+            request.source=source
+        if subject_id is not None:
+            request.subject_id=subject_id
+
+        
         request.detect_options.best=best
         
         if threshold == None:
@@ -118,6 +128,7 @@ class FaceClient(object):
     
     def extract(self, im, face_records, run_async=False):
         request = fsd.ExtractRequest()
+        print("DR INFO",dir(request))
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
         except:
@@ -136,12 +147,23 @@ class FaceClient(object):
         
         return face_records
 
-    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False):
+    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None):
         request = fsd.DetectExtractRequest()
+
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
         except:
             request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+
+        # Setup the source and subject information.
+        request.source='UNKNOWN_SOURCE'
+        request.subject_id='UNKNOWN_SUBJECT'
+        if source is not None:
+            request.source=source
+        if subject_id is not None:
+            request.subject_id=subject_id
+            
+            
         request.detect_options.best=best
         
         if threshold == None:
@@ -164,6 +186,9 @@ class FaceClient(object):
         request = fsd.EnrollRequest()
         
         request.gallery_name = gallery_name
+        
+        #print(type(faces),dir(faces))
+        
         request.records.CopyFrom(faces)
     
         if run_async == False:

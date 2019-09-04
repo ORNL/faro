@@ -121,6 +121,9 @@ def parseOptions():
     #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
     #                  help="A string value.")
 
+    parser.add_option( "--enroll", type="str", dest="gallery_name", default=None,
+                      help="Enroll detected faces into a gallery.")
+
     parser.add_option( "--detect-log", type="str", dest="detect_log", default=None,
                       help="A directory for detection images.")
 
@@ -254,9 +257,10 @@ if __name__ == '__main__':
             #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
             #templates = face_client.extract(im,detections.result(),run_async=True).result()
             if options.detect_only:
-                templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
+                templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=filename)
             else:
-                templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True)
+                templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=filename)
+            
             #templates.result()
             extraction_results.append((templates,full_path))
             
@@ -265,6 +269,11 @@ if __name__ == '__main__':
     for templates,full_path in extraction_results:
         templates = templates.result()
         tmp.append((templates,full_path))
+
+        if options.gallery_name is not None:
+            face_client.enroll(templates, options.gallery_name)
+            
+
     extraction_results = tmp
     del tmp
     extract_stop = time.time()
@@ -285,12 +294,14 @@ if __name__ == '__main__':
                 vis.annotateRect(rect)
                 vis.annotateLabel(pv.Point(rect.x+5,rect.y+5),each.detection.detection_class)
             filename = os.path.split(full_path)[-1]
-            out_name = os.path.splitext(filename)[0]+'_detections.png'
+            out_name = os.path.splitext(filename)[0]+'_detections.jpg'
             out_path = os.path.join(options.detect_log,out_name)
             if options.verbose:
                 print("    Saving Detections To:",out_path)
-            vis.asAnnotated().save(out_path)
-
+            try:
+                vis.asAnnotated().save(out_path)
+            except:
+                print("    ERROR: Could not save image: %s"%(out_path,))
         i = 0
         for face_record in templates.face_records:
             face_record.source = full_path

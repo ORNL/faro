@@ -54,6 +54,10 @@ FACE_ALG = None
         
 FACE_WORKER_LIST = {}     
 
+
+GALLERIES = {}
+
+
 def filterDetectMinSize(face_records, min_size):
     if min_size is not None:
         # iterate through the list in reverse order because we are deleting as we go
@@ -248,7 +252,11 @@ class FaceService(fs.FaceRecognitionServicer):
             
             notes += ", Detections %s"%(len(face_records_list.face_records),)
             #print('time_check CC:',time.time()-start)
-            
+                        
+            for face in face_records_list.face_records:
+                face.source = request.source
+                face.subject_id = request.subject_id
+                            
             #date = request.image.date
             #time_ = request.image.time
             #module = request.image.module
@@ -287,6 +295,7 @@ class FaceService(fs.FaceRecognitionServicer):
             notes += ", Faces %s"%(len(face_records_list.face_records),)
 
             stop = time.time()
+            
             global LOG_FORMAT
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"extract()",notes)))
 
@@ -316,8 +325,29 @@ class FaceService(fs.FaceRecognitionServicer):
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
         try:
-            print('enroll',request,context)
+            start = time.time()
+            
+            gallery_name = request.gallery_name
+            
+            global GALLERIES
+
+            if gallery_name not in GALLERIES:
+                print("Creating gallery",gallery_name)
+                GALLERIES[gallery_name] = {}
+
+            count = 0
+            for face in request.records.face_records:
+                face_id = faro.generateFaceId(face)
+                count += 1 
+                GALLERIES[gallery_name][face_id] = face
+                
             response = fsd.ErrorMessage()
+
+            stop = time.time()
+            notes = "Enrolled %d faces into gallery %s.  Gallery size = %d."%(count,request.gallery_name,len(GALLERIES[gallery_name]))
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes)))
+
             return response
         except:
             traceback.print_exc()

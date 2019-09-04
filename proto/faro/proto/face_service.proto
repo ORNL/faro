@@ -170,6 +170,7 @@ message TemplateList{
 
 
 message FaceRecord{
+	// Note: The face id is a combination of subject_id:source:detection.detection_id is the face id and this should be unique.
 	string subject_id = 1;
 	string name = 5;
 	string source = 4;
@@ -209,11 +210,13 @@ message SearchRequest{
 	string gallery_name = 1;
 	FaceRecord face_record = 3;
 	int32 max_results = 4;
+	float threshold = 5;
 }
 
 message SearchResponse{
 	ErrorMessage message = 1;
 	repeated FaceRecord matches = 2;
+	repeated float scores = 2;
 }
 
 message EnrollRequest{
@@ -224,7 +227,8 @@ message EnrollRequest{
 
 message DetectRequest{
 	Image image = 1;
-	string image_id = 2;
+	string source = 2;
+	string subject_id = 3;
 	DetectionOptions detect_options = 8;
 }
 
@@ -236,7 +240,8 @@ message ExtractRequest{
 
 message DetectExtractRequest{
 	Image image = 1;
-	string image_id = 2;
+	string source = 2;
+	string subject_id = 3;
 	//FaceRecordList records = 4;
 	DetectionOptions detect_options = 8;
 	ExtractOptions extract_options = 9;

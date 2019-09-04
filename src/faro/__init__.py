@@ -43,3 +43,18 @@ import os
 
 
 DEFAULT_STORAGE_DIR = os.path.join(os.environ['HOME'],'faro_storage')
+
+
+def generateFaceId(face):
+    '''
+    Generate a face_id code to identify this particular face.
+    '''
+    if len(face.source) == 0 or face.source == "UNKNOWN_SOURCE":
+        raise ValueError("face.source needs to be defined in order to generate a unique face id code.")
+
+    face_id = "%s:%s:%03d"%(face.subject_id,face.source,face.detection.detection_id)
+
+    return face_id
+
+
+
