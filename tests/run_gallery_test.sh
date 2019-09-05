@@ -39,7 +39,16 @@ if [ ! -d data ]; then
 
 fi
 
-#../bin/faro_recognize -m matches -f faces -d detections.csv -a attributes.csv -s scores.csv data
+
+../bin/faro_recognize --enroll potus --subject-id=0043 --name="George W. Bush" gallery/bush.jpg
+../bin/faro_recognize --enroll potus --subject-id=0044 --name="Barack Obama"   gallery/obama.jpg
+../bin/faro_recognize --enroll potus --subject-id=0045 --name="Donald Trump"   gallery/trump.jpg
+
+../bin/faro_recognize --search potus --search-log=search_log  data
+
+
+
+
 
 
 

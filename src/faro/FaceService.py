@@ -353,22 +353,6 @@ class FaceService(fs.FaceRecognitionServicer):
             traceback.print_exc()
             raise
 
-    def search(self,request,context):
-        ''' Enrolls the faces in the gallery. '''
-        try:
-            print('search',request,context)
-            name = request.gallery_name
-            if name not in self.galleries:
-                self.galleries[name] = faro.Gallery()
-            
-            for each in request.records.face_records:
-                self.galleries[name].addTemplate( each )
-                
-            response = fsd.ErrorMessage()
-            return response
-        except:
-            traceback.print_exc()
-            raise
 
     
     def score(self,request,context):
@@ -440,20 +424,51 @@ class FaceService(fs.FaceRecognitionServicer):
         try:
             start = time.time()
             result = fsd.SearchResponse()
+
+            #print('search',request)
             name = request.gallery_name
-            temp = pt.vector_proto2np(request.face_record.template)
+            probes = request.probes
             max_results = request.max_results
-            if max_results <= 0:
-                max_results = None
+            threshold = request.threshold
             
-            data = self.galleries[name].search(temp,max_results=max_results)
+            if name not in GALLERIES:
+                raise ValueError("Unknown gallery: "+name)
             
-            for each in data:
-                #print "result:",len(each),str(each[0])[:30],str(each[1])[:30]
-                result.matches.add().CopyFrom(each[0])
-                result.matches[-1].similarity_score = each[1]
-                #result.scores.append(each[1])
-                #print "   %12.8f: %s"%(each[1],each[0].name)
+            gallery = fsd.FaceRecordList()
+            for key in GALLERIES[name]:
+                face = GALLERIES[name][key]
+                gallery.face_records.add().CopyFrom(face)
+                
+            print('gallery size',len(gallery.face_records))
+
+            score_request = fsd.ScoreRequest()
+            score_request.face_probes.CopyFrom(probes)
+            score_request.face_gallery.CopyFrom(gallery)
+            
+            scores = self.score(score_request,None)
+                 
+            print('-------------- scores ------------')
+            print(threshold)
+            print(scores)
+            scores = pt.matrix_proto2np(scores)
+            
+            
+            for row in range(scores.shape[0]):
+                out = result.matches.add()
+                matches = []
+                for col in range(scores.shape[1]):
+                    score = scores[row,col]
+                    if score > threshold:
+                        continue
+                    matches.append( [ score, gallery.face_records[col] ] )
+                matches.sort(key=lambda x: x[0])
+                print('matches',matches)
+                for score,face in matches:
+                    out.face_records.add().CopyFrom(face)
+                    out.scores.append(score)
+            #for each in request.face_records:
+            #    self.galleries[name].addTemplate( each )
+                
                 
             notes = "Returned %d Results"%(len(result.matches))
             stop = time.time()

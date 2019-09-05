@@ -102,13 +102,13 @@ class FaceWorker(object):
         
         # Generate probe and gallery matrices
         if len(score_request.face_probes.face_records) > len(score_request.template_probes.templates):
-            probe_mat = [pt.vector_proto2np(face_rec.template.data) for face_rec in score_request.face_records]
+            probe_mat = [pt.vector_proto2np(face_rec.template.data) for face_rec in score_request.face_probes.face_records]
         else:
             probe_mat = [pt.vector_proto2np(template.data) for template in score_request.template_probes.templates]
         probe_mat = np.array(probe_mat,dtype=np.float32)
                 
         if len(score_request.face_gallery.face_records) > len(score_request.template_gallery.templates):
-            gal_mat = [pt.vector_proto2np(face_rec.template.data) for face_rec in score_request.face_records]
+            gal_mat = [pt.vector_proto2np(face_rec.template.data) for face_rec in score_request.face_gallery.face_records]
         else:
             gal_mat = [pt.vector_proto2np(template.data) for template in score_request.template_gallery.templates]
         gal_mat = np.array(gal_mat,dtype=np.float32)

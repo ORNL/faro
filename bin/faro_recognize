@@ -121,9 +121,21 @@ def parseOptions():
     #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
     #                  help="A string value.")
 
-    parser.add_option( "--enroll", type="str", dest="gallery_name", default=None,
+    parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
                       help="Enroll detected faces into a gallery.")
-
+    
+    parser.add_option( "--search", type="str", dest="search_gallery", default=None,
+                      help="Search images for faces from a gallery.")
+    
+    parser.add_option( "--name", type="str", dest="subject_name", default=None,
+                      help="Enroll detected faces into a gallery.")
+    
+    parser.add_option( "--subject-id", type="str", dest="subject_id", default=None,
+                      help="Enroll detected faces into a gallery.")
+    
+    parser.add_option( "--search-log", type="str", dest="search_log", default=None,
+                      help="Enroll detected faces into a gallery.")
+    
     parser.add_option( "--detect-log", type="str", dest="detect_log", default=None,
                       help="A directory for detection images.")
 
@@ -168,12 +180,34 @@ def parseOptions():
     return options,args
 
 
+def getFilesToProcess(args):
+    images = []
+    videos = []
+    for each in args:
+        if os.path.isfile(each) and pv.isImage(each):
+            images.append(each)
+        elif os.path.isfile(each) and pv.isVideo(each):
+            videos.append(each)
+        elif os.path.isdir(each):
+            for path,dirs,files in os.walk(each):
+                for filename in files:
+                    filepath = os.path.join(path,filename)
+                    if os.path.isfile(filepath) and pv.isImage(filepath):
+                        images.append(filepath)
+                    if os.path.isfile(filepath) and pv.isVideo(filepath):
+                        videos.append(filepath)
+        else:
+            raise ValueError("Cannot determine filetype:"+each)
+        
+    print("Found %d images and %d videos."%(len(images),len(videos)))
+                    
+    return images,videos
     
 # the main function.
 if __name__ == '__main__':
     options,args = parseOptions()
 
-    probe_dir = args[0]
+    probes = args
 
     detections_csv_file = None
     detections_csv = None
@@ -202,12 +236,8 @@ if __name__ == '__main__':
         
     # Check support for large messages        
     #mat = face_client.echo(np.zeros((2000,2000),np.float32))
-    #print(mat)
-    #exit(0)
-    
 
     
-    print("Extracting from probe directory:",probe_dir)
     
     
     if options.detections_csv is not None:
@@ -230,49 +260,69 @@ if __name__ == '__main__':
     extract_start = time.time()
     extraction_results = []
     im_count = 0
-    for path,dirs,files in os.walk(probe_dir):
-        #print( path,files )
-        for filename in files:
-            if os.path.splitext(filename)[-1].lower() not in (".jpg",".png",".tif",".tiff",".gif",".ppm",".pgm",".bmp",) :
-                continue
-            if (options.max_images is not None) and (im_count >= options.max_images):
-                break
-            im_count += 1
-            full_path = os.path.join(path,filename)
-            print( "Processing",full_path)
-            im = cv2.imread(full_path)[:,:,::-1] # Convert to RGB
+    
+    images,videos = getFilesToProcess(probes)
+    for full_path in images:
+        print( "Processing",full_path)
+        im = cv2.imread(full_path)[:,:,::-1] # Convert to RGB
+        
+        # Resample
+        scale = 1.0
+        inv_scale = 1.0
+        if (options.resample_size is not None) and (options.resample_size < max(im.shape[0],im.shape[1])):
+            h,w,_ = im.shape
+            scale = options.resample_size/max(w,h)
+            inv_scale = 1.0/scale
+            w = int(scale*w)
+            h = int(scale*h)
+            im = cv2.resize(im,(w,h),cv2.INTER_AREA)
             
-            # Resample
-            scale = 1.0
-            inv_scale = 1.0
-            if (options.resample_size is not None) and (options.resample_size < max(im.shape[0],im.shape[1])):
-                h,w,_ = im.shape
-                scale = options.resample_size/max(w,h)
-                inv_scale = 1.0/scale
-                w = int(scale*w)
-                h = int(scale*h)
-                im = cv2.resize(im,(w,h),cv2.INTER_AREA)
-                
-            
-            #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
-            #templates = face_client.extract(im,detections.result(),run_async=True).result()
-            if options.detect_only:
-                templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=filename)
-            else:
-                templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=filename)
-            
-            #templates.result()
-            extraction_results.append((templates,full_path))
+        
+        #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
+        #templates = face_client.extract(im,detections.result(),run_async=True).result()
+        if options.detect_only:
+            templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=full_path)
+        else:
+            templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=full_path)
+        
+        #templates.result()
+        extraction_results.append((templates,full_path))
             
     # Make sure the extraction finishes processing.
     tmp = []
     for templates,full_path in extraction_results:
         templates = templates.result()
+        print("Faces Detected...",len(templates.face_records))
         tmp.append((templates,full_path))
 
-        if options.gallery_name is not None:
-            face_client.enroll(templates, options.gallery_name)
+        if options.enroll_gallery is not None:
+            face_client.enroll(templates, options.enroll_gallery, subject_id=options.subject_id, subject_name=options.subject_name)
             
+        if options.search_gallery is not None:
+            results = face_client.search(templates, options.search_gallery, threshold=options.match_thresh)
+            if options.search_log is not None:
+                try:
+                    os.makedirs(options.search_log)
+                except:
+                    pass
+                
+                im = pv.Image(full_path)
+                filename = os.path.split(full_path)[-1]
+                for face,matches in zip(templates.face_records,results.matches):
+                    print('scores:',matches.scores)
+                    face_rect = pt.rect_proto2pv(face.detection.location)
+                    if len(matches.scores) > 0:
+                        im.annotateRect(face_rect,color='yellow')
+                        gal = matches.face_records[0]
+                        loc = pv.Point(face_rect.x,face_rect.y+face_rect.h)
+                        im.annotateLabel(loc+pv.Point(0,5), "Name: %s"%(gal.name,), color='yellow')
+                        im.annotateLabel(loc+pv.Point(0,15), "Subject Id: %s"%(gal.subject_id,), color='yellow')
+                        im.annotateLabel(loc+pv.Point(0,25), "Score: %0.4f"%(matches.scores[0],), color='yellow')
+                        im.annotateLabel(loc+pv.Point(0,35), "Enrollment Source: %s"%(gal.source,), color='yellow')
+                    else:
+                        im.annotateRect(face_rect,color='gray')
+                        
+                pv.Image(im.asAnnotated()).save(os.path.join(options.search_log,filename))
 
     extraction_results = tmp
     del tmp

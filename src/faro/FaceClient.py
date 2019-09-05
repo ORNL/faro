@@ -182,13 +182,21 @@ class FaceClient(object):
                                 
         return face_records
     
-    def enroll(self,faces,gallery_name,run_async=False,**kwargs):
+    def enroll(self,faces,gallery_name, subject_id=None, subject_name=None, run_async=False,**kwargs):
         request = fsd.EnrollRequest()
+        
+        #print( "enrolling:",gallery_name,subject_id,subject_name)
         
         request.gallery_name = gallery_name
         
-        #print(type(faces),dir(faces))
+        if subject_id is not None:
+            for face in faces.face_records:
+                face.subject_id = subject_id
         
+        if subject_name is not None:
+            for face in faces.face_records:
+                face.name = subject_name
+                
         request.records.CopyFrom(faces)
     
         if run_async == False:
@@ -196,6 +204,29 @@ class FaceClient(object):
         elif run_async == True:
             self.waitOnResults()
             error = self.rec_stub.enroll.future(request,None)
+            self.running_async_jobs.append(error)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
+
+        return error
+        
+
+    def search(self, faces, gallery_name, max_results=3, threshold=None, run_async=False,**kwargs):
+        request = fsd.SearchRequest()
+        
+        #print( "enrolling:",gallery_name,subject_id,subject_name)
+        request.probes.CopyFrom(faces)
+        request.gallery_name = gallery_name
+        request.max_results=max_results
+        
+        if threshold is not None:
+            request.threshold=threshold
+            
+        if run_async == False:
+            error = self.rec_stub.search(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            error = self.rec_stub.search.future(request,None)
             self.running_async_jobs.append(error)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -267,6 +298,9 @@ class FaceClient(object):
         status_message = self.rec_stub.status(request,None)
         if verbose:
             print(type(status_message),status_message)
+            
+        #self.detect_threshold = status_message.detect_threshold
+        self.match_threshold = status_message.match_threshold
             
         return status_message.status == fsd.READY, status_message
         
