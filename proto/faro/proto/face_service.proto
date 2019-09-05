@@ -141,6 +141,8 @@ message MatchList{
 	repeated MatchInfo match_list = 1;
 }
 
+
+
 message MatchInfo{
 	float score = 1;
 	string image_id = 2;
@@ -150,16 +152,19 @@ message MatchInfo{
 	Image face = 6;
 }
 
+
+
 message TemplateInput{
 	Image im = 1;
 	repeated Rect detections = 2;
 }
 
 
+
 message FaceTemplate{
     // Typically just populate one of these fields.
-	Vector data = 1; // A standard floating point feature vector.
-	bytes buffer = 2; // General storage.  Can be used for raw data templates from commercial systems.
+	Vector data = 1;    // A standard floating point feature vector.
+	bytes buffer = 2;   // General storage.  Can be used for raw data templates from commercial systems.
 }
 
 
@@ -176,19 +181,20 @@ message FaceRecord{
 	string source = 4;
 	string notes = 6;
 
-	Image view = 7; // A cropped and scaled image to be viewed by humans.
-	Image aligned = 9; // An aligned image used for template extraction.
+	Image view = 7;                        // A cropped and scaled image to be viewed by humans.
+	Image aligned = 9;                     // An aligned image used for template extraction.
 
-	Detection detection = 2; // The detection rectangle etc.
-	repeated Landmark landmarks = 8; // eyes, nose, mouth, etc
-	repeated Attribute attributes = 10; // smiling, glasses, gender, race, ...
+	Detection detection = 2;               // The detection rectangle etc.
+	repeated Landmark landmarks = 8;       // eyes, nose, mouth, etc
+	repeated Attribute attributes = 10;    // smiling, glasses, gender, race, ...
 	repeated Attribute internal_data = 11; // a dictionary used to store algorithm specific data about the face.
-	FaceTemplate template = 3; // A small encoding used for fast face matching.
+	FaceTemplate template = 3;             // A small encoding used for fast face matching.
 }
 
 
 message FaceRecordList{
 	repeated FaceRecord face_records = 1;
+	repeated float scores = 2; // Scores returned by gallery searches
 }
 
 
@@ -208,15 +214,14 @@ message VerificationResponse{
 
 message SearchRequest{
 	string gallery_name = 1;
-	FaceRecord face_record = 3;
+	FaceRecordList probes = 3;
 	int32 max_results = 4;
 	float threshold = 5;
 }
 
 message SearchResponse{
 	ErrorMessage message = 1;
-	repeated FaceRecord matches = 2;
-	repeated float scores = 3;
+	repeated FaceRecordList matches = 2;
 }
 
 message EnrollRequest{
