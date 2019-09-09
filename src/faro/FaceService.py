@@ -42,8 +42,8 @@ import sys
 import socket
 import faro
 import os
+import h5py
 
-import skimage.io
 
 LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s"
 #FFD = dlib.get_frontal_face_detector()
@@ -56,7 +56,7 @@ FACE_WORKER_LIST = {}
 
 
 GALLERIES = {}
-
+STORAGE = {}
 
 def filterDetectMinSize(face_records, min_size):
     if min_size is not None:
@@ -224,7 +224,45 @@ class FaceService(fs.FaceRecognitionServicer):
         #self.alg = FaceAlgorithms.FaceAlgorithms()
         self.galleries = {}
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
+        
+        self.gallery_storage = os.path.join(options.storage_dir,'galleries',str(options.algorithm))
+        if not os.path.isdir(self.gallery_storage):
+            print( 'Creating directory for gallery storage:',self.gallery_storage)
+            os.makedirs(self.gallery_storage)
+            
+        self.loadGalleries()
+        
+    def loadGalleries(self):
+        '''Load gallery information into memory on startup.'''
+        global STORAGE, GALLERIES
+        
+        galleries = os.listdir(self.gallery_storage)
+        
+        galleries = list(filter(lambda x: x.endswith('.h5'), galleries))
+        
+        print("Loading %d galleries: %s"%(len(galleries),galleries))
+        for each in galleries:
+            gallery_name = each[:-3]
+            path = os.path.join(self.gallery_storage,gallery_name+'.h5')
+            STORAGE[gallery_name] = h5py.File(path)
+            GALLERIES[gallery_name] = {}
+            
+            print(each,gallery_name,path)
+            print(list(STORAGE[gallery_name]))
+            for each in STORAGE[gallery_name]:
+                data = STORAGE[gallery_name][each]
+                print(data)
+                fr = fsd.FaceRecord()
+                print(data)
+                print(dir(data))
+                #print(list(data))
+                fr.ParseFromString(np.array(data))
+                print(each,fr)
+                GALLERIES[gallery_name][each] = fr
+ 
 
+                
+            
         
     def status(self,request,context):
         ''' Returns the status of the service. '''
@@ -329,17 +367,24 @@ class FaceService(fs.FaceRecognitionServicer):
             
             gallery_name = request.gallery_name
             
-            global GALLERIES
+            global GALLERIES, STORAGE
 
             if gallery_name not in GALLERIES:
-                #print("Creating gallery",gallery_name)
+                print("Creating gallery",gallery_name)
                 GALLERIES[gallery_name] = {}
+                
+                path = os.path.join(self.gallery_storage,gallery_name+'.h5')
+                STORAGE[gallery_name] = h5py.File(path)
 
             count = 0
             for face in request.records.face_records:
                 face_id = faro.generateFaceId(face)
+                #face_id = "-".join(face_id.split('/'))
+                #print('face_id:',face_id)
                 count += 1 
                 GALLERIES[gallery_name][face_id] = face
+                STORAGE[gallery_name][face_id] = np.bytes_(face.SerializeToString())
+                STORAGE[gallery_name].flush()
                 
             response = fsd.ErrorMessage()
 
@@ -486,46 +531,6 @@ class FaceService(fs.FaceRecognitionServicer):
         
         raise NotImplementedError("'verify' is currently not implemented.")
         
-    
-    def batchLoad(self,filepath,gallery_name):
-        start = time.time()
-        f = open(filepath)
-        loadinfo = csv.DictReader(f)
-        image_count = 0
-        face_count = 0
-        for each in loadinfo:
-            image_count += 1
-            #print each
-            request = DetectRequest()
-            im = pv.Image(each['image_path'])
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()))#[:,:,::-1]))
-            request.detect_options.best=False
-            
-            detected_faces = self.detectAndExtract(request, None)
-            
-            if len(detected_faces.face_records) == 1:
-                face_count += 1
-                request = fsd.EnrollRequest()
-                request.gallery_name = gallery_name
-                face = detected_faces.face_records[0]
-                face.subject_id = each['subject_id']
-                face.name = each['name']
-                face.source = each['image_path']
-                
-                request.records.face_records.add().CopyFrom(face)
-
-                #result.face_records[0].name=each['name']
-                #result.face_records[0].subject_id=each['subject_id']
-                
-                self.enroll(request, None)
-                
-                #print "Added %s to gallery %s"%(each,gallery_name)
-            
-            else:
-                print(( "WARNING: Face not found for image %s."%each))
-            stop = time.time()
-        notes = "Loaded %d faces from %d images."%(face_count,image_count)
-        print(( LOG_FORMAT%(pv.timestamp(),stop-start,"batchLoad()",notes)))
 
         
     def cleanexit(self):
@@ -597,7 +602,6 @@ def parseOptions(face_workers_list):
 
     #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
     #                  help="A string value.")
-
     
     parser.add_option( "--storage", type="str", dest="storage_dir", default=faro.DEFAULT_STORAGE_DIR,
                       help="A location to store persistant files. DEFAULT=%s"%faro.DEFAULT_STORAGE_DIR)

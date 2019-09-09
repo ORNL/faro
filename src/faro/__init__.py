@@ -53,6 +53,8 @@ def generateFaceId(face):
         raise ValueError("face.source needs to be defined in order to generate a unique face id code.")
 
     face_id = "%s:%s:%03d"%(face.subject_id,face.source,face.detection.detection_id)
+    
+    face_id = "_-_".join(face_id.split('/'))
 
     return face_id
 
