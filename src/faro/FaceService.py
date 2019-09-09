@@ -383,6 +383,8 @@ class FaceService(fs.FaceRecognitionServicer):
                 #print('face_id:',face_id)
                 count += 1 
                 GALLERIES[gallery_name][face_id] = face
+                if face_id in STORAGE[gallery_name]:
+                    del STORAGE[gallery_name][face_id] # delete so it can be replaced.
                 STORAGE[gallery_name][face_id] = np.bytes_(face.SerializeToString())
                 STORAGE[gallery_name].flush()
                 
