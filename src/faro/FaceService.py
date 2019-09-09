@@ -332,7 +332,7 @@ class FaceService(fs.FaceRecognitionServicer):
             global GALLERIES
 
             if gallery_name not in GALLERIES:
-                print("Creating gallery",gallery_name)
+                #print("Creating gallery",gallery_name)
                 GALLERIES[gallery_name] = {}
 
             count = 0
@@ -439,7 +439,7 @@ class FaceService(fs.FaceRecognitionServicer):
                 face = GALLERIES[name][key]
                 gallery.face_records.add().CopyFrom(face)
                 
-            print('gallery size',len(gallery.face_records))
+            #print('gallery size',len(gallery.face_records))
 
             score_request = fsd.ScoreRequest()
             score_request.face_probes.CopyFrom(probes)
@@ -447,9 +447,9 @@ class FaceService(fs.FaceRecognitionServicer):
             
             scores = self.score(score_request,None)
                  
-            print('-------------- scores ------------')
-            print(threshold)
-            print(scores)
+            #print('-------------- scores ------------')
+            #print(threshold)
+            #print(scores)
             scores = pt.matrix_proto2np(scores)
             
             
@@ -462,7 +462,7 @@ class FaceService(fs.FaceRecognitionServicer):
                         continue
                     matches.append( [ score, gallery.face_records[col] ] )
                 matches.sort(key=lambda x: x[0])
-                print('matches',matches)
+                #print('matches',matches)
                 for score,face in matches:
                     out.face_records.add().CopyFrom(face)
                     out.scores.append(score)
