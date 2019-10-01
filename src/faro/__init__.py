@@ -37,7 +37,7 @@ from .util import loadKeras
 
 from .FaceGallery import Gallery
 
-from .FaceClient import FaceClient
+from .FaceClient import FaceClient, getDefaultClientOptions
 
 import os
 
