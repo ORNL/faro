@@ -109,7 +109,7 @@ def worker_init(options):
     WORKER_INDEX = (int(proc.name.split('-')[-1])-1)%options.worker_count
 
     OPTIONS = options
-    
+ 
     assert WORKER_INDEX >= 0
     if options.gpus is not "":
         # This should rotate through the gpus selected for each worker
@@ -120,6 +120,7 @@ def worker_init(options):
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
     global FACE_ALG 
     try: 
+        options.gpuid = gpu_id
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)
     except:
         print ("ERROR: Worker %d could not be started."%WORKER_INDEX)

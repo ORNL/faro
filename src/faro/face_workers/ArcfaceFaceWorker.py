@@ -52,8 +52,8 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         self.detector.prepare(ctx_id = -1, nms=0.4)
         # load arcface FR model
         self.fr_model = insightface.model_zoo.get_model('arcface_r100_v1',**kwargs)
-        #run on gpu - set ctx_id = -1 for spu usage
-        self.fr_model.prepare(ctx_id = -1)    
+        
+        self.fr_model.prepare(ctx_id = -1) 
                 
         print("ArcFace Models Loaded.")
 
@@ -62,7 +62,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         '''Run a face detector and return rectangles.'''
         print('Running Face Detector For ArchFace')
 
-        print(options.threshold)
+        #print(options.threshold)
         # Run the detector on the image
         dets, lpts = self.detector.detect(img, threshold=options.threshold, scale=1)
         # Now process each face we found and add a face to the records list.
