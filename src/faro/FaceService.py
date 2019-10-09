@@ -115,12 +115,12 @@ def worker_init(options):
         # This should rotate through the gpus selected for each worker
         gpus = [each for each in options.gpus.split(',')]
         gpu_id = gpus[WORKER_INDEX%len(gpus)]
+        options.gpuid = gpu_id
         WORKER_GPU_MAPPING[WORKER_INDEX] = gpu_id
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
     global FACE_ALG 
     try: 
-        options.gpuid = gpu_id
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)
     except:
         print ("ERROR: Worker %d could not be started."%WORKER_INDEX)
