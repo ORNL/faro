@@ -119,6 +119,8 @@ def worker_init(options):
         WORKER_GPU_MAPPING[WORKER_INDEX] = gpu_id
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
+    else:
+        options.gpuid = -1    
     global FACE_ALG 
     try: 
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)
