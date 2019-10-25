@@ -70,7 +70,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
             face_record = face_records.face_records.add()
             face_record.detection.score = dets[idx,-1:]
             ulx, uly, lrx, lry = dets[idx,:-1]        
-            #≈create_square_bbox = np.amax(abs(lrx-ulx) , abs(lry-uly))
+            #create_square_bbox = np.amax(abs(lrx-ulx) , abs(lry-uly))
             face_record.detection.location.CopyFrom(pt.rect_val2proto(ulx, uly, abs(lrx-ulx) , abs(lry-uly)))
             face_record.detection.detection_id = idx
             face_record.detection.detection_class = "FACE_%d"%idx
