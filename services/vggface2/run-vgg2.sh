@@ -2,7 +2,7 @@
 
 HOST=localhost
 PORT=50030
-WORKER_COUNT=2
+WORKER_COUNT=1
 
 if lsof -i:$PORT
 then

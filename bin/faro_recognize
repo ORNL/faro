@@ -208,7 +208,6 @@ if __name__ == '__main__':
     options,args = parseOptions()
 
     probes = args
-
     detections_csv_file = None
     detections_csv = None
     attributes_csv_file = None
@@ -265,7 +264,7 @@ if __name__ == '__main__':
     for full_path in images:
         print( "Processing",full_path)
         im = cv2.imread(full_path)[:,:,::-1] # Convert to RGB
-        
+        print(im.shape)
         # Resample
         scale = 1.0
         inv_scale = 1.0
@@ -280,11 +279,11 @@ if __name__ == '__main__':
         
         #detections = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size,run_async=True)
         #templates = face_client.extract(im,detections.result(),run_async=True).result()
+    
         if options.detect_only:
             templates = face_client.detect(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=full_path)
         else:
             templates = face_client.detectExtract(im,best=options.best,threshold=options.detect_thresh,min_size=options.min_size, run_async=True,source=full_path)
-        
         #templates.result()
         extraction_results.append((templates,full_path))
             
@@ -327,7 +326,6 @@ if __name__ == '__main__':
     extraction_results = tmp
     del tmp
     extract_stop = time.time()
-    
     for templates,full_path in extraction_results:
         #templates = templates.result() # Wait for calls to finish and then get the result of the async request
         #print( detections)
@@ -343,6 +341,7 @@ if __name__ == '__main__':
                 rect = pt.rect_proto2pv(each.detection.location)
                 vis.annotateRect(rect)
                 vis.annotateLabel(pv.Point(rect.x+5,rect.y+5),each.detection.detection_class)
+                vis.annotateLabel(pv.Point(rect.x+5,rect.y+20),"Score: %0.4f"%(each.detection.score,), color='yellow')
             filename = os.path.split(full_path)[-1]
             out_name = os.path.splitext(filename)[0]+'_detections.jpg'
             out_path = os.path.join(options.detect_log,out_name)
@@ -430,7 +429,6 @@ if __name__ == '__main__':
                     if (not options.matches_only) or (scores[i,j] < options.match_thresh):
                         scores_csv.writerow([i,filename1,det1.detection_id,det1.score,j,filename2,det2.detection_id,det2.score,scores[i,j],scores[i,j]<options.match_thresh])
                         scores_csv_file.flush()
-                        
                 if scores[i,j] < options.match_thresh:
                     tile1 = pt.image_proto2pv(face_records[i].view)
                     tile2 = pt.image_proto2pv(face_records[j].view)
@@ -452,7 +450,7 @@ if __name__ == '__main__':
     extract_time = extract_stop - extract_start
     template_count = len(face_records)
     print("Images: %d @ %0.1f"%(im_count,im_count/extract_time))
-    print("Templates: %d @ %0.1f"%(template_count,template_count/extract_time))
+    print("Templates: %d @ %0.1f @time %0.1f"%(template_count,template_count/extract_time,extract_time))
     if not options.detect_only:
         score_time = score_stop - score_start
         score_count = scores.shape[0]*scores.shape[1]

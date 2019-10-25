@@ -55,6 +55,7 @@ FACE_ALG = None
 FACE_WORKER_LIST = {}     
 
 
+WORKER_GPU_MAPPING = {}
 GALLERIES = {}
 STORAGE = {}
 
@@ -101,27 +102,28 @@ def worker_init(options):
     
     global MYNET,WORKER_INDEX,OPTIONS
     global FACE_WORKER_LIST
+    global WORKER_GPU_MAPPING
+
     #cfg.TEST.HAS_RPN = True  # Use RPN for proposals
     proc = mp.current_process()
     WORKER_INDEX = (int(proc.name.split('-')[-1])-1)%options.worker_count
 
     OPTIONS = options
-    
+ 
     assert WORKER_INDEX >= 0
-
     if options.gpus is not "":
         # This should rotate through the gpus selected for each worker
         gpus = [each for each in options.gpus.split(',')]
-        
         gpu_id = gpus[WORKER_INDEX%len(gpus)]
-        print('Worker', WORKER_INDEX, 'running on GPU', gpu_id)
+        options.gpuid = gpu_id
+        WORKER_GPU_MAPPING[WORKER_INDEX] = gpu_id
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
+    else:
+        options.gpuid = -1    
     global FACE_ALG 
-    
     try: 
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)
-        
     except:
         print ("ERROR: Worker %d could not be started."%WORKER_INDEX)
         traceback.print_exc() 
@@ -145,8 +147,8 @@ def worker_status():
 
 def worker_detect(mat,options):
     global FACE_ALG
+    global WORKER_GPU_MAPPING
     assert FACE_ALG is not None
-    
     try:
         # uncomment this line to check that the image is comming through properly.
         # skimage.io.imsave('/tmp/test.png', mat)
