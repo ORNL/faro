@@ -29,6 +29,7 @@ DEFAULT_MAX_ASYNC = 8 # The maximum number of async client calls at a time.
 
 
 
+
 from .FaceWorker import FaceWorker, SCORE_L1, SCORE_L2, SCORE_DOT, SCORE_SERVER, STATUS_READY
 #from faro.face_workers import DlibFaceWorker
 #from faro.face_workers import VggFaceWorker
@@ -41,8 +42,12 @@ from .FaceClient import FaceClient, getDefaultClientOptions
 
 import os
 
+try:
+    DEFAULT_STORAGE_DIR = os.environ['FARO_STORAGE']
+except:
+    DEFAULT_STORAGE_DIR = os.path.join(os.environ['HOME'],'faro_storage')
 
-DEFAULT_STORAGE_DIR = os.path.join(os.environ['HOME'],'faro_storage')
+
 
 
 def generateFaceId(face):

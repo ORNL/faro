@@ -11,7 +11,12 @@ fi
 
 #!/bin/bash
 
-FARO_STORAGE=~/faro_storage
+
+if [[ -z "${FARO_STORAGE}" ]]; then
+  FARO_STORAGE=${HOME}/faro_storage
+fi
+
+
 RESNET_MODEL=$FARO_STORAGE/models/dlib_face_recognition_resnet_model_v1.dat
 LANDMARK_MODEL=$FARO_STORAGE/models/shape_predictor_5_face_landmarks.dat
 
@@ -22,7 +27,7 @@ if [[ ! -f "$RESNET_MODEL" ]]; then
 	echo "Downloading dlib resnet model..."
 	wget http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2
 	bunzip2 dlib_face_recognition_resnet_model_v1.dat.bz2
-	mv dlib_face_recognition_resnet_model_v1.dat ~/faro_storage/models/
+	mv dlib_face_recognition_resnet_model_v1.dat $FARO_STORAGE/models/
 fi
 
 
@@ -30,7 +35,7 @@ if [[ ! -f "$LANDMARK_MODEL" ]]; then
 	echo "Downloading dlib landmark model..."
 	wget http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2
 	bunzip2 shape_predictor_5_face_landmarks.dat.bz2
-	mv shape_predictor_5_face_landmarks.dat ~/faro_storage/models/
+	mv shape_predictor_5_face_landmarks.dat $FARO_STORAGE/models/
 fi
 
 
