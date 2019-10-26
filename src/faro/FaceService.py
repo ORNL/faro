@@ -249,19 +249,19 @@ class FaceService(fs.FaceRecognitionServicer):
             STORAGE[gallery_name] = h5py.File(path)
             GALLERIES[gallery_name] = {}
             
-            print(each,gallery_name,path)
-            print(list(STORAGE[gallery_name]))
+            #print(each,gallery_name,path)
+            #print(list(STORAGE[gallery_name]))
             for each in STORAGE[gallery_name]:
                 data = STORAGE[gallery_name][each]
-                print(data)
+                #print(data)
                 fr = fsd.FaceRecord()
-                print(data)
-                print(dir(data))
+                #print(data)
+                #print(dir(data))
                 #print(list(data))
                 fr.ParseFromString(np.array(data))
-                print(each,fr)
+                #print(each,fr)
                 GALLERIES[gallery_name][each] = fr
- 
+        print('Done Loading Galleries.')
 
                 
             
