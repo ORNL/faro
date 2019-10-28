@@ -62,4 +62,4 @@ else
 fi
 
 
-python -m faro.FaceService --port=$HOST:$PORT --worker-count=$WORKER_COUNT --algorithm=arcface --gpus=$USE_GPUS 
+python -m faro.FaceService --port=$HOST:$PORT --worker-count=$WORKER_COUNT --algorithm=arcface --gpus=$USE_GPUS --storage=$FARO_STORAGE 
