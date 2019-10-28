@@ -7,9 +7,9 @@ docker build -t faro_face_recognition_services .
 ######################### Useful commands ########################
 # 1. Ensure that nvidia-docker is installed
 # 2. run server - 
-#       docker run --runtime=nvidia -it --net host --name server faro_face_recognition_services
+#       docker run --runtime=nvidia -it --net host -v $HOME/faro_storage:/faro/faro_storage:rw --name server faro_face_recognition_services
 # 3. run client - 
-#       docker run --runtime=nvidia -it --net host --name client faro_face_recognition_services
+#       docker run --runtime=nvidia -it --net host -v $HOME/faro_storage:/faro/faro_storage:rw --name client faro_face_recognition_services
 # 4. The above two commands should be run in  separte terminals as it will create an interactive session.
 # 5. In the server terminal,
 #       - cd services
