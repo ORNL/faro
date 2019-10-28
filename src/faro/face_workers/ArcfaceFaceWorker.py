@@ -45,7 +45,8 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         Constructor
         '''
         import insightface
-        kwargs = {'root':'~/faro_storage/models'}
+        kwargs = {'root':options.storage_dir}
+        print('storage dir',options.storage_dir)
         #load Retina face model
         self.detector = insightface.model_zoo.get_model('retinaface_r50_v1',**kwargs)
         #set ctx_id to a gpu a predefined gpu value

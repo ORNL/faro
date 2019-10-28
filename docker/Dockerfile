@@ -12,7 +12,7 @@ WORKDIR /faro
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y vim git wget cmake lsof unzip
+RUN apt-get update && apt-get install -y vim git wget cmake lsof 
 
 RUN apt-get install -y python3-pip python3-dev \
   && cd /usr/local/bin \
@@ -41,7 +41,7 @@ RUN pip uninstall -y tensorflow-gpu tensorflow \
 # Increment the build to rerun from this point on...
 ENV FARO_DOCKER_BUILD="0001"
 
-RUN git clone -b faro_fr_servicesdocker https://github.com/ORNL/faro.git ./
+RUN git clone https://github.com/ORNL/faro.git ./
 
 ENV FARO_STORAGE="/faro/faro_storage"
 

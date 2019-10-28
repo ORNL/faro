@@ -10,7 +10,10 @@ then
     exit 1
 fi
 
-FARO_STORAGE=~/faro_storage
+if [[ -z "${FARO_STORAGE}" ]]; then
+  FARO_STORAGE=${HOME}/faro_storage
+fi
+
 
 mkdir -p ${FARO_STORAGE}/models
 mkdir -p ${FARO_STORAGE}/galleries
