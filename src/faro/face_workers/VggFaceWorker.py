@@ -75,7 +75,7 @@ class VggFaceWorker(faro.FaceWorker):
         self.shape_pred = dlib.shape_predictor(os.path.join(options.storage_dir,'models',"shape_predictor_5_face_landmarks.dat"))
         
         # This may run on the GPU.
-        self.face_rec = dlib.face_recognition_model_v1(os.path.join(options.storage_dir,'models',"dlib_face_recognition_resnet_model_v1.dat"))
+        #self.face_rec = dlib.face_recognition_model_v1(os.path.join(options.storage_dir,'models',"dlib_face_recognition_resnet_model_v1.dat"))
 
         #self.detector = dlib.get_frontal_face_detector()
         #self.shape_pred = dlib.shape_predictor(os.path.join(options.storage_dir,"shape_predictor_5_face_landmarks.dat"))
