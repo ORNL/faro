@@ -28,7 +28,13 @@ if [ ! -f env_faro_server_cpu/bin/activate ]; then
 	#fi
 	
 	pip install -U keras==2.2.0 # The newer versions have a bug
-	pip install -U dlib
+	
+	# pip install -U dlib
+    wget http://dlib.net/files/dlib-19.18.tar.bz2
+    tar xzf dlib-19.18.tar.bz2
+    pushd dlib-19.18
+    python setup.py install --no DLIB_USE_CUDA
+    popd
 fi
 
 #if [ ! -f env_faro_server2/bin/activate ]; then
