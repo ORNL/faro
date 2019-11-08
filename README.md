@@ -11,7 +11,7 @@ configuration management, easy to use interfaces, deployment tools, backend
 databases, and analysis tools that FaRO provides.
  
 In our research we have found that there are many high quality and open source 
-face analysis and recognition algorithms avalible for research however 
+face analysis and recognition algorithms available for research however 
 end-to-end systems that can support larger systems or can be retrained for niche 
 applications are lacking. We hope FARO can fill some of those needs.
 
@@ -20,10 +20,10 @@ The primary goals of this project are:
  2. Provide well defined benchmark algorithms.
  3. Allow for algorithm improvements via open source software and models and support improvements using techniques like transfer learning. 
 
-FARO is designed as a client/server system to accomodate the need for high speed GPU 
+FARO is designed as a client/server system to accommodate the need for high speed GPU 
 hardware to support deep learning face processing.  GRPC calls are used to communicate 
 with the server components which allows the clients to be written in many languages and 
-implemented on a varity of computationally limited platforms such as cellphones or biometric
+implemented on a variety of computationally limited platforms such as cellphones or biometric
 collection devices.  
 
 ## Publications
@@ -77,7 +77,7 @@ $ ./build-proto.sh
 In one terminal run the DLIB service.  When you do this for the first time it 
 will create a "faro-storage" directory and will download and extract the machine
 learning models.  At the end it will print out messages for each started worker:
-"Worker N Started."  By default the services is started on port localhost:50030.
+"Worker N Started."  By default, the services are started on port localhost:50030.
 
 ```
 $ source env_faro_server/bin/activate
@@ -86,7 +86,7 @@ $ ./run-dlib.sh
 ```
 
 The VGG2Resnet model can also be run using similar commands, but only run one 
-service at a time unless you carefully configure the ports and check avalible 
+service at a time unless you carefully configure the ports and check available 
 memory, etc.
 
 ```
@@ -96,7 +96,7 @@ $ ./run-vgg2.sh
 ```
 
 In a second terminal run client applications for this you can use either the 
-"env_faro" or "env_faro_server" environments.  A simple test is avalible in the
+"env_faro" or "env_faro_server" environments.  A simple test is available in the
 test directory that will download images and run a small test.  This test will 
 populate directories named "faces" and "matches" with results.
 
