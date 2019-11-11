@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOST=localhost
+HOST=0.0.0.0
 PORT=50030
 WORKER_COUNT=1
 if lsof -i:$PORT
