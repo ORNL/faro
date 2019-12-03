@@ -473,6 +473,7 @@ class FaceService(fs.FaceRecognitionServicer):
         try:
             start = time.time()
             result = fsd.SearchResponse()
+            result.probes.CopyFrom(request.probes)
 
             #print('search',request)
             name = request.gallery_name
@@ -501,25 +502,38 @@ class FaceService(fs.FaceRecognitionServicer):
             #print(scores)
             scores = pt.matrix_proto2np(scores)
             
-            
             for row in range(scores.shape[0]):
-                out = result.matches.add()
+                out = result.probes.face_records[row].search_results
                 matches = []
                 for col in range(scores.shape[1]):
                     score = scores[row,col]
                     if score > threshold:
                         continue
+                    gallery.face_records[col].score = score
                     matches.append( [ score, gallery.face_records[col] ] )
                 matches.sort(key=lambda x: x[0])
+                
+                if max_results > 0:
+                    matches = matches[:max_results]
+                
                 #print('matches',matches)
                 for score,face in matches:
                     out.face_records.add().CopyFrom(face)
-                    out.scores.append(score)
+                    #out.scores.append(score)
             #for each in request.face_records:
             #    self.galleries[name].addTemplate( each )
                 
                 
-            notes = "Returned %d Results"%(len(result.matches))
+            # Count the matches
+            probes = len(result.probes.face_records)
+            matched = 0
+            count = 0
+            for face_rec in result.probes.face_records:
+                c = len(face_rec.search_results.face_records)
+                count += c
+                if c > 0:
+                    matched += 1
+            notes = "Processed %d probes. %d matched. %d total results."%(probes,matched,count)
             stop = time.time()
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"search()",notes)))
             return result

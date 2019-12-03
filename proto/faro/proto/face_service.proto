@@ -181,7 +181,7 @@ message FaceRecord{
 	string source = 4;
 	string notes = 6;
 
-	Image view = 7;                        // A cropped and scaled image to be viewed by humans.
+	Image view = 7;                        // A cropped and scaled image to be viewed by humans, similar to a passport photo.
 	Image aligned = 9;                     // An aligned image used for template extraction.
 
 	Detection detection = 2;               // The detection rectangle etc.
@@ -189,12 +189,16 @@ message FaceRecord{
 	repeated Attribute attributes = 10;    // smiling, glasses, gender, race, ...
 	repeated Attribute internal_data = 11; // a dictionary used to store algorithm specific data about the face.
 	FaceTemplate template = 3;             // A small encoding used for fast face matching.
+
+	float score = 12;               // A score indicating the similarity in a search results list
+
+	FaceRecordList search_results = 13;    // A list of matching faces
 }
 
 
 message FaceRecordList{
 	repeated FaceRecord face_records = 1;
-	repeated float scores = 2; // Scores returned by gallery searches
+	//repeated float scores = 2; // Scores returned by gallery searches
 }
 
 
@@ -221,7 +225,7 @@ message SearchRequest{
 
 message SearchResponse{
 	ErrorMessage message = 1;
-	repeated FaceRecordList matches = 2;
+	FaceRecordList probes = 2;
 }
 
 message EnrollRequest{

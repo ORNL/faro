@@ -307,16 +307,17 @@ if __name__ == '__main__':
                 
                 im = pv.Image(full_path)
                 filename = os.path.split(full_path)[-1]
-                for face,matches in zip(templates.face_records,results.matches):
-                    print('scores:',matches.scores)
+                
+                for face in results.probes.face_records:
+                    #print('scores:',matches.scores)
                     face_rect = pt.rect_proto2pv(face.detection.location)
-                    if len(matches.scores) > 0:
+                    if len(face.search_results.face_records) > 0:
                         im.annotateRect(face_rect,color='yellow')
-                        gal = matches.face_records[0]
+                        gal = face.search_results.face_records[0]
                         loc = pv.Point(face_rect.x,face_rect.y+face_rect.h)
                         im.annotateLabel(loc+pv.Point(0,5), "Name: %s"%(gal.name,), color='yellow')
                         im.annotateLabel(loc+pv.Point(0,15), "Subject Id: %s"%(gal.subject_id,), color='yellow')
-                        im.annotateLabel(loc+pv.Point(0,25), "Score: %0.4f"%(matches.scores[0],), color='yellow')
+                        im.annotateLabel(loc+pv.Point(0,25), "Score: %0.4f"%(gal.score,), color='yellow')
                         im.annotateLabel(loc+pv.Point(0,35), "Enrollment Source: %s"%(gal.source,), color='yellow')
                     else:
                         im.annotateRect(face_rect,color='gray')

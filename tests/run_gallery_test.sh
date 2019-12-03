@@ -40,9 +40,9 @@ if [ ! -d data ]; then
 fi
 
 
-../bin/faro_recognize --enroll potus --subject-id=0043 --name="George W. Bush" gallery/bush.jpg
-../bin/faro_recognize --enroll potus --subject-id=0044 --name="Barack Obama"   gallery/obama.jpg
-../bin/faro_recognize --enroll potus --subject-id=0045 --name="Donald Trump"   gallery/trump.jpg
+../bin/faro_recognize --resample-size=768 --enroll potus --subject-id=0043 --name="George W. Bush" gallery/bush.jpg
+../bin/faro_recognize --resample-size=768 -enroll potus --subject-id=0044 --name="Barack Obama"   gallery/obama.jpg
+../bin/faro_recognize --resample-size=768 --enroll potus --subject-id=0045 --name="Donald Trump"   gallery/trump.jpg
 
 ../bin/faro_recognize --search potus --search-log=search_log  data
 
