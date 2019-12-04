@@ -295,6 +295,7 @@ class FaceService(fs.FaceRecognitionServicer):
                         
             for face in face_records_list.face_records:
                 face.source = request.source
+                face.frame = request.frame
                 face.subject_id = request.subject_id
                             
             #date = request.image.date

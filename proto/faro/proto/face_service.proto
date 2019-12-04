@@ -179,6 +179,7 @@ message FaceRecord{
 	string subject_id = 1;
 	string name = 5;
 	string source = 4;
+	int64 frame = 14;
 	string notes = 6;
 
 	Image view = 7;                        // A cropped and scaled image to be viewed by humans, similar to a passport photo.
@@ -237,6 +238,7 @@ message EnrollRequest{
 message DetectRequest{
 	Image image = 1;
 	string source = 2;
+	int64 frame = 4;
 	string subject_id = 3;
 	DetectionOptions detect_options = 8;
 }

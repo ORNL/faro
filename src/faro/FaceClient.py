@@ -35,10 +35,15 @@ import faro.proto.face_service_pb2 as fsd
 import time
 import faro
 
+
+
 class ClientOptions(object):
     pass
 
+
+
 DEFAULT_MAX_ASYNC = 4
+
 
 def getDefaultClientOptions():
     '''
@@ -51,6 +56,7 @@ def getDefaultClientOptions():
     options.rec_port = 'localhost:50030'
     
     return options
+
 
 class FaceClient(object):
     '''
@@ -82,17 +88,19 @@ class FaceClient(object):
         self.rec_stub = fs.FaceRecognitionStub(channel)
         
         self.is_ready,self.info = self.status(False)
-        print (self.status)
+        
+        if options.verbose:
+            print (self.status)
+        
         
     def waitOnResults(self):
-        #if len(self.running_async_jobs) >= self.max_async_jobs:
-            #print("Waiting:",len(self.running_async_jobs))
         while len(self.running_async_jobs) >= self.max_async_jobs:
             self.running_async_jobs = list(filter(lambda x: x.running(),self.running_async_jobs))
             if len(self.running_async_jobs) >= self.max_async_jobs: 
                 time.sleep(self.async_sleep_time)
 
-    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None):
+
+    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
@@ -104,6 +112,8 @@ class FaceClient(object):
         request.subject_id='UNKNOWN_SUBJECT'
         if source is not None:
             request.source=source
+        if frame is not None:
+            request.frame=frame
         if subject_id is not None:
             request.subject_id=subject_id
 
@@ -214,7 +224,6 @@ class FaceClient(object):
     def search(self, faces, gallery_name, max_results=3, threshold=None, run_async=False,**kwargs):
         request = fsd.SearchRequest()
         
-        #print( "enrolling:",gallery_name,subject_id,subject_name)
         request.probes.CopyFrom(faces)
         request.gallery_name = gallery_name
         request.max_results=max_results
@@ -234,38 +243,6 @@ class FaceClient(object):
         return error
         
 
-    #def detectAndExtract(self,im,best=False,threshold=0.9):
-    #    request = fsd.DetectionRequest()
-    #    try:
-    #        request.image.CopyFrom( pt.image_np2proto(im))
-    #    except:
-    #        request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
-    #    request.options.best=best
-
-
-    #    request.options.threshold = threshold
-
-    #    face_records = self.detect_rec_stub.detectAndExtract(request,None)
-
-
-    #    assert len(face_records.face_records) == 1
-
-    #    if best and len(face_records.face_records) == 0:
-    #        print( "WARNING: detector service does not seem to support best mode.  No faces returned." )
-
-    #        # in this case select the center of the image
-    #        det = face_records.face_records.add().detection
-    #        h,w = im.shape[:2]
-    #        s = 0.8*min(w,h)
-    #        det.location.CopyFrom(pt.rect_val2proto(0.5*w-0.5*s,0.5*h-0.5*s, s, s))
-    #        det.score = -1.0
-
-    #        det.detection_id = 1
-
-    #        assert len(face_records.face_records) == 1
-
-    #    return face_records
-
     def score(self,probe,gallery):
         '''
         '''
@@ -281,6 +258,7 @@ class FaceClient(object):
         dist_mat = self.rec_stub.score(request,None)
         return pt.matrix_proto2np(dist_mat)
 
+
     def echo(self,mat):
         '''
         '''
@@ -292,6 +270,7 @@ class FaceClient(object):
         
         return pt.matrix_proto2np(dist_mat)
 
+
     def status(self,verbose=False):
         request = fsd.FaceStatusRequest()
         
@@ -299,10 +278,16 @@ class FaceClient(object):
         if verbose:
             print(type(status_message),status_message)
             
-        #self.detect_threshold = status_message.detect_threshold
         self.match_threshold = status_message.match_threshold
             
         return status_message.status == fsd.READY, status_message
+    
+    
+    
+    
+    
+if __name__ == '__main__':
+    faro.face_command_line()
         
 
 

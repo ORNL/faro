@@ -448,6 +448,7 @@ if __name__ == '__main__':
                         print("    Saving Match To:",out_path)
                         im.save(out_path)
 
+
     extract_time = extract_stop - extract_start
     template_count = len(face_records)
     print("Images: %d @ %0.1f"%(im_count,im_count/extract_time))
