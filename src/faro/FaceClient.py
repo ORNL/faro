@@ -54,6 +54,7 @@ def getDefaultClientOptions():
     options.max_async = 4
     options.detect_port = 'localhost:50030'
     options.rec_port = 'localhost:50030'
+    options.verbose = False
     
     return options
 
@@ -157,7 +158,7 @@ class FaceClient(object):
         
         return face_records
 
-    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None):
+    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectExtractRequest()
 
         try:
@@ -170,6 +171,8 @@ class FaceClient(object):
         request.subject_id='UNKNOWN_SUBJECT'
         if source is not None:
             request.source=source
+        if frame is not None:
+            request.frame=frame
         if subject_id is not None:
             request.subject_id=subject_id
             

@@ -10,6 +10,7 @@ import os
 import faro
 import pyvision as pv
 import cv2
+import faro.proto.proto_types as pt
 # client connection options
 # preprocess options
 # detection options
@@ -349,6 +350,40 @@ def processDetections(each):
                                             ]),
                 ATTRIBUTES_FILE.flush()
                 
+                # Save Images with Detections
+            
+                
+                # Save Detected Faces
+                face_out_dir = ""    
+            
+            if options.face_log:
+                if not os.path.exists(options.face_log):
+                    os.makedirs(options.face_log, exist_ok=True)
+                #print(face.detection.location)
+                
+                rect = pt.rect_proto2pv(face.detection.location)
+                rect = rect.rescale(1.5)
+                affine = pv.AffineFromRect(rect,(128,128))
+                try:
+                    pvim = pv.Image(im[:,:,::-1])
+                    view = affine(pvim)
+                    #print('Face',rect)
+                    #print(view)
+                    base_name,ext = os.path.splitext(os.path.basename(face.source))
+                    out_path = os.path.join(options.face_log,os.path.basename(base_name)+'_face_%03d'%(face.detection.detection_id,)+ext)
+                    
+                    view.save(out_path)
+                    print('Saving face:',out_path)
+                except:
+                    print("WARNING: Image not processed correctly:",face.source)
+                    
+                out_path = os.path.join(options.face_log,os.path.basename(base_name)+'_orig'+ext)
+                
+                if not os.path.exists(out_path):
+                    os.symlink(face.source,out_path)
+                
+                #print(options.face_log)
+                #pass
             i += 1
         return False
     return True
@@ -367,7 +402,7 @@ def detect():
         print("Processing images.")
         
     image_count = 0
-    out_queue = []
+    detect_queue = []
     
     for filename in image_list:
         print("Processing:",filename)
@@ -378,26 +413,67 @@ def detect():
         
         results = face_client.detect(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
         
-        out_queue.append([im,results,options])
-        out_queue = list(filter(processDetections,out_queue))
+        detect_queue.append([im,results,options])
+        detect_queue = list(filter(processDetections,detect_queue))
         
         image_count += 1
-        if image_count >= options.max_images:
+        if options.max_images is not None and image_count >= options.max_images:
             break
         
     import time
     time.sleep(2)
                     
-    while len(out_queue):
-        out_queue = list(filter(processDetections,out_queue))
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
         time.sleep(0.05)
+        
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
 
-    print(len(out_queue))
     
     
     
 def enroll():
-    print("Not Implemented.")
+    options,args = detectParseOptions()
+    face_client = connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+    
+    image_list, video_list = collect_files(args[1:],options)
+
+    if options.verbose:
+        print("Processing images.")
+        
+    image_count = 0
+    detect_queue = []
+    
+    for filename in image_list:
+        print("Processing:",filename)
+        im = cv2.imread(filename)
+        im = im[:,:,::-1] # BGR to RGB
+        
+        im = preprocessImage(im, options)
+        
+        results = face_client.detectEnroll(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        
+        detect_queue.append([im,results,options])
+        detect_queue = list(filter(processDetections,detect_queue))
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+        
+    import time
+    time.sleep(2)
+                    
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
+
 
 
 def search():
