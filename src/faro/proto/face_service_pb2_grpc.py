@@ -38,16 +38,26 @@ class FaceRecognitionStub(object):
     self.enroll = channel.unary_unary(
         '/FaceRecognition/enroll',
         request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollRequest.SerializeToString,
-        response_deserializer=faro_dot_proto_dot_face__service__pb2.ErrorMessage.FromString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
     self.search = channel.unary_unary(
         '/FaceRecognition/search',
         request_serializer=faro_dot_proto_dot_face__service__pb2.SearchRequest.SerializeToString,
-        response_deserializer=faro_dot_proto_dot_face__service__pb2.SearchResponse.FromString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
     self.detectExtract = channel.unary_unary(
         '/FaceRecognition/detectExtract',
         request_serializer=faro_dot_proto_dot_face__service__pb2.DetectExtractRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
+    self.detectExtractEnroll = channel.unary_unary(
+        '/FaceRecognition/detectExtractEnroll',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.DetectExtractEnrollRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
+    self.detectExtractSearch = channel.unary_unary(
+        '/FaceRecognition/detectExtractSearch',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.DetectExtractSearchRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
     self.echo = channel.unary_unary(
@@ -110,6 +120,20 @@ class FaceRecognitionServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def detectExtractEnroll(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def detectExtractSearch(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def echo(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -143,16 +167,26 @@ def add_FaceRecognitionServicer_to_server(servicer, server):
       'enroll': grpc.unary_unary_rpc_method_handler(
           servicer.enroll,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollRequest.FromString,
-          response_serializer=faro_dot_proto_dot_face__service__pb2.ErrorMessage.SerializeToString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),
       'search': grpc.unary_unary_rpc_method_handler(
           servicer.search,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.SearchRequest.FromString,
-          response_serializer=faro_dot_proto_dot_face__service__pb2.SearchResponse.SerializeToString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),
       'detectExtract': grpc.unary_unary_rpc_method_handler(
           servicer.detectExtract,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.DetectExtractRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'detectExtractEnroll': grpc.unary_unary_rpc_method_handler(
+          servicer.detectExtractEnroll,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.DetectExtractEnrollRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'detectExtractSearch': grpc.unary_unary_rpc_method_handler(
+          servicer.detectExtractSearch,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.DetectExtractSearchRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),
       'echo': grpc.unary_unary_rpc_method_handler(

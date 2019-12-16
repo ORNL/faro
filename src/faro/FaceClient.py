@@ -160,29 +160,34 @@ class FaceClient(object):
 
     def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectExtractRequest()
+        request.detect_request.CopyFrom( fsd.DetectRequest() )
+        request.extract_request.CopyFrom( fsd.ExtractRequest() )
 
         try:
-            request.image.CopyFrom( pt.image_np2proto(im))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            
 
         # Setup the source and subject information.
-        request.source='UNKNOWN_SOURCE'
-        request.subject_id='UNKNOWN_SUBJECT'
+        request.detect_request.source='UNKNOWN_SOURCE'
+        request.detect_request.subject_id='UNKNOWN_SUBJECT'
         if source is not None:
-            request.source=source
+            request.detect_request.source=source
         if frame is not None:
-            request.frame=frame
+            request.detect_request.frame=frame
         if subject_id is not None:
-            request.subject_id=subject_id
+            request.detect_request.subject_id=subject_id
             
             
-        request.detect_options.best=best
+        request.detect_request.detect_options.best=best
         
         if threshold == None:
-            request.detect_options.threshold = self.info.detection_threshold
+            request.detect_request.detect_options.threshold = self.info.detection_threshold
         else: 
-            request.detect_options.threshold = float(threshold)
+            request.detect_request.detect_options.threshold = float(threshold)
+            
+            
             
         if run_async == False:
             face_records = self.detect_stub.detectExtract(request,None)
@@ -194,6 +199,105 @@ class FaceClient(object):
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
                                 
         return face_records
+    
+    
+    
+    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+        request = fsd.DetectExtractEnrollRequest()
+        request.detect_request.CopyFrom( fsd.DetectRequest() )
+        request.extract_request.CopyFrom( fsd.ExtractRequest() )
+        request.enroll_request.CopyFrom( fsd.EnrollRequest() )
+
+        try:
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
+        except:
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            
+        request.enroll_request.enroll_gallery = enroll_gallery
+
+        # Setup the source and subject information.
+        request.detect_request.source='UNKNOWN_SOURCE'
+        request.detect_request.subject_id='UNKNOWN_SUBJECT'
+        if source is not None:
+            request.detect_request.source=source
+        if frame is not None:
+            request.detect_request.frame=frame
+        if subject_id is not None:
+            request.detect_request.subject_id=subject_id
+            
+            
+        request.detect_request.detect_options.best=best
+        
+        if threshold == None:
+            request.detect_request.detect_options.threshold = self.info.detection_threshold
+        else: 
+            request.detect_request.detect_options.threshold = float(threshold)
+            
+            
+            
+        if run_async == False:
+            face_records = self.detect_stub.detectExtractEnroll(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            face_records = self.detect_stub.detectExtractEnroll.future(request,None)
+            self.running_async_jobs.append(face_records)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
+                                
+        return face_records
+    
+    
+    def detectExtractSearch(self,im,search_gallery='default',max_results=3,search_threshold=None,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+        request = fsd.DetectExtractSearchRequest()
+        request.detect_request.CopyFrom( fsd.DetectRequest() )
+        request.extract_request.CopyFrom( fsd.ExtractRequest() )
+        request.search_request.CopyFrom( fsd.SearchRequest() )
+
+        try:
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
+        except:
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            
+        request.search_request.search_gallery = search_gallery
+        request.search_request.max_results=max_results
+        
+        if search_threshold is None:
+            search_threshold = self.match_threshold
+            
+        request.search_request.threshold = search_threshold
+
+
+        # Setup the source and subject information.
+        request.detect_request.source='UNKNOWN_SOURCE'
+        request.detect_request.subject_id='UNKNOWN_SUBJECT'
+        if source is not None:
+            request.detect_request.source=source
+        if frame is not None:
+            request.detect_request.frame=frame
+        if subject_id is not None:
+            request.detect_request.subject_id=subject_id
+            
+            
+        request.detect_request.detect_options.best=best
+        
+        if threshold == None:
+            request.detect_request.detect_options.threshold = self.info.detection_threshold
+        else: 
+            request.detect_request.detect_options.threshold = float(threshold)
+            
+            
+            
+        if run_async == False:
+            face_records = self.detect_stub.detectExtractSearch(request,None)
+        elif run_async == True:
+            self.waitOnResults()
+            face_records = self.detect_stub.detectExtractSearch.future(request,None)
+            self.running_async_jobs.append(face_records)
+        else:
+            raise ValueError("Unexpected run_async value: %s"%(run_async,))
+                                
+        return face_records
+    
     
     def enroll(self,faces,gallery_name, subject_id=None, subject_name=None, run_async=False,**kwargs):
         request = fsd.EnrollRequest()
@@ -224,11 +328,11 @@ class FaceClient(object):
         return error
         
 
-    def search(self, faces, gallery_name, max_results=3, threshold=None, run_async=False,**kwargs):
+    def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False,**kwargs):
         request = fsd.SearchRequest()
         
         request.probes.CopyFrom(faces)
-        request.gallery_name = gallery_name
+        request.search_gallery = search_gallery
         request.max_results=max_results
         
         if threshold is not None:

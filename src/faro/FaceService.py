@@ -258,7 +258,7 @@ class FaceService(fs.FaceRecognitionServicer):
                 #print(data)
                 #print(dir(data))
                 #print(list(data))
-                fr.ParseFromString(np.array(data))
+                fr.ParseFromString(np.array(data).tobytes())
                 #print(each,fr)
                 GALLERIES[gallery_name][each] = fr
         print('Done Loading Galleries.')
@@ -347,28 +347,12 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
-    def detectExtract(self,request,context):
-        ''' runs the face detector and extraction in one call and returns extracted faces. '''
-        # Run detection
-        face_records_list = self.detect(request,context)
-        
-        # Run extract
-        extract_request = fsd.ExtractRequest()
-        extract_request.image.CopyFrom( request.image )
-        extract_request.records.CopyFrom(face_records_list)
-        extract_request.extract_options.CopyFrom(request.extract_options)
-        
-        face_records_list = self.extract(extract_request, context)
-        
-        return face_records_list
-    
-
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
         try:
             start = time.time()
             
-            gallery_name = request.gallery_name
+            gallery_name = request.enroll_gallery
             
             global GALLERIES, STORAGE
 
@@ -382,6 +366,7 @@ class FaceService(fs.FaceRecognitionServicer):
             count = 0
             for face in request.records.face_records:
                 face_id = faro.generateFaceId(face)
+                face.gallery_key = face_id
                 #face_id = "-".join(face_id.split('/'))
                 #print('face_id:',face_id)
                 count += 1 
@@ -391,14 +376,14 @@ class FaceService(fs.FaceRecognitionServicer):
                 STORAGE[gallery_name][face_id] = np.bytes_(face.SerializeToString())
                 STORAGE[gallery_name].flush()
                 
-            response = fsd.ErrorMessage()
+            #response = fsd.ErrorMessage()
 
             stop = time.time()
-            notes = "Enrolled %d faces into gallery %s.  Gallery size = %d."%(count,request.gallery_name,len(GALLERIES[gallery_name]))
+            notes = "Enrolled %d faces into gallery '%s'.  Gallery size = %d."%(count,gallery_name,len(GALLERIES[gallery_name]))
             global LOG_FORMAT
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes)))
 
-            return response
+            return request.records
         except:
             traceback.print_exc()
             raise
@@ -477,17 +462,17 @@ class FaceService(fs.FaceRecognitionServicer):
             result.probes.CopyFrom(request.probes)
 
             #print('search',request)
-            name = request.gallery_name
+            search_gallery = request.search_gallery
             probes = request.probes
             max_results = request.max_results
             threshold = request.threshold
             
-            if name not in GALLERIES:
-                raise ValueError("Unknown gallery: "+name)
+            if search_gallery not in GALLERIES:
+                raise ValueError("Unknown gallery: "+search_gallery)
             
             gallery = fsd.FaceRecordList()
-            for key in GALLERIES[name]:
-                face = GALLERIES[name][key]
+            for key in GALLERIES[search_gallery]:
+                face = GALLERIES[search_gallery][key]
                 gallery.face_records.add().CopyFrom(face)
                 
             #print('gallery size',len(gallery.face_records))
@@ -522,7 +507,7 @@ class FaceService(fs.FaceRecognitionServicer):
                     out.face_records.add().CopyFrom(face)
                     #out.scores.append(score)
             #for each in request.face_records:
-            #    self.galleries[name].addTemplate( each )
+            #    self.galleries[search_gallery].addTemplate( each )
                 
                 
             # Count the matches
@@ -550,6 +535,78 @@ class FaceService(fs.FaceRecognitionServicer):
         
         raise NotImplementedError("'verify' is currently not implemented.")
         
+
+    def detectExtract(self,request,context):
+        ''' runs the face detector and extraction in one call and returns extracted faces. '''
+        try:
+            # Run detection
+            face_records_list = self.detect(request.detect_request,context)
+            
+            # Run extract
+            extract_request = request.extract_request
+            extract_request.image.CopyFrom( request.detect_request.image )
+            extract_request.records.CopyFrom(face_records_list)
+            
+            face_records_list = self.extract(extract_request, context)
+            
+            return face_records_list
+        except:
+            traceback.print_exc()
+            raise
+    
+
+    def detectExtractEnroll(self,request,context):
+        ''' runs the face detector and extraction in one call and returns extracted faces. '''
+        try:
+            # Run detection
+            face_records_list = self.detect(request.detect_request,context)
+            
+            # Run extract
+            extract_request = request.extract_request
+            extract_request.image.CopyFrom( request.detect_request.image )
+            extract_request.records.CopyFrom(face_records_list)
+            
+            face_records_list = self.extract(extract_request, context)
+            
+            enroll_request = request.enroll_request
+            enroll_request.records.CopyFrom(face_records_list)
+            
+            results = self.enroll(enroll_request, context)
+            
+            #print("enroll result",results)
+            
+            return results
+        except:
+            traceback.print_exc()
+            raise
+    
+
+    def detectExtractSearch(self,request,context):
+        ''' runs the face detector and extraction in one call and returns extracted faces. '''
+        try:
+            # Run detection
+            face_records_list = self.detect(request.detect_request,context)
+            
+            # Run extract
+            extract_request = request.extract_request
+            extract_request.image.CopyFrom( request.detect_request.image )
+            extract_request.records.CopyFrom(face_records_list)
+            
+            face_records_list = self.extract(extract_request, context)
+            
+            search_request = request.search_request
+            search_request.probes.CopyFrom(face_records_list)
+            
+            results = self.search(search_request, context)
+            
+            #print("enroll result",results)
+            
+            return results
+        except:
+            traceback.print_exc()
+            raise
+    
+
 
         
     def cleanexit(self):

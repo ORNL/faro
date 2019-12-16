@@ -11,12 +11,11 @@ import faro
 import pyvision as pv
 import cv2
 import faro.proto.proto_types as pt
-# client connection options
-# preprocess options
-# detection options
-# output options
+
 
 def addConnectionOptions(parser):
+    ''' Add options for connecting to the faro service. '''
+    
     connection_group = optparse.OptionGroup(parser, "Connection Options",
                         "Control the connection to the FaRO service.")
     
@@ -41,8 +40,22 @@ def addConnectionOptions(parser):
 
 
 def addDetectorOptions(parser):
+    ''' Add options for detections to the parser. '''
+    
     detector_group = optparse.OptionGroup(parser, "Detector Options",
                         "Configuration for the face detector.")
+
+    detector_group.add_option( "-d","--detections-csv", type="str", dest="detections_csv", default=None,
+                      help="Save detection data to the file.")
+
+    detector_group.add_option( "-a","--attributes-csv", type="str", dest="attributes_csv", default=None,
+                      help="Save attributes data to the file.")
+
+    detector_group.add_option( "--detect-log", type="str", dest="detect_log", default=None,
+                      help="A directory for detection images.")
+
+    detector_group.add_option( "--face-log", type="str", dest="face_log", default=None,
+                      help="A directory for faces.")
 
     detector_group.add_option("-b", "--best", action="store_true", dest="best", default=False,
                       help="Detect the 'best' highest scoring face in the image.")
@@ -59,7 +72,45 @@ def addDetectorOptions(parser):
     parser.add_option_group(detector_group)
     
     
+def addEnrollOptions(parser):
+    ''' Add options for enrollment into a gallery. '''
     
+    enroll_group =  optparse.OptionGroup(parser, "Enrollment Options",
+                        "Configuration for enrollment.")
+    #parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
+    #                   help="Enroll detected faces into a gallery.")
+    
+    enroll_group.add_option( "-e", "--enroll-csv", type="str", dest="enroll_csv", default='default',
+                       help="Save a log of the enrollments.")
+    
+    enroll_group.add_option( "--enroll-gallery", type="str", dest="enroll_gallery", default='default',
+                       help="Select the gallery to enroll into.")
+    
+    enroll_group.add_option( "--name", type="str", dest="subject_name", default='UNKNOWN',
+                       help="Enroll detected faces into a gallery.")
+    
+    enroll_group.add_option( "--subject-id", type="str", dest="subject_id", default='unknown',
+                       help="Enroll detected faces into a gallery.")
+    
+    parser.add_option_group(enroll_group)
+
+
+def addSearchOptions(parser):
+    ''' Add options for enrollment into a gallery. '''
+    
+    enroll_group =  optparse.OptionGroup(parser, "Enrollment Options",
+                        "Configuration for enrollment.")
+
+    enroll_group.add_option( "-s", "--search-csv", type="str", dest="search_csv", default='default',
+                       help="Save the search results.")
+    
+    enroll_group.add_option( "--search-gallery", type="str", dest="search_gallery", default='default',
+                       help="Select the gallery to search.")
+        
+    parser.add_option_group(enroll_group)
+
+
+
 def preprocessImage(im,options):
     
     # Reduce the size if the image is too large
@@ -88,8 +139,7 @@ def detectParseOptions():
     description = '''Run detection on a collection of images.'''
     epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
     
-    version = "0.0.0"
-    
+    version = faro.__version__
     
     
     # Setup the parser
@@ -103,25 +153,6 @@ def detectParseOptions():
 
     parser.add_option( "--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
                       help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
-    
-    
-    
-    output_group = optparse.OptionGroup(parser, "Output Options",
-                        "Specify the output configuration.")
-
-    output_group.add_option( "-d","--detections-csv", type="str", dest="detections_csv", default=None,
-                      help="Save detection data to the file.")
-
-    output_group.add_option( "-a","--attributes-csv", type="str", dest="attributes_csv", default=None,
-                      help="Save attributes data to the file.")
-
-    output_group.add_option( "--detect-log", type="str", dest="detect_log", default=None,
-                      help="A directory for detection images.")
-
-    output_group.add_option( "--face-log", type="str", dest="face_log", default=None,
-                      help="A directory for faces.")
-    
-    parser.add_option_group(output_group)
     
     addDetectorOptions(parser)
     addConnectionOptions(parser)
@@ -182,6 +213,93 @@ def detectParseOptions():
     return options,args
 
 
+def enrollParseOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['[image] [image_directory] [video] [...]'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Run detection on a collection of images.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
+                      help="Process at N images and then stop.")
+
+    parser.add_option( "--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
+                      help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
+    
+    addEnrollOptions(parser)
+    addDetectorOptions(parser)
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 2:
+        parser.print_help()
+        print()
+        print(( "Error: Please supply at least one directory, image, or video."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
+def searchParseOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['[image] [image_directory] [video] [...]'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Run detection on a collection of images.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
+                      help="Process at N images and then stop.")
+
+    parser.add_option( "--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
+                      help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
+    
+    addSearchOptions(parser)
+    addDetectorOptions(parser)
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 2:
+        parser.print_help()
+        print()
+        print(( "Error: Please supply at least one directory, image, or video."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
+
 def connectToFaroClient(options):
     if options.verbose:
         print('Connecting to FaRO Service...')
@@ -233,12 +351,6 @@ def collect_files(args,options):
     return image_list, video_list
 
 
-          
-DETECTIONS_FILE = None  
-DETECTIONS_CSV = None  
-ATTRIBUTES_FILE = None  
-ATTRIBUTES_CSV = None  
-
 def processAttributeFilter(face,options):
     if options.attribute_filter is None:
         return True
@@ -266,6 +378,7 @@ def processAttributeFilter(face,options):
 
     attributes = list(face.attributes)
     attributes.sort(key=lambda x: x.key)
+
     for attribute in attributes:
         key = attribute.key
         value = attribute.fvalue
@@ -275,13 +388,17 @@ def processAttributeFilter(face,options):
             if tkey == key and value < tval and tcmp == '<':
                 satisfied += 1
                 
-    assert satisfied <= len(terms) # Make sure we get an expected answer
+    #assert satisfied <= len(terms) # Make sure we get an expected answer
     
     return satisfied == len(terms)
            
     
         
-    
+          
+DETECTIONS_FILE = None  
+DETECTIONS_CSV = None  
+ATTRIBUTES_FILE = None  
+ATTRIBUTES_CSV = None    
 
 def processDetections(each):
     im, results, options = each
@@ -388,6 +505,99 @@ def processDetections(each):
         return False
     return True
 
+ENROLL_FILE = None  
+ENROLL_CSV = None  
+
+def processEnrollments(each):
+    im, results, options = each
+    
+    if results.done():
+        recs = results.result().face_records
+        i = 0
+        for face in recs:
+            # Filter faces based on min size
+            size = min(face.detection.location.width,face.detection.location.height)
+            if size < options.min_size:
+                continue
+            
+            # Filter faces based on attributes
+            if not processAttributeFilter(face,options):
+                continue
+            
+            # Process Detections
+            if options.enroll_csv is not None:
+                global ENROLL_CSV
+                global ENROLL_FILE
+                import csv 
+                if ENROLL_CSV == None:
+                    ENROLL_FILE = open(options.enroll_csv,'w')
+                    ENROLL_CSV = csv.writer(ENROLL_FILE)
+                    ENROLL_CSV.writerow(['gallery_key','source','frame','detect_id','type','score','x','y','w','h']) 
+                    
+                ENROLL_CSV.writerow([face.gallery_key,face.source,
+                                        face.frame,
+                                        i,
+                                        face.detection.detection_class,
+                                        face.detection.score,
+                                        face.detection.location.x,
+                                        face.detection.location.y,
+                                        face.detection.location.width,
+                                        face.detection.location.height
+                                        ]),
+                ENROLL_FILE.flush()
+                
+            i += 1
+        return False
+    return True
+
+SEARCH_CSV = None
+SEARCH_FILE = None
+def processSearchResults(each):
+    print('Search results')
+    im, results, options = each
+    
+    if results.done():
+        print('Done')
+        recs = results.result().face_records
+        print(recs)
+        i = 0
+        for face in recs:
+            # Filter faces based on min size
+            size = min(face.detection.location.width,face.detection.location.height)
+            if size < options.min_size:
+                continue
+            
+            # Filter faces based on attributes
+            if not processAttributeFilter(face,options):
+                continue
+            
+            # Process Detections
+            print( "Face" )
+            if options.search_csv is not None:
+                global SEARCH_CSV
+                global SEARCH_FILE
+                import csv 
+                if SEARCH_CSV == None:
+                    SEARCH_FILE = open(options.search_csv,'w')
+                    SEARCH_CSV = csv.writer(SEARCH_FILE)
+                    SEARCH_CSV.writerow(['gallery_key','source','frame','detect_id','type','score','x','y','w','h']) 
+                    
+                SEARCH_CSV.writerow([face.gallery_key,face.source,
+                                        face.frame,
+                                        i,
+                                        face.detection.detection_class,
+                                        face.detection.score,
+                                        face.detection.location.x,
+                                        face.detection.location.y,
+                                        face.detection.location.width,
+                                        face.detection.location.height
+                                        ]),
+                SEARCH_FILE.flush()
+                
+            i += 1
+        return False
+    return True
+
 
 def detect():
     options,args = detectParseOptions()
@@ -411,7 +621,7 @@ def detect():
         
         im = preprocessImage(im, options)
         
-        results = face_client.detect(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        results = face_client.detectExtract(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
         
         detect_queue.append([im,results,options])
         detect_queue = list(filter(processDetections,detect_queue))
@@ -421,7 +631,6 @@ def detect():
             break
         
     import time
-    time.sleep(2)
                     
     while len(detect_queue):
         detect_queue = list(filter(processDetections,detect_queue))
@@ -434,7 +643,7 @@ def detect():
     
     
 def enroll():
-    options,args = detectParseOptions()
+    options,args = enrollParseOptions()
     face_client = connectToFaroClient(options)
 
     if options.verbose:
@@ -447,6 +656,7 @@ def enroll():
         
     image_count = 0
     detect_queue = []
+    enroll_queue = []
     
     for filename in image_list:
         print("Processing:",filename)
@@ -455,20 +665,28 @@ def enroll():
         
         im = preprocessImage(im, options)
         
-        results = face_client.detectEnroll(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
         
         detect_queue.append([im,results,options])
+        enroll_queue.append([im,results,options])
+
+        # Process results that are completed.
         detect_queue = list(filter(processDetections,detect_queue))
+        enroll_queue = list(filter(processEnrollments,enroll_queue))
         
         image_count += 1
         if options.max_images is not None and image_count >= options.max_images:
             break
         
     import time
-    time.sleep(2)
                     
+    # Finish processing.
     while len(detect_queue):
         detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+
+    while len(enroll_queue):
+        enroll_queue = list(filter(processEnrollments,enroll_queue))
         time.sleep(0.05)
 
     if len(video_list) > 0:
@@ -477,7 +695,55 @@ def enroll():
 
 
 def search():
-    print("Not Implemented.")
+    options,args = searchParseOptions()
+    face_client = connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+    
+    image_list, video_list = collect_files(args[1:],options)
+
+    if options.verbose:
+        print("Processing images.")
+        
+    image_count = 0
+    detect_queue = []
+    search_queue = []
+    
+    for filename in image_list:
+        print("Processing:",filename)
+        im = cv2.imread(filename)
+        im = im[:,:,::-1] # BGR to RGB
+        
+        im = preprocessImage(im, options)
+        
+        results = face_client.detectExtractSearch(im, search_gallery=options.search_gallery, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        
+        detect_queue.append([im,results,options])
+        search_queue.append([im,results,options])
+
+        # Process results that are completed.
+        detect_queue = list(filter(processDetections,detect_queue))
+        search_queue = list(filter(processSearchResults,search_queue))
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+        
+    import time
+                    
+    # Finish processing.
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+
+    while len(search_queue):
+        search_queue = list(filter(processSearchResults,search_queue))
+        time.sleep(0.05)
+
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
+
 
 
 COMMANDS = {
