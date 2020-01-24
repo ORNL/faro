@@ -139,7 +139,6 @@ class FaceClient(object):
     
     def extract(self, im, face_records, run_async=False):
         request = fsd.ExtractRequest()
-        print("DR INFO",dir(request))
         try:
             request.image.CopyFrom( pt.image_np2proto(im))
         except:
@@ -335,8 +334,8 @@ class FaceClient(object):
         request.search_gallery = search_gallery
         request.max_results=max_results
         
-        if threshold is not None:
-            request.threshold=threshold
+        if search_threshold is not None:
+            request.threshold=search_threshold
             
         if run_async == False:
             error = self.rec_stub.search(request,None)

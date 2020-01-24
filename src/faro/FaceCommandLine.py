@@ -11,7 +11,11 @@ import faro
 import pyvision as pv
 import cv2
 import faro.proto.proto_types as pt
+import csv
+from faro.proto.face_service_pb2 import FaceRecordList
+import time
 
+FACE_COUNT = 0
 
 def addConnectionOptions(parser):
     ''' Add options for connecting to the faro service. '''
@@ -366,7 +370,7 @@ def processAttributeFilter(face,options):
         except:
             try:
                 parts = each.split('<')
-                print (parts)
+                #print (parts)
                 parts = parts[0], '<', float(parts[1])
                 assert len(parts) == 3
             except:
@@ -406,6 +410,8 @@ def processDetections(each):
         recs = results.result().face_records
         i = 0
         for face in recs:
+            global FACE_COUNT
+            FACE_COUNT += 1
             # Filter faces based on min size
             size = min(face.detection.location.width,face.detection.location.height)
             if size < options.min_size:
@@ -559,7 +565,7 @@ def processSearchResults(each):
     if results.done():
         print('Done')
         recs = results.result().face_records
-        print(recs)
+        #print(recs)
         i = 0
         for face in recs:
             # Filter faces based on min size
@@ -614,6 +620,50 @@ def detect():
     image_count = 0
     detect_queue = []
     
+    start = time.time()
+    for filename in image_list:
+        print("Processing:",filename)
+        im = cv2.imread(filename)
+        im = im[:,:,::-1] # BGR to RGB
+        
+        im = preprocessImage(im, options)
+        
+        results = face_client.detect(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        
+        detect_queue.append([im,results,options])
+        detect_queue = list(filter(processDetections,detect_queue))
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+                            
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+        
+    end = time.time()
+    
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
+
+    print("Processed %d images in %0.3f seconds: %f images/second"%(image_count,end-start,image_count/(end-start)))
+    print("Processed %d faces in %0.3f seconds: %f faces/second"%(FACE_COUNT,end-start,FACE_COUNT/(end-start)))
+    
+def detectExtract():
+    options,args = detectParseOptions()
+    face_client = connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+    
+    image_list, video_list = collect_files(args[1:],options)
+
+    if options.verbose:
+        print("Processing images.")
+        
+    image_count = 0
+    detect_queue = []
+    start = time.time()
     for filename in image_list:
         print("Processing:",filename)
         im = cv2.imread(filename)
@@ -630,8 +680,8 @@ def detect():
         if options.max_images is not None and image_count >= options.max_images:
             break
         
-    import time
-                    
+    end = time.time()
+                        
     while len(detect_queue):
         detect_queue = list(filter(processDetections,detect_queue))
         time.sleep(0.05)
@@ -639,6 +689,75 @@ def detect():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
 
+    print("Processed %d images in %0.3f seconds: %f images/second"%(image_count,end-start,image_count/(end-start)))
+    print("Processed %d faces in %0.3f seconds: %f faces/second"%(FACE_COUNT,end-start,FACE_COUNT/(end-start)))
+    
+    
+    
+def extractOnly():
+    options,args = detectParseOptions()
+    face_client = connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+    
+    f = open(args[1],'r')
+    csv_f = csv.DictReader(f)
+    
+    process_queue = []
+    current_file = None
+    for row in csv_f:
+        if current_file == None or current_file != row['source']:
+            current_file = row['source']
+            detections = FaceRecordList()
+            process_queue.append([current_file,detections])
+            
+        face = detections.face_records.add()
+        face.source = row['source']
+        face.frame = int(row['frame']);
+        face.detection.detection_id = int(row['detect_id'])
+        face.detection.score = float(row['score'])
+        face.detection.detection_class = row['type']
+        face.detection.location.x = float(row['x'])
+        face.detection.location.y = float(row['y'])
+        face.detection.location.width = float(row['w'])
+        face.detection.location.height = float(row['h'])
+
+    
+    #image_list, video_list = collect_files(args[1:],options)
+
+    if options.verbose:
+        print("Processing images.")
+        
+    image_count = 0
+    detect_queue = []
+    start = time.time()
+    for filename,detections in process_queue:
+        #print("Processing:",filename)
+        im = cv2.imread(filename)
+        im = im[:,:,::-1] # BGR to RGB
+        
+        im = preprocessImage(im, options)
+        
+        results = face_client.extract(im, detections, run_async=True)
+        
+        detect_queue.append([im,results,options])
+        detect_queue = list(filter(processDetections,detect_queue))
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+    end = time.time()
+                    
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+        
+    #if len(video_list) > 0:
+    #    print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
+
+    print("Processed %d images in %0.3f seconds: %f images/second"%(image_count,end-start,image_count/(end-start)))
+    print("Processed %d faces in %0.3f seconds: %f faces/second"%(FACE_COUNT,end-start,FACE_COUNT/(end-start)))
     
     
     
@@ -747,7 +866,9 @@ def search():
 
 
 COMMANDS = {
-    'detect' : ['Only run face detection and attribute extraction.',detect],
+    'detect' : ['Only run face detection.',detect],
+    'detectExtract' : ['Run face detection and template extraction.',detectExtract],
+    'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
     'search' : ['Search images for faces in a gallery.',search],
             }
