@@ -29,7 +29,7 @@ if [ ! -d data ]; then
 
 fi
 
-../bin/faro_recognize --detect-only -f faces --detect-log=detections -d detections.csv -a attributes.csv  data --max-async 16
+python -m faro.FaceClient detect -d detections.csv --detect-log=faces --face-log=faces data
 
 
 

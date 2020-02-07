@@ -405,6 +405,8 @@ def processDetections(each):
     if results.done():
         recs = results.result().face_records
         i = 0
+
+
         for face in recs:
             # Filter faces based on min size
             size = min(face.detection.location.width,face.detection.location.height)
@@ -495,13 +497,16 @@ def processDetections(each):
                     print("WARNING: Image not processed correctly:",face.source)
                     
                 out_path = os.path.join(options.face_log,os.path.basename(base_name)+'_orig'+ext)
+        
+                if not os.path.lexists(out_path):
+                    os.symlink(os.path.abspath(face.source),out_path)
                 
-                if not os.path.exists(out_path):
-                    os.symlink(face.source,out_path)
                 
                 #print(options.face_log)
                 #pass
             i += 1
+        
+
         return False
     return True
 
