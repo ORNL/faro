@@ -297,6 +297,7 @@ class FaceService(fs.FaceRecognitionServicer):
                 face.source = request.source
                 face.frame = request.frame
                 face.subject_id = request.subject_id
+                face.name = request.subject_name
                             
             #date = request.image.date
             #time_ = request.image.time
@@ -458,10 +459,10 @@ class FaceService(fs.FaceRecognitionServicer):
         '''
         try:
             start = time.time()
-            result = fsd.SearchResponse()
-            result.probes.CopyFrom(request.probes)
+            #result = fsd.SearchResponse()
+            #result.probes.CopyFrom(request.probes)
 
-            #print('search',request)
+            # Collect the options
             search_gallery = request.search_gallery
             probes = request.probes
             max_results = request.max_results
@@ -475,54 +476,41 @@ class FaceService(fs.FaceRecognitionServicer):
                 face = GALLERIES[search_gallery][key]
                 gallery.face_records.add().CopyFrom(face)
                 
-            #print('gallery size',len(gallery.face_records))
-
             score_request = fsd.ScoreRequest()
             score_request.face_probes.CopyFrom(probes)
             score_request.face_gallery.CopyFrom(gallery)
             
+            # Compute the scores matrix
             scores = self.score(score_request,None)
-                 
-            #print('-------------- scores ------------')
-            #print(threshold)
-            #print(scores)
             scores = pt.matrix_proto2np(scores)
             
-            for row in range(scores.shape[0]):
-                out = result.probes.face_records[row].search_results
+            matched = 0
+            for p in range(scores.shape[0]):
+                #probe = probes.face_records[p]
+                #out = result.probes.face_records[p].search_results
                 matches = []
-                for col in range(scores.shape[1]):
-                    score = scores[row,col]
+                for g in range(scores.shape[1]):
+                    score = scores[p,g]
                     if score > threshold:
                         continue
-                    gallery.face_records[col].score = score
-                    matches.append( [ score, gallery.face_records[col] ] )
+                    matches.append( [ score, gallery.face_records[g] ] )
+                
                 matches.sort(key=lambda x: x[0])
                 
                 if max_results > 0:
                     matches = matches[:max_results]
-                
-                #print('matches',matches)
-                for score,face in matches:
-                    out.face_records.add().CopyFrom(face)
-                    #out.scores.append(score)
-            #for each in request.face_records:
-            #    self.galleries[search_gallery].addTemplate( each )
-                
-                
-            # Count the matches
-            probes = len(result.probes.face_records)
-            matched = 0
-            count = 0
-            for face_rec in result.probes.face_records:
-                c = len(face_rec.search_results.face_records)
-                count += c
-                if c > 0:
                     matched += 1
-            notes = "Processed %d probes. %d matched. %d total results."%(probes,matched,count)
+                
+                for score,face in matches:
+                    probes.face_records[p].search_results.face_records.add().CopyFrom(face)
+                    probes.face_records[p].search_results.face_records[-1].score=score
+                    
+            # Count the matches
+            count = len(probes.face_records)
+            notes = "Processed %d probes. %d matched."%(count,matched)
             stop = time.time()
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"search()",notes)))
-            return result
+            return probes
         except:
             traceback.print_exc()
             raise
@@ -597,11 +585,9 @@ class FaceService(fs.FaceRecognitionServicer):
             search_request = request.search_request
             search_request.probes.CopyFrom(face_records_list)
             
-            results = self.search(search_request, context)
+            face_records_list = self.search(search_request, context)
             
-            #print("enroll result",results)
-            
-            return results
+            return face_records_list
         except:
             traceback.print_exc()
             raise
