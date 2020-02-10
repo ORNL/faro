@@ -84,10 +84,10 @@ def addEnrollOptions(parser):
     #parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
     #                   help="Enroll detected faces into a gallery.")
     
-    enroll_group.add_option( "-e", "--enroll-csv", type="str", dest="enroll_csv", default='default',
+    enroll_group.add_option( "-e", "--enroll-csv", type="str", dest="enroll_csv", default=None,
                        help="Save a log of the enrollments.")
     
-    enroll_group.add_option( "--enroll-gallery", type="str", dest="enroll_gallery", default='default',
+    enroll_group.add_option( "--gallery", type="str", dest="enroll_gallery", default='default',
                        help="Select the gallery to enroll into.")
     
     enroll_group.add_option( "--name", type="str", dest="subject_name", default='UNKNOWN',
@@ -100,18 +100,21 @@ def addEnrollOptions(parser):
 
 
 def addSearchOptions(parser):
-    ''' Add options for enrollment into a gallery. '''
+    ''' Add options for search of a gallery. '''
     
-    enroll_group =  optparse.OptionGroup(parser, "Enrollment Options",
-                        "Configuration for enrollment.")
+    search_group =  optparse.OptionGroup(parser, "Search Options",
+                        "Configuration for gallery search.")
 
-    enroll_group.add_option( "-s", "--search-csv", type="str", dest="search_csv", default='default',
+    search_group.add_option( "-s", "--search-csv", type="str", dest="search_csv", default='default',
                        help="Save the search results.")
     
-    enroll_group.add_option( "--search-gallery", type="str", dest="search_gallery", default='default',
+    search_group.add_option( "--search-log", type="str", dest="search_log", default='default',
+                       help="Save the search results.")
+    
+    search_group.add_option( "--gallery", type="str", dest="search_gallery", default='default',
                        help="Select the gallery to search.")
         
-    parser.add_option_group(enroll_group)
+    parser.add_option_group(search_group)
 
 
 
@@ -243,8 +246,8 @@ def enrollParseOptions():
     parser.add_option( "--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
                       help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
     
-    addEnrollOptions(parser)
     addDetectorOptions(parser)
+    addEnrollOptions(parser)
     addConnectionOptions(parser)
 
     # Parse the arguments and return the results.
@@ -409,6 +412,8 @@ def processDetections(each):
     if results.done():
         recs = results.result().face_records
         i = 0
+
+
         for face in recs:
             global FACE_COUNT
             FACE_COUNT += 1
@@ -501,13 +506,16 @@ def processDetections(each):
                     print("WARNING: Image not processed correctly:",face.source)
                     
                 out_path = os.path.join(options.face_log,os.path.basename(base_name)+'_orig'+ext)
+        
+                if not os.path.lexists(out_path):
+                    os.symlink(os.path.abspath(face.source),out_path)
                 
-                if not os.path.exists(out_path):
-                    os.symlink(face.source,out_path)
                 
                 #print(options.face_log)
                 #pass
             i += 1
+        
+
         return False
     return True
 
@@ -559,15 +567,16 @@ def processEnrollments(each):
 SEARCH_CSV = None
 SEARCH_FILE = None
 def processSearchResults(each):
-    print('Search results')
+    print('Search results...')
     im, results, options = each
     
     if results.done():
         print('Done')
         recs = results.result().face_records
-        #print(recs)
+
         i = 0
-        for face in recs:
+        for face in recs.face_records:
+            #print(face)
             # Filter faces based on min size
             size = min(face.detection.location.width,face.detection.location.height)
             if size < options.min_size:
@@ -580,23 +589,41 @@ def processSearchResults(each):
             # Process Detections
             print( "Face" )
             if options.search_csv is not None:
+                print('******  search file: %s'%options.search_csv)
                 global SEARCH_CSV
                 global SEARCH_FILE
                 import csv 
                 if SEARCH_CSV == None:
+                    #if options.verbose:
+                    print('****** Opening search file: %s'%options.search_csv)
                     SEARCH_FILE = open(options.search_csv,'w')
                     SEARCH_CSV = csv.writer(SEARCH_FILE)
-                    SEARCH_CSV.writerow(['gallery_key','source','frame','detect_id','type','score','x','y','w','h']) 
+                    SEARCH_CSV.writerow(['face_source','face_detect_id',
+                                         'gal_sub_id','gal_name','gal_source',
+                                         'gal_score','gal_key','x','y','w','h']) 
                     
-                SEARCH_CSV.writerow([face.gallery_key,face.source,
-                                        face.frame,
-                                        i,
-                                        face.detection.detection_class,
-                                        face.detection.score,
-                                        face.detection.location.x,
-                                        face.detection.location.y,
-                                        face.detection.location.width,
-                                        face.detection.location.height
+                face_source = face.source
+                face_detect_id = face.detection.detection_id
+                #face_detect_rect = face.detection.location.rect
+                
+                for gal in face.search_results.face_records:
+                    gal_name = gal.name
+                    gal_sub_id = gal.name
+                    gal_source = gal.source
+                    gal_score = gal.score
+                    gal_key = gal.gallery_key
+                                    
+                                
+                    #face.search_results.face_records
+                    #string subject_id = 1;
+                    #string name = 5;
+                    #string source = 4;
+                    #int64 frame = 14;
+                    #string notes = 6;
+                    #string gallery_key = 15;
+
+                    SEARCH_CSV.writerow([face_source,face_detect_id,
+                                         gal_sub_id,gal_name,gal_source,gal_score,gal_key
                                         ]),
                 SEARCH_FILE.flush()
                 
@@ -784,7 +811,7 @@ def enroll():
         
         im = preprocessImage(im, options)
         
-        results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1, subject_name=options.subject_name)
         
         detect_queue.append([im,results,options])
         enroll_queue.append([im,results,options])

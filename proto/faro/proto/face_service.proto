@@ -239,8 +239,9 @@ message EnrollRequest{
 message DetectRequest{
 	Image image = 1;
 	string source = 2;
-	int64 frame = 4;
-	string subject_id = 3;
+	int64 frame = 3;
+	string subject_id = 4;
+	string subject_name = 5;
 	DetectionOptions detect_options = 8;
 }
 

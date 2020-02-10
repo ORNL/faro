@@ -201,7 +201,7 @@ class FaceClient(object):
     
     
     
-    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,subject_name=None,frame=None):
         request = fsd.DetectExtractEnrollRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
@@ -223,6 +223,8 @@ class FaceClient(object):
             request.detect_request.frame=frame
         if subject_id is not None:
             request.detect_request.subject_id=subject_id
+        if subject_name is not None:
+            request.detect_request.subject_name=subject_name
             
             
         request.detect_request.detect_options.best=best
