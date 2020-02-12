@@ -118,6 +118,37 @@ def addSearchOptions(parser):
 
 
 
+def addTestOptions(parser):
+    ''' Add options for a test. '''
+    
+    search_group =  optparse.OptionGroup(parser, "Test Options",
+                        "Configuration for a face recognition test.")
+
+    search_group.add_option( "--is-match", type="str", dest="search_csv", default=None,
+                       help="A function that can parse two image paths and determine ground truth if they are the same subject.  i.e. match the first five characters 'lambda x,y: x[:5] == y[:5]'")
+    
+    search_group.add_option( '-m',"--distance-matrix", type="str", dest="distance_matrix", default=None,
+                       help="Save the distance matrix to this file.")
+    
+    search_group.add_option( "-s", "--test-summary", type="str", dest="test_summary", default=None,
+                       help="A csv file summarizing test results.")
+
+    search_group.add_option( "-t", "--threshold", type="float", dest="test_threshold", default=None,
+                       help="A score threshold to determine matches.")
+        
+    search_group.add_option( "--matches-log", type="str", dest="matches_log", default=None,
+                       help="A directory containing matching face images.")
+        
+    search_group.add_option( "--false-matches-log", type="str", dest="false_matches_log", default=None,
+                       help="A directory containing matching face images.")
+        
+    search_group.add_option( "--false-reject-log", type="str", dest="false_reject_log", default=None,
+                       help="A directory containing matching face images.")
+        
+    parser.add_option_group(search_group)
+
+
+
 def preprocessImage(im,options):
     
     # Reduce the size if the image is too large
@@ -290,6 +321,50 @@ def searchParseOptions():
                       help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
     
     addSearchOptions(parser)
+    addDetectorOptions(parser)
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 2:
+        parser.print_help()
+        print()
+        print(( "Error: Please supply at least one directory, image, or video."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
+
+def testParseOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['gallery_dir probe_dir'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Run a test to compute the distance matrix between images in probe and gallery directories.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
+                      help="Process at N images and then stop.")
+
+    parser.add_option( "--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
+                      help="If too large, images will be scaled to have this maximum size. Default=%d"%(faro.DEFAULT_MAX_SIZE))
+    
+    addTestOptions(parser)
     addDetectorOptions(parser)
     addConnectionOptions(parser)
 
@@ -892,12 +967,61 @@ def search():
 
 
 
+def test():
+    ''' Run a recognition test and compute a distance matrix and optionally other results. ''' 
+    options,args = testParseOptions()
+    
+    face_client = connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+    
+    image_list, video_list = collect_files(args[1:],options)
+
+    if options.verbose:
+        print("Processing images.")
+        
+    image_count = 0
+    detect_queue = []
+    search_queue = []
+    
+    for filename in image_list:
+        print("Processing:",filename)
+        im = cv2.imread(filename)
+        im = im[:,:,::-1] # BGR to RGB
+        
+        im = preprocessImage(im, options)
+        
+        results = face_client.detectExtract(im, search_gallery=options.search_gallery, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        
+        detect_queue.append([im,results,options])
+
+        # Process results that are completed.
+        detect_queue = list(filter(processDetections,detect_queue))
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+        
+    import time
+                    
+    # Finish processing.
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections,detect_queue))
+        time.sleep(0.05)
+
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
+
+
+
 COMMANDS = {
     'detect' : ['Only run face detection.',detect],
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
     'search' : ['Search images for faces in a gallery.',search],
+    'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
             }
     
 
