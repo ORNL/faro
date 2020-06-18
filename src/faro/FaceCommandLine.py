@@ -488,8 +488,8 @@ def processDetections(each):
         recs = results.result().face_records
         i = 0
 
-
-        for face in recs:
+        dimg = None
+        for idx, face in enumerate(recs):
             global FACE_COUNT
             FACE_COUNT += 1
             # Filter faces based on min size
@@ -509,9 +509,32 @@ def processDetections(each):
                 if DETECTIONS_CSV == None:
                     DETECTIONS_FILE = open(options.detections_csv,'w')
                     DETECTIONS_CSV = csv.writer(DETECTIONS_FILE)
-                    DETECTIONS_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h']) 
-                    
-                DETECTIONS_CSV.writerow([face.source,
+                
+                    if len(face.landmarks) > 0:
+                        DETECTIONS_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h',
+                                             'lmark_id_1','lmark_x','lmark_y', 'lmark_id_2','lmark_x',
+                                             'lmark_y','lmark_id_3','lmark_x','lmark_y','lmark_id_4',
+                                             'lmark_x','lmark_y','lmark_id_5','lmark_x','lmark_y'])
+                    else:
+                        DETECTIONS_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h'])
+
+                if len(face.landmarks) > 0:
+                    DETECTIONS_CSV.writerow([face.source,
+                                        face.frame,
+                                        i,
+                                        face.detection.detection_class,
+                                        face.detection.score,
+                                        face.detection.location.x,
+                                        face.detection.location.y,
+                                        face.detection.location.width,
+                                        face.detection.location.height,
+                                        face.landmarks[0].landmark_id,face.landmarks[0].location.x, face.landmarks[0].location.y,
+                                        face.landmarks[1].landmark_id,face.landmarks[1].location.x, face.landmarks[1].location.y,
+                                        face.landmarks[2].landmark_id,face.landmarks[2].location.x, face.landmarks[2].location.y,
+                                        face.landmarks[3].landmark_id,face.landmarks[3].location.x, face.landmarks[3].location.y,
+                                        face.landmarks[4].landmark_id,face.landmarks[4].location.x, face.landmarks[4].location.y]),
+                else:
+                    DETECTIONS_CSV.writerow([face.source,
                                         face.frame,
                                         i,
                                         face.detection.detection_class,
@@ -532,14 +555,39 @@ def processDetections(each):
                 if ATTRIBUTES_CSV == None:
                     ATTRIBUTES_FILE = open(options.attributes_csv,'w')
                     ATTRIBUTES_CSV = csv.writer(ATTRIBUTES_FILE)
-                    ATTRIBUTES_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h','attribute','value']) 
                     
+                    if len(face.landmarks) > 0:
+                        ATTRIBUTES_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h',
+                                             'lmark_id_1','lmark_x','lmark_y', 'lmark_id_2','lmark_x',
+                                             'lmark_y','lmark_id_3','lmark_x','lmark_y','lmark_id_4',
+                                             'lmark_x','lmark_y','lmark_id_5','lmark_x','lmark_y', 'attribute', 'value'])
+                    else:
+                        ATTRIBUTES_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h', 'attribute', 'value'])
+
+
                 attributes = list(face.attributes)
                 attributes.sort(key=lambda x: x.key)
                 for attribute in attributes:
                     key = attribute.key
                     value = attribute.fvalue
-                    ATTRIBUTES_CSV.writerow([face.source,
+                    if len(face.landmarks) > 0:
+                        ATTRIBUTES_CSV.writerow([face.source,
+                                        face.frame,
+                                        i,
+                                        face.detection.detection_class,
+                                        face.detection.score,
+                                        face.detection.location.x,
+                                        face.detection.location.y,
+                                        face.detection.location.width,
+                                        face.detection.location.height,
+                                        face.landmarks[0].landmark_id,face.landmarks[0].location.x, face.landmarks[0].location.y,
+                                        face.landmarks[1].landmark_id,face.landmarks[1].location.x, face.landmarks[1].location.y,
+                                        face.landmarks[2].landmark_id,face.landmarks[2].location.x, face.landmarks[2].location.y,
+                                        face.landmarks[3].landmark_id,face.landmarks[3].location.x, face.landmarks[3].location.y,
+                                        face.landmarks[4].landmark_id,face.landmarks[4].location.x, face.landmarks[4].location.y, key, value])
+                    
+                    else:
+                        ATTRIBUTES_CSV.writerow([face.source,
                                             face.frame,
                                             i,
                                             face.detection.detection_class,
@@ -549,16 +597,27 @@ def processDetections(each):
                                             face.detection.location.width,
                                             face.detection.location.height,
                                             key,
-                                            value,
+                                            value
                                             ]),
                 ATTRIBUTES_FILE.flush()
                 
-                # Save Images with Detections
-            
-                
-                # Save Detected Faces
-                face_out_dir = ""    
-            
+            # Save Images with Detections
+        
+            if options.detect_log:
+                if not os.path.exists(options.detect_log):
+                    os.makedirs(options.detect_log, exist_ok=True)     
+                rect = pt.rect_proto2pv(face.detection.location)
+                if dimg is None:
+                    dimg = pv.Image(im[:,:,::-1])
+                dimg.annotateThickRect(rect)
+                dimg.annotateLabel(pv.Point(rect.x+5,rect.y+5),face.detection.detection_class)
+                dimg.annotateLabel(pv.Point(rect.x+5,rect.y+20),
+                                    "Score: %0.4f"%(face.detection.score,), color='yellow')
+                if len(face.landmarks) > 0:
+                    for each_lmark in face.landmarks:
+                            dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y), 
+                                                radius=3, color = 'green', fill='green')
+
             if options.face_log:
                 if not os.path.exists(options.face_log):
                     os.makedirs(options.face_log, exist_ok=True)
@@ -586,11 +645,10 @@ def processDetections(each):
                     os.symlink(os.path.abspath(face.source),out_path)
                 
                 
-                #print(options.face_log)
-                #pass
             i += 1
         
-
+        if options.detect_log:
+            dimg.asAnnotated().save(os.path.join(options.detect_log,os.path.basename(base_name) + ext))
         return False
     return True
 
@@ -709,6 +767,7 @@ def processSearchResults(each):
 
 def detect():
     options,args = detectParseOptions()
+    print(options)
     face_client = connectToFaroClient(options)
 
     if options.verbose:
