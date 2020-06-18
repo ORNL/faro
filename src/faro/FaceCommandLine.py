@@ -726,19 +726,22 @@ def detect():
     for filename in image_list:
         print("Processing:",filename)
         im = cv2.imread(filename)
+        
+        if im is None:
+            continue
+
         im = im[:,:,::-1] # BGR to RGB
         
         im = preprocessImage(im, options)
         
         results = face_client.detect(im, best = options.best, threshold=options.detect_thresh, min_size=options.min_size, run_async=True, source=filename, frame=-1)
-        
+
         detect_queue.append([im,results,options])
         detect_queue = list(filter(processDetections,detect_queue))
-        
         image_count += 1
         if options.max_images is not None and image_count >= options.max_images:
             break
-                            
+    
     while len(detect_queue):
         detect_queue = list(filter(processDetections,detect_queue))
         time.sleep(0.05)

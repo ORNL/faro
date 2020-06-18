@@ -10,7 +10,7 @@
 python_path=`which python`
 printf 'Python is installed at %s\n ' "$python_path"
 
-environment_name="faro"
+environment_name="env_faro"
 
 if [[ "$python_path" =~ .*anaconda.* ]]; then
 	echo "The environment will be setup using conda"
@@ -46,7 +46,7 @@ fi
 python_path=`which python`
 printf 'Python is installed at %s\n ' "$python_path"
 
-environment_name_server="faro_server"
+environment_name_server="env_faro_server"
 
 if [[ "$python_path" =~ .*anaconda.* ]]; then
 	echo "The environment will be setup using conda"
