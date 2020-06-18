@@ -650,7 +650,7 @@ def processSearchResults(each):
         recs = results.result().face_records
 
         i = 0
-        for face in recs.face_records:
+        for face in recs:
             #print(face)
             # Filter faces based on min size
             size = min(face.detection.location.width,face.detection.location.height)
