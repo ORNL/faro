@@ -509,41 +509,38 @@ def processDetections(each):
                 if DETECTIONS_CSV == None:
                     DETECTIONS_FILE = open(options.detections_csv,'w')
                     DETECTIONS_CSV = csv.writer(DETECTIONS_FILE)
-                
+                    csv_header = ['source','frame','detect_id','type','score','x','y','w','h']                
                     if len(face.landmarks) > 0:
-                        DETECTIONS_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h',
-                                             'lmark_id_1','lmark_x','lmark_y', 'lmark_id_2','lmark_x',
-                                             'lmark_y','lmark_id_3','lmark_x','lmark_y','lmark_id_4',
-                                             'lmark_x','lmark_y','lmark_id_5','lmark_x','lmark_y'])
-                    else:
-                        DETECTIONS_CSV.writerow(['source','frame','detect_id','type','score','x','y','w','h'])
+                        for each_lpt in face.landmarks:
+                            pt_id_label = 'lmark_id_' + each_lpt.landmark_id
+                            xpt_label = 'lmark_x'
+                            ypt_label = 'lmark_y'
+                            csv_header.append(pt_id_label)
+                            csv_header.append(xpt_label)
+                            csv_header.append(ypt_label)
+                    
+                    DETECTIONS_CSV.writerow(csv_header)
+                
+                csv_eachline = [face.source,
+                            face.frame,
+                            i,
+                            face.detection.detection_class,
+                            face.detection.score,
+                            face.detection.location.x,
+                            face.detection.location.y,
+                            face.detection.location.width,
+                            face.detection.location.height]
 
                 if len(face.landmarks) > 0:
-                    DETECTIONS_CSV.writerow([face.source,
-                                        face.frame,
-                                        i,
-                                        face.detection.detection_class,
-                                        face.detection.score,
-                                        face.detection.location.x,
-                                        face.detection.location.y,
-                                        face.detection.location.width,
-                                        face.detection.location.height,
-                                        face.landmarks[0].landmark_id,face.landmarks[0].location.x, face.landmarks[0].location.y,
-                                        face.landmarks[1].landmark_id,face.landmarks[1].location.x, face.landmarks[1].location.y,
-                                        face.landmarks[2].landmark_id,face.landmarks[2].location.x, face.landmarks[2].location.y,
-                                        face.landmarks[3].landmark_id,face.landmarks[3].location.x, face.landmarks[3].location.y,
-                                        face.landmarks[4].landmark_id,face.landmarks[4].location.x, face.landmarks[4].location.y]),
-                else:
-                    DETECTIONS_CSV.writerow([face.source,
-                                        face.frame,
-                                        i,
-                                        face.detection.detection_class,
-                                        face.detection.score,
-                                        face.detection.location.x,
-                                        face.detection.location.y,
-                                        face.detection.location.width,
-                                        face.detection.location.height
-                                        ]),
+                    for each_lpt in face.landmarks:
+                        pt_id_label = each_lpt.landmark_id
+                        xpt_label = each_lpt.location.x
+                        ypt_label = each_lpt.location.y
+                        csv_eachline.append(pt_id_label)
+                        csv_eachline.append(xpt_label)
+                        csv_eachline.append(ypt_label)
+                DETECTIONS_CSV.writerow(csv_eachline)
+
                 DETECTIONS_FILE.flush()
                 
             # Process Detections
