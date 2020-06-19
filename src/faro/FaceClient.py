@@ -300,12 +300,12 @@ class FaceClient(object):
         return face_records
     
     
-    def enroll(self,faces,gallery_name, subject_id=None, subject_name=None, run_async=False,**kwargs):
+    def enroll(self,faces, enroll_gallery, subject_id=None, subject_name=None, run_async=False,**kwargs):
         request = fsd.EnrollRequest()
         
         #print( "enrolling:",gallery_name,subject_id,subject_name)
         
-        request.gallery_name = gallery_name
+        request.enroll_gallery = enroll_gallery
         
         if subject_id is not None:
             for face in faces.face_records:
@@ -328,6 +328,25 @@ class FaceClient(object):
 
         return error
         
+        
+    def galleryList(self):
+        '''Get a list of the galleries'''
+        
+        request = fsd.GalleryListRequest()
+        
+        result = self.rec_stub.galleryList(request)
+        
+        return result
+    
+    def faceList(self,gallery_name):
+        '''Get a list faces in a gallery'''
+        
+        request = fsd.FaceListRequest()
+        request.gallery_name = gallery_name
+        result = self.rec_stub.faceList(request)
+        
+        return result
+
 
     def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False,**kwargs):
         request = fsd.SearchRequest()

@@ -12,7 +12,7 @@ import pyvision as pv
 import cv2
 import faro.proto.proto_types as pt
 import csv
-from faro.proto.face_service_pb2 import FaceRecordList
+from faro.proto.face_service_pb2 import FaceRecordList,GalleryListRequest
 import time
 
 FACE_COUNT = 0
@@ -293,6 +293,77 @@ def enrollParseOptions():
         
         
     return options,args
+
+def galleryListOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = [] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''List galleries avalible on the service.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 1:
+        parser.print_help()
+        print()
+        print(( "Error: No position arguments required."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
+def faceListOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['gallery_name'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''List faces in a gallery.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 1:
+        parser.print_help()
+        print()
+        print(( "Error: No position arguments required."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
 
 def searchParseOptions():
     '''
@@ -914,7 +985,33 @@ def enroll():
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
 
 
+def glist():
+    options,args = galleryListOptions()
+    face_client = connectToFaroClient(options)
 
+    result = face_client.galleryList()
+    
+    print()
+    print("%-24s | %10s"%('GALLERY NAME','FACE_COUNT'))
+    print('-'*37)
+    for gallery in result.galleries:
+        print("%-24s | %10d"%(gallery.gallery_name,gallery.face_count))
+    print()
+    
+def flist():
+    options,args = faceListOptions()
+    face_client = connectToFaroClient(options)
+    
+    gallery_name = args[1]
+    result = face_client.faceList(gallery_name)
+    
+    print()
+    print("%-48s | %-16s | %-32s | %-40s | %10s"%('KEY','SUBJECT_ID','NAME','SOURCE','FRAME'))
+    print('-'*158)
+    for face in result.face_records:
+        print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
+    print()
+    
 def search():
     options,args = searchParseOptions()
     face_client = connectToFaroClient(options)
@@ -964,7 +1061,6 @@ def search():
 
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped."%(video_list,))
-
 
 
 def test():
@@ -1020,6 +1116,8 @@ COMMANDS = {
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
+    'flist' : ['List the faces in a gallery.',flist],
+    'glist' : ['List the galleries on the service.',glist],
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
             }

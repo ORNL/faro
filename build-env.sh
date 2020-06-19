@@ -27,7 +27,7 @@ if [ ! -f env_faro_server/bin/activate ]; then
 		pip install -U tensorflow	
 	fi
 	
-	pip install -U keras==2.2.0 # The newer versions have a bug
+	pip install -U keras # The newer versions have a bug
 	pip install -U dlib
 fi
 

@@ -299,18 +299,39 @@ message DetectExtractSearchRequest{
 message FaceStatusRequest{ }
 
 message FaceServiceInfo{
-	ServiceStatus  	status 				= 1;
-	int32          	worker_count 		= 2;
-	bool    		    detection_support 	= 3;
-	bool    		    extract_support 	    = 4;
-	bool    		    score_support 		= 5;
-	bool           	attribute_support 	= 6;
-	ScoreType 		score_type 			= 7;
-	float 			detection_threshold = 8;
-	float 			match_threshold 	    = 9;
-	string 			algorithm 			= 10;
-	string 			notes 				= 11;
+    ServiceStatus   status              = 1;
+    int32           worker_count        = 2;
+    bool            detection_support   = 3;
+    bool            extract_support     = 4;
+    bool            score_support       = 5;
+    bool            attribute_support   = 6;
+    ScoreType       score_type          = 7;
+    float           detection_threshold = 8;
+    float           match_threshold     = 9;
+    string          algorithm           = 10;
+    string          notes               = 11;
 }
+
+message GalleryListRequest {}
+
+message FaceListRequest {
+    string gallery_name = 1;
+}
+
+message GalleryClearRequest {
+    string name = 1;
+}
+
+message GalleryInfo{
+    string          gallery_name = 1;
+    int64           face_count   = 2;
+}
+
+
+message GalleryList{
+    repeated GalleryInfo galleries = 1;
+}
+
 
 message Empty{
 
@@ -332,6 +353,12 @@ service FaceRecognition{
     rpc detectExtractEnroll(DetectExtractEnrollRequest) returns (FaceRecordList){};
     rpc detectExtractSearch(DetectExtractSearchRequest) returns (FaceRecordList){};
 
+    // Gallery Management
+    rpc galleryList(GalleryListRequest) returns (GalleryList){};
+    rpc galleryClear(GalleryClearRequest) returns (GalleryInfo){};
+    rpc faceList(FaceListRequest) returns (FaceRecordList){};
+
+    // Test
 	rpc echo(Matrix) returns (Matrix){}; // test large messages
 
     //rpc cleanexit(Empty) returns (Empty){}; // TODO: This needs to go away.

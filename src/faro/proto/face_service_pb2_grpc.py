@@ -60,6 +60,21 @@ class FaceRecognitionStub(object):
         request_serializer=faro_dot_proto_dot_face__service__pb2.DetectExtractSearchRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
+    self.galleryList = channel.unary_unary(
+        '/FaceRecognition/galleryList',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryListRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryList.FromString,
+        )
+    self.galleryClear = channel.unary_unary(
+        '/FaceRecognition/galleryClear',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryClearRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.FromString,
+        )
+    self.faceList = channel.unary_unary(
+        '/FaceRecognition/faceList',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.FaceListRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
     self.echo = channel.unary_unary(
         '/FaceRecognition/echo',
         request_serializer=faro_dot_proto_dot_geometry__pb2.Matrix.SerializeToString,
@@ -134,9 +149,30 @@ class FaceRecognitionServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def echo(self, request, context):
+  def galleryList(self, request, context):
+    """Gallery Management
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def galleryClear(self, request, context):
     # missing associated documentation comment in .proto file
     pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def faceList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def echo(self, request, context):
+    """Test
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
@@ -187,6 +223,21 @@ def add_FaceRecognitionServicer_to_server(servicer, server):
       'detectExtractSearch': grpc.unary_unary_rpc_method_handler(
           servicer.detectExtractSearch,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.DetectExtractSearchRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'galleryList': grpc.unary_unary_rpc_method_handler(
+          servicer.galleryList,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryListRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.GalleryList.SerializeToString,
+      ),
+      'galleryClear': grpc.unary_unary_rpc_method_handler(
+          servicer.galleryClear,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryClearRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.SerializeToString,
+      ),
+      'faceList': grpc.unary_unary_rpc_method_handler(
+          servicer.faceList,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.FaceListRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),
       'echo': grpc.unary_unary_rpc_method_handler(

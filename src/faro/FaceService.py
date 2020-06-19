@@ -34,7 +34,7 @@ from concurrent import futures
 import traceback
 import time
 import faro.proto.proto_types as pt
-from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList
+from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo
 import csv
 import multiprocessing as mp
 import optparse
@@ -420,6 +420,82 @@ class FaceService(fs.FaceRecognitionServicer):
             traceback.print_exc()
             raise
         
+    def galleryList(self, request, context):
+        ''' List the galleries for this service. '''
+        try:
+            start = time.time()
+            
+            result = GalleryList()
+            #gallery_name = request.enroll_gallery
+            
+            global GALLERIES, STORAGE
+
+            count = 0
+            for gallery_name in GALLERIES:
+                item = result.galleries.add()
+                item.gallery_name=gallery_name
+                item.face_count=len(GALLERIES[gallery_name])
+                #print("Name:",gallery_name)
+                #print("Size:",len(GALLERIES[gallery_name]))
+                #print()
+                count += 1
+                
+            stop = time.time()
+            notes = "%d galleries returned."%(count,)
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes)))
+
+            return result
+        except:
+            traceback.print_exc()
+            raise
+
+
+    def faceList(self, request, context):
+        ''' List the galleries for this service. '''
+        try:
+            start = time.time()
+            
+            result = FaceRecordList()
+            gallery_name = request.gallery_name
+            
+            global GALLERIES, STORAGE
+
+            count = 0
+            for face_id in GALLERIES[gallery_name]:
+                print(face_id)
+                face_record = GALLERIES[gallery_name][face_id]
+                print(dir(face_record))
+                
+                face = result.face_records.add()
+                print(dir(face))
+                face.gallery_key = face_id
+                face.name = GALLERIES[gallery_name][face_id].name
+                face.subject_id = GALLERIES[gallery_name][face_id].subject_id
+                face.source = GALLERIES[gallery_name][face_id].source
+                face.frame = GALLERIES[gallery_name][face_id].frame
+                
+                #item = result.galleries.add()
+                #item.gallery_name=gallery_name
+                #item.face_count=len(GALLERIES[gallery_name])
+                #print("Name:",gallery_name)
+                #print("Size:",len(GALLERIES[gallery_name]))
+                #print()
+                count += 1
+                
+            stop = time.time()
+            notes = "%d faces returned."%(count,)
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes)))
+
+            return result
+        except:
+            traceback.print_exc()
+            raise
+
+
+    
+
     def echo(self,request,context):
         try:
             start = time.time()
