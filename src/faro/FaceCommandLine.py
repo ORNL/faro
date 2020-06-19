@@ -512,7 +512,7 @@ def processDetections(each):
                     csv_header = ['source','frame','detect_id','type','score','x','y','w','h']                
                     if len(face.landmarks) > 0:
                         for each_lpt in face.landmarks:
-                            pt_id_label = 'lmark_id_' + each_lpt.landmark_id
+                            pt_id_label = each_lpt.landmark_id
                             xpt_label = 'lmark_x'
                             ypt_label = 'lmark_y'
                             csv_header.append(pt_id_label)
