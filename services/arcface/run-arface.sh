@@ -5,8 +5,8 @@
 
 HOST=localhost
 PORT=50030
-WORKER_COUNT=4
-USE_GPUS=''
+WORKER_COUNT=1
+USE_GPUS='0'
 
 if lsof -i:$PORT
 then
@@ -61,5 +61,5 @@ else
     fi
 fi
 
-
-python -m faro.FaceService --port=$HOST:$PORT --worker-count=$WORKER_COUNT --algorithm=arcface --gpus=$USE_GPUS --storage=$FARO_STORAGE 
+#--max-message-size = 1 , no limit on return msg in grpc
+python -m faro.FaceService --port=$HOST:$PORT --worker-count=$WORKER_COUNT --algorithm=arcface --gpus=$USE_GPUS --storage=$FARO_STORAGE --max-message-size -1 

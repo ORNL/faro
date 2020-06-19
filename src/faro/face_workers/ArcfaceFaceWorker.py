@@ -45,27 +45,31 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         Constructor
         '''
         import insightface
+        os.environ['MXNET_CUDNN_AUTOTUNE_DEFAULT'] = '0'
         kwargs = {'root':os.path.join(options.storage_dir,'models')}
-        
         #load Retina face model
         self.detector = insightface.model_zoo.get_model('retinaface_r50_v1',**kwargs)
+        if options.gpuid == -1:
+            ctx_id = -1
+        else:
+            ctx_id = int(options.gpuid)
+        #self.detector.rac = 'net5'
         #set ctx_id to a gpu a predefined gpu value
-        self.detector.prepare(ctx_id = -1, nms=0.4)
+        self.detector.prepare(ctx_id, nms=0.4)
         # load arcface FR model
         self.fr_model = insightface.model_zoo.get_model('arcface_r100_v1',**kwargs)
         
-        self.fr_model.prepare(ctx_id = -1) 
-                
+        self.fr_model.prepare(ctx_id) 
+        self.preprocess = insightface.utils.face_align
         print("ArcFace Models Loaded.")
 
         
     def detect(self,img,face_records,options):
         '''Run a face detector and return rectangles.'''
         print('Running Face Detector For ArchFace')
-
-        #print(options.threshold)
-        # Run the detector on the image
+        img = img[:,:,::-1] #convert from rgb to bgr . There is a reordering from bgr to RGB internally in the detector code.
         dets, lpts = self.detector.detect(img, threshold=options.threshold, scale=1)
+        #print('Number of detections ', dets.shape[0])
         # Now process each face we found and add a face to the records list.
         for idx in range(0,dets.shape[0]):
             face_record = face_records.face_records.add()
@@ -75,9 +79,10 @@ class ArcfaceFaceWorker(faro.FaceWorker):
             face_record.detection.location.CopyFrom(pt.rect_val2proto(ulx, uly, abs(lrx-ulx) , abs(lry-uly)))
             face_record.detection.detection_id = idx
             face_record.detection.detection_class = "FACE_%d"%idx
-            lmark = face_record.landmarks.add()
+            #lmark = face_record.landmarks.add()
             lmarkloc = lpts[idx]
             for ldx in range(0,lmarkloc.shape[0]):
+                lmark = face_record.landmarks.add()
                 lmark.landmark_id = "point_%02d"%ldx
                 lmark.location.x = lmarkloc[ldx][0]
                 lmark.location.y = lmarkloc[ldx][1]
@@ -104,35 +109,28 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         '''Extract a template that allows the face to be matched.'''
         # Compute the 512D vector that describes the face in img identified by
         #shape.
-
-        im = pv.Image(img[:,:,::-1])
+        #print(type(img),img.shape)
+        img = img[:,:,::-1] #convert from rgb to bgr. There is BGRtoRGB conversion in get_embedding
 
         for face_record in face_records.face_records:
-            rect = pt.rect_proto2pv(face_record.detection.location)
-            x,y,w,h = rect.asTuple()
-
-            # Extract view
-            rect = pv.Rect()
-            cx,cy = x+0.5*w,y+0.5*h
-            tmp = 1.5*max(w,h)
-            cw,ch = tmp,tmp
-            crop = pv.AffineFromRect(pv.CenteredRect(cx,cy,cw,ch),(256,256))
-
-            pvim = pv.Image(img[:,:,::-1]) # convert rgb to bgr
-            pvim = crop(pvim)
-            view = pt.image_pv2proto(pvim)
-            face_record.view.CopyFrom(view)
+            #print(face_record)
+            if face_record.detection.score != -1:
+                landmarks = np.zeros((5,2),dtype=np.float)
+                for i in range(0,len(face_record.landmarks)):
+                        vals = face_record.landmarks[i]
+                        landmarks[i,0] = vals.location.x
+                        landmarks[i,1] = vals.location.y
+ 
+                _img = self.preprocess.norm_crop(img, landmark = landmarks)
+                #print(_img.shape)            
+                embedding = self.fr_model.get_embedding(_img).flatten()
+                embedding_norm = np.linalg.norm(embedding)
+                normed_embedding = embedding / embedding_norm
+                #print(normed_embedding.shape)
+            else:
+                normed_embedding = np.zeros(512,dtype=float)
             
-            tile = pvim.resize((224,224))
-            tile = tile.resize((112,112)) 
-        
-            face_im = tile.asOpenCV2()
-            face_im = face_im[:,:,::-1] # Convert BGR to RGB
-        
-            features = self.fr_model.get_embedding(face_im) 
-            face_descriptor = pv.meanUnit(features.flatten())
-            
-            face_record.template.data.CopyFrom(pt.vector_np2proto(face_descriptor))
+            face_record.template.data.CopyFrom(pt.vector_np2proto(normed_embedding))
 
                 
     def scoreType(self):

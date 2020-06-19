@@ -69,8 +69,16 @@ $ sudo apt install wget
 
 First build the client environment and compile the proto interfaces.
 ```
-$ ./build-env.sh
-$ source env_faro_server/bin/activate
+$ ./build-env-universal.sh
+
+if using virtualenv,
+    $ source env_faro_server/bin/activate
+
+if using conda,
+    $ source activate env_faro_server
+    or
+    $ conda activate env_faro_server
+
 $ ./build-proto.sh
 ```
 
@@ -79,15 +87,26 @@ will create a "faro-storage" directory and will download and extract the machine
 learning models.  At the end it will print out messages for each started worker:
 "Worker N Started."  By default the services is started on port localhost:50030.
 
+If using virtualenv,
 ```
 $ source env_faro_server/bin/activate
 $ cd services/dlib
 $ ./run-dlib.sh
 ```
 
+If using conda, 
+
+```
+$ source activate env_faro_server or conda activate env_faro_server
+$ cd services/dlib
+$ ./run_dlib.sh
+```
+
 The VGG2Resnet model can also be run using similar commands, but only run one 
 service at a time unless you carefully configure the ports and check avalible 
 memory, etc.
+
+If using virtualenv,
 
 ```
 $ source env_faro_server/bin/activate
@@ -95,16 +114,53 @@ $ cd services/vggface2
 $ ./run-vgg2.sh
 ```
 
+If using conda,
+
+```
+$ source activate env_faro_server or conda activate env_faro_server
+$ cd services/vggface2
+$ ./run_vgg2.sh
+```
+
+Similarly, the InsightFace face analysis algorithms can be executed using similar commands.
+Face detection is performed using RetinaFace and features are extracted using ArcFace.
+Currenly, insightface works only with 1 gpu and worker.
+
+If using virtualenv,
+
+```
+$ source env_faro_server/bin/activate 
+$ cd services/arcface
+$ ./run_arcface.sh
+```
+
+If using conda,
+
+```
+$ source activate env_faro_server or conda activate env_faro_server    
+$ cd services/arcface
+$ ./run_arcface.sh
+```
+  
 In a second terminal run client applications for this you can use either the 
 "env_faro" or "env_faro_server" environments.  A simple test is avalible in the
 test directory that will download images and run a small test.  This test will 
 populate directories named "faces" and "matches" with results.
+
+If using virtualenv,
 
 ```
 $ source env_faro/bin/activate
 $ cd tests
 $ ./run_test.sh
 ```
+
+If usind conda,
+
+```
+$ source activate env_faro or conda activate env_faro
+$ cd tests
+$ ./run_test.sh
 
 The faro_recognize will read a directory and compute a distance matrix like
 this:
