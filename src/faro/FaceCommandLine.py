@@ -919,7 +919,7 @@ def process_video_detections(each):
                     pvim = pv.Image(im[:, :, ::-1])
                     view = affine(pvim)
                     out_path = os.path.join(face_log_dir, os.path.basename(base_name) +
-                                            '_Frame_%06d' % face.frame +
+                                            '_Frame_%09d' % face.frame +
                                             '_face_%03d' % (face.detection.detection_id,) + '.jpg')
                     if len(face.landmarks) > 0:
                         for each_lmark in face.landmarks:
@@ -933,7 +933,7 @@ def process_video_detections(each):
 
         if options.detect_log and detect_log_dir is not None:
             dimg.asAnnotated().save(os.path.join(detect_log_dir,
-                                                 os.path.basename(base_name) + '_Frame_%06d' % frame_id + '.jpg'))
+                                                 os.path.basename(base_name) + '_Frame_%09d' % frame_id + '.jpg'))
         return False
     return True
 
@@ -952,7 +952,8 @@ def process_single_videos(each_video, face_client, options):
             save_video_csvfile_dir = os.path.dirname(options.detections_csv)
         else:
             save_video_csvfile_dir = options.detections_csv
-    
+        if not os.path.isdir(save_video_csvfile_dir):
+            os.makedirs(save_video_csvfile_dir)    
         fid = open(os.path.join(save_video_csvfile_dir, video_name + '.csv'), 'w')
         video_detections_csv = csv.writer(fid)
     else:
@@ -969,7 +970,7 @@ def process_single_videos(each_video, face_client, options):
                                      min_size=options.min_size,
                                      run_async=True,
                                      source=each_video,
-                                     frame=frame_id)
+                                     frame=frame_id + 1)
         detect_queue.append([each_frame, results, options, video_detections_csv])
         detect_queue = list(filter(process_video_detections, detect_queue))
 
