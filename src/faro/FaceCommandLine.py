@@ -950,6 +950,8 @@ def process_single_videos(each_video, face_client, options):
         _, tmp_ext = os.path.splitext(os.path.basename(options.detections_csv))
         if tmp_ext:
             save_video_csvfile_dir = os.path.dirname(options.detections_csv)
+            if len(save_video_csvfile_dir) == 0:
+                save_video_csvfile_dir = os.getcwd()
         else:
             save_video_csvfile_dir = options.detections_csv
         if not os.path.isdir(save_video_csvfile_dir):

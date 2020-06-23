@@ -25,7 +25,8 @@ docker/rcnn/face_rcnn/faro
 *.TIF
 *.caffemodel
 *.hdf5
-
+*.mp4
+*.avi
 ## generic files to ignore
 *~
 *.lock

@@ -66,14 +66,13 @@ class DlibFaceWorker(faro.FaceWorker):
     def detect(self,img,face_records,options):
         '''Run a face detector and return rectangles.'''
         
+        detection_threshold = options.threshold        
         # TODO: Make this an option
-        detection_threshold = options.threshold
         if options.best:
             detection_threshold = -1.5
         
         # Run the detector on the image
         dets, scores, idx = self.detector.run(img, 1, detection_threshold)
-
 
         # Now process each face we found and add a face to the records list.
         for k, d in enumerate(dets):
@@ -82,6 +81,14 @@ class DlibFaceWorker(faro.FaceWorker):
             face_record.detection.location.CopyFrom(pt.rect_val2proto(d.left(), d.top(), d.width(), d.height()))
             face_record.detection.detection_id = k
             face_record.detection.detection_class = "FACE_%d"%idx[k]
+            #print(d)
+            shape = self.shape_pred(img, d)
+            for i in range(len(shape.parts())):
+                loc = shape.parts()[i]
+                landmark = face_record.landmarks.add()
+                landmark.landmark_id = "point_%02d"%i
+                landmark.location.x = loc.x
+                landmark.location.y = loc.y
 
         if options.best:
             face_records.face_records.sort(key = lambda x: -x.detection.score)
@@ -142,14 +149,6 @@ class DlibFaceWorker(faro.FaceWorker):
             #print('s',dir(shape))
             #print(shape.parts()[0])
             
-            for i in range(len(shape.parts())):
-                loc = shape.parts()[i]
-                landmark = face_record.landmarks.add()
-                landmark.landmark_id = "point_%02d"%i
-                landmark.location.x = loc.x
-                landmark.location.y = loc.y
-            
-            #print('fr',face_record)
 
             #print('shape:',face_records.face_records[0].landmarks)
             face_descriptor = self.face_rec.compute_face_descriptor(img, shape, JITTER_COUNT)
