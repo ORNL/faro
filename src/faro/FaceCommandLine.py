@@ -945,39 +945,40 @@ def process_video_detections(each):
             if size < options.min_size:
                 continue
 
-            if (VIDEO_HEADER_FILE) and (options.detections_csv is not None):
-                csv_header = ['source', 'frame', 'detect_id', 'type', 'score', 'x', 'y', 'w', 'h']
+            if (options.detections_csv is not None):    
+                if VIDEO_HEADER_FILE:
+                    csv_header = ['source', 'frame', 'detect_id', 'type', 'score', 'x', 'y', 'w', 'h']
+                    if len(face.landmarks) > 0:
+                        for each_lpt in face.landmarks:
+                            pt_id_label = each_lpt.landmark_id
+                            xpt_label = pt_id_label + '_x'
+                            ypt_label = pt_id_label + '_y'
+                            csv_header.append(pt_id_label)
+                            csv_header.append(xpt_label)
+                            csv_header.append(ypt_label)
+                    file_identifier.writerow(csv_header)
+                    VIDEO_HEADER_FILE = False
+
+                csv_eachline = [face.source,
+                                face.frame,
+                                i,
+                                face.detection.detection_class,
+                                face.detection.score,
+                                face.detection.location.x,
+                                face.detection.location.y,
+                                face.detection.location.width,
+                                face.detection.location.height]
+
                 if len(face.landmarks) > 0:
                     for each_lpt in face.landmarks:
                         pt_id_label = each_lpt.landmark_id
-                        xpt_label = pt_id_label + '_x'
-                        ypt_label = pt_id_label + '_y'
-                        csv_header.append(pt_id_label)
-                        csv_header.append(xpt_label)
-                        csv_header.append(ypt_label)
-                file_identifier.writerow(csv_header)
-                VIDEO_HEADER_FILE = False
+                        xpt_label = each_lpt.location.x
+                        ypt_label = each_lpt.location.y
+                        csv_eachline.append(pt_id_label)
+                        csv_eachline.append(xpt_label)
+                        csv_eachline.append(ypt_label)
 
-            csv_eachline = [face.source,
-                            face.frame,
-                            i,
-                            face.detection.detection_class,
-                            face.detection.score,
-                            face.detection.location.x,
-                            face.detection.location.y,
-                            face.detection.location.width,
-                            face.detection.location.height]
-
-            if len(face.landmarks) > 0:
-                for each_lpt in face.landmarks:
-                    pt_id_label = each_lpt.landmark_id
-                    xpt_label = each_lpt.location.x
-                    ypt_label = each_lpt.location.y
-                    csv_eachline.append(pt_id_label)
-                    csv_eachline.append(xpt_label)
-                    csv_eachline.append(ypt_label)
-
-            file_identifier.writerow(csv_eachline)
+                file_identifier.writerow(csv_eachline)
 
             if options.detect_log:
                 detect_log_dir = os.path.join(os.path.join(options.detect_log, base_name))
@@ -1009,7 +1010,7 @@ def process_video_detections(each):
                     pvim = pv.Image(im[:, :, ::-1])
                     view = affine(pvim)
                     out_path = os.path.join(face_log_dir, os.path.basename(base_name) +
-                                            '_Frame_%06d' % face.frame +
+                                            '_Frame_%09d' % face.frame +
                                             '_face_%03d' % (face.detection.detection_id,) + '.jpg')
                     if len(face.landmarks) > 0:
                         for each_lmark in face.landmarks:
@@ -1023,7 +1024,7 @@ def process_video_detections(each):
 
         if options.detect_log and detect_log_dir is not None:
             dimg.asAnnotated().save(os.path.join(detect_log_dir,
-                                                 os.path.basename(base_name) + '_Frame_%06d' % frame_id + '.jpg'))
+                                                 os.path.basename(base_name) + '_Frame_%09d' % frame_id + '.jpg'))
         return False
     return True
 
@@ -1035,15 +1036,21 @@ def process_single_videos(each_video, face_client, options):
     # Read Video
     video = pv.Video(each_video)
     video_name, ext = os.path.splitext(os.path.basename(each_video))
-
-    _, tmp_ext = os.path.splitext(os.path.basename(options.detections_csv))
-    if tmp_ext:
-        save_video_csvfile_dir = os.path.dirname(options.detections_csv)
+    
+    if options.detections_csv:
+        _, tmp_ext = os.path.splitext(os.path.basename(options.detections_csv))
+        if tmp_ext:
+            save_video_csvfile_dir = os.path.dirname(options.detections_csv)
+            if len(save_video_csvfile_dir) == 0:
+                save_video_csvfile_dir = os.getcwd()
+        else:
+            save_video_csvfile_dir = options.detections_csv
+        if not os.path.isdir(save_video_csvfile_dir):
+            os.makedirs(save_video_csvfile_dir)    
+        fid = open(os.path.join(save_video_csvfile_dir, video_name + '.csv'), 'w')
+        video_detections_csv = csv.writer(fid)
     else:
-        save_video_csvfile_dir = options.detections_csv
-    print(save_video_csvfile_dir, os.path.dirname(options.detections_csv), options.detections_csv)
-    fid = open(os.path.join(save_video_csvfile_dir, video_name + '.csv'), 'w')
-    video_detections_csv = csv.writer(fid)
+        video_detections_csv = None
 
     start_time = time.time()
     for frame_id, each_frame in enumerate(video):
@@ -1056,7 +1063,7 @@ def process_single_videos(each_video, face_client, options):
                                      min_size=options.min_size,
                                      run_async=True,
                                      source=each_video,
-                                     frame=frame_id)
+                                     frame=frame_id + 1)
         detect_queue.append([each_frame, results, options, video_detections_csv])
         detect_queue = list(filter(process_video_detections, detect_queue))
 
@@ -1064,11 +1071,12 @@ def process_single_videos(each_video, face_client, options):
         detect_queue = list(filter(process_video_detections, detect_queue))
         time.sleep(0.05)
 
-    end_time = time.time() - start_time
+    end_time = time.time()
     print("Processed %d frames in %0.3f seconds: %f images/second" % (frame_id + 1, end_time - start_time,
                                                                       (frame_id + 1) / (end_time - start_time)))
 
-    fid.close()
+    if options.detections_csv:
+        fid.close()
 
 
 def process_videos(vlist, face_client, options):
@@ -1129,6 +1137,7 @@ def detect():
         print("Scanning directories for images and videos.")
 
     image_list, video_list = collect_files(args[1:], options)
+        
 
     if len(image_list) != 0:
         process_images(image_list, face_client, options)
