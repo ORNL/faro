@@ -34,13 +34,7 @@ def addConnectionOptions(parser):
                                 help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d" % (
                                     faro.DEFAULT_MAX_MESSAGE_SIZE))
 
-    connection_group.add_option("-p", "--port", type="str", dest="detect_port", default="localhost:50030",
-                                help="The port used for the recognition service.")
-
-    connection_group.add_option("--detect-port", type="str", dest="detect_port", default="localhost:50030",
-                                help="The port used for the recognition service.")
-
-    connection_group.add_option("--recognition-port", type="str", dest="rec_port", default="localhost:50030",
+    connection_group.add_option("-p", "--port", type="str", dest="port", default="localhost:50030",
                                 help="The port used for the recognition service.")
 
     parser.add_option_group(connection_group)

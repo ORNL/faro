@@ -52,8 +52,7 @@ def getDefaultClientOptions():
     
     options = ClientOptions()
     options.max_async = 4
-    options.detect_port = 'localhost:50030'
-    options.rec_port = 'localhost:50030'
+    options.port = 'localhost:50030'
     options.verbose = False
     
     return options
@@ -79,14 +78,14 @@ class FaceClient(object):
         self.async_sleep_time = 0.001
         self.running_async_jobs = []
         
-        channel = grpc.insecure_channel(options.detect_port,
+        channel = grpc.insecure_channel(options.port,
                                         options=channel_options)
         
-        self.detect_stub = fs.FaceRecognitionStub(channel)
+        self.service_stub = fs.FaceRecognitionStub(channel)
         
-        channel = grpc.insecure_channel(options.rec_port,
-                                        options=channel_options)
-        self.rec_stub = fs.FaceRecognitionStub(channel)
+        #channel = grpc.insecure_channel(options.rec_port,
+        #                                options=channel_options)
+        #self.rec_stub = fs.FaceRecognitionStub(channel)
         
         self.is_ready,self.info = self.status(False)
         
@@ -127,10 +126,10 @@ class FaceClient(object):
             request.detect_options.threshold = float(threshold)
             
         if run_async == False:
-            face_records = self.detect_stub.detect(request,None)
+            face_records = self.service_stub.detect(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.detect_stub.detect.future(request,None)
+            face_records = self.service_stub.detect.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -147,10 +146,10 @@ class FaceClient(object):
         request.records.CopyFrom(face_records)
         
         if run_async == False:
-            face_records = self.rec_stub.extract(request,None)
+            face_records = self.service_stub.extract(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.rec_stub.extract.future(request,None)
+            face_records = self.service_stub.extract.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -189,10 +188,10 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.detect_stub.detectExtract(request,None)
+            face_records = self.service_stub.detectExtract(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.detect_stub.detectExtract.future(request,None)
+            face_records = self.service_stub.detectExtract.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -237,10 +236,10 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.detect_stub.detectExtractEnroll(request,None)
+            face_records = self.service_stub.detectExtractEnroll(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.detect_stub.detectExtractEnroll.future(request,None)
+            face_records = self.service_stub.detectExtractEnroll.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -289,10 +288,10 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.detect_stub.detectExtractSearch(request,None)
+            face_records = self.service_stub.detectExtractSearch(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.detect_stub.detectExtractSearch.future(request,None)
+            face_records = self.service_stub.detectExtractSearch.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -318,10 +317,10 @@ class FaceClient(object):
         request.records.CopyFrom(faces)
     
         if run_async == False:
-            error = self.rec_stub.enroll(request,None)
+            error = self.service_stub.enroll(request,None)
         elif run_async == True:
             self.waitOnResults()
-            error = self.rec_stub.enroll.future(request,None)
+            error = self.service_stub.enroll.future(request,None)
             self.running_async_jobs.append(error)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -334,7 +333,7 @@ class FaceClient(object):
         
         request = fsd.GalleryListRequest()
         
-        result = self.rec_stub.galleryList(request)
+        result = self.service_stub.galleryList(request)
         
         return result
     
@@ -343,7 +342,7 @@ class FaceClient(object):
         
         request = fsd.FaceListRequest()
         request.gallery_name = gallery_name
-        result = self.rec_stub.faceList(request)
+        result = self.service_stub.faceList(request)
         
         return result
 
@@ -359,10 +358,10 @@ class FaceClient(object):
             request.threshold=search_threshold
             
         if run_async == False:
-            error = self.rec_stub.search(request,None)
+            error = self.service_stub.search(request,None)
         elif run_async == True:
             self.waitOnResults()
-            error = self.rec_stub.search.future(request,None)
+            error = self.service_stub.search.future(request,None)
             self.running_async_jobs.append(error)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -382,7 +381,7 @@ class FaceClient(object):
             request.template_gallery.templates.add().CopyFrom(face_rec.template)
         
         # Run the computation on the server
-        dist_mat = self.rec_stub.score(request,None)
+        dist_mat = self.service_stub.score(request,None)
         return pt.matrix_proto2np(dist_mat)
 
 
@@ -393,7 +392,7 @@ class FaceClient(object):
         
         
         # Run the computation on the server
-        dist_mat = self.rec_stub.echo(request,None)
+        dist_mat = self.service_stub.echo(request,None)
         
         return pt.matrix_proto2np(dist_mat)
 
@@ -401,7 +400,7 @@ class FaceClient(object):
     def status(self,verbose=False):
         request = fsd.FaceStatusRequest()
         
-        status_message = self.rec_stub.status(request,None)
+        status_message = self.service_stub.status(request,None)
         if verbose:
             print(type(status_message),status_message)
             
