@@ -847,17 +847,21 @@ SEARCH_FILE = None
 
 
 def processSearchResults(each):
-    print('Search results...')
     im, results, options = each
+    im = pv.Image(im[:,:,::-1]) # RGB to BGR
 
     if results.done():
-        print('Done')
         recs = results.result().face_records
 
         i = 0
 
+        if options.search_log is not None:
+            try:
+                os.makedirs(options.search_log)
+            except:
+                pass
+
         for face in recs:
-        #for face in recs.face_records:
             # Filter faces based on min size
             size = min(face.detection.location.width, face.detection.location.height)
             if size < options.min_size:
@@ -867,29 +871,30 @@ def processSearchResults(each):
             if not processAttributeFilter(face, options):
                 continue
 
+            face_source = face.source
+            face_detect_id = face.detection.detection_id
+            face_detect_rect = pt.rect_proto2pv(face.detection.location)
+
             # Process Detections
-            print("Face")
             if options.search_csv is not None:
-                print('******  search file: %s' % options.search_csv)
                 global SEARCH_CSV
                 global SEARCH_FILE
                 import csv
                 if SEARCH_CSV == None:
                     # if options.verbose:
-                    print('****** Opening search file: %s' % options.search_csv)
                     SEARCH_FILE = open(options.search_csv, 'w')
                     SEARCH_CSV = csv.writer(SEARCH_FILE)
                     SEARCH_CSV.writerow(['face_source', 'face_detect_id',
                                          'gal_sub_id', 'gal_name', 'gal_source',
                                          'gal_score', 'gal_key', 'x', 'y', 'w', 'h'])
 
-                face_source = face.source
-                face_detect_id = face.detection.detection_id
-                # face_detect_rect = face.detection.location.rect
 
-                for gal in face.search_results.face_records:
+            if options.search_log is not None:
+
+                if len(face.search_results.face_records) > 0:
+                    gal = face.search_results.face_records[0]
                     gal_name = gal.name
-                    gal_sub_id = gal.name
+                    gal_sub_id = gal.subject_id
                     gal_source = gal.source
                     gal_score = gal.score
                     gal_key = gal.gallery_key
@@ -903,11 +908,22 @@ def processSearchResults(each):
                     # string gallery_key = 15;
 
                     SEARCH_CSV.writerow([face_source, face_detect_id,
-                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key
+                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key, face_detect_rect.x,face_detect_rect.y,face_detect_rect.w,face_detect_rect.h
                                          ]),
+
+                    im.annotateThickRect(face_detect_rect,width=3,color='yellow')
+                    im.annotateLabel(pv.Point(face_detect_rect.x,face_detect_rect.y+face_detect_rect.h+5),"%s - %s"%(gal_sub_id,gal_name),font=16,color='yellow')
+                else:
+                    im.annotateRect(face_detect_rect,color='white')
+
                 SEARCH_FILE.flush()
 
             i += 1
+
+        if options.search_log is not None:
+            out_name = os.path.join(options.search_log,os.path.basename(face_source))
+            im.asAnnotated().save(out_name)
+
         return False
     return True
 
