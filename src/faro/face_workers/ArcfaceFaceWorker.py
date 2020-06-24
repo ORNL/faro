@@ -66,7 +66,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         
     def detect(self,img,face_records,options):
         '''Run a face detector and return rectangles.'''
-        print('Running Face Detector For ArchFace')
+        #print('Running Face Detector For ArchFace')
         img = img[:,:,::-1] #convert from rgb to bgr . There is a reordering from bgr to RGB internally in the detector code.
         dets, lpts = self.detector.detect(img, threshold=options.threshold, scale=1)
         #print('Number of detections ', dets.shape[0])
@@ -93,7 +93,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
             while len(face_records.face_records) > 1:
                 del face_records.face_records[-1]
             
-        print('Done Running Face Detector For ArchFace')
+        #print('Done Running Face Detector For ArchFace')
     
     def locate(self,img,face_records,options):
         '''Locate facial features.'''
