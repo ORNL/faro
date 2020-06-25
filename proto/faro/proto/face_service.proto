@@ -312,15 +312,24 @@ message FaceServiceInfo{
     string          notes               = 11;
 }
 
+/********* Gallery Management ********/
 message GalleryListRequest {}
 
-message FaceListRequest {
+message GalleryDeleteRequest {
     string gallery_name = 1;
 }
 
-message GalleryClearRequest {
-    string name = 1;
+/********* Enrollment Management ********/
+message EnrollmentListRequest {
+    string gallery_name = 1;
 }
+
+message EnrollmentDeleteRequest {
+	string gallery_name = 1;
+	string subject_id = 2;
+}
+
+
 
 message GalleryInfo{
     string          gallery_name = 1;
@@ -355,8 +364,9 @@ service FaceRecognition{
 
     // Gallery Management
     rpc galleryList(GalleryListRequest) returns (GalleryList){};
-    rpc galleryClear(GalleryClearRequest) returns (GalleryInfo){};
-    rpc faceList(FaceListRequest) returns (FaceRecordList){};
+    rpc galleryDelete(GalleryDeleteRequest) returns (GalleryInfo){};
+    rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
+    rpc enrollmentDelete(EnrollmentDeleteRequest) returns (FaceRecordList){};
 
     // Test
 	rpc echo(Matrix) returns (Matrix){}; // test large messages

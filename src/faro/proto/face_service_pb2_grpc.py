@@ -65,14 +65,19 @@ class FaceRecognitionStub(object):
         request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryListRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryList.FromString,
         )
-    self.galleryClear = channel.unary_unary(
-        '/FaceRecognition/galleryClear',
-        request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryClearRequest.SerializeToString,
+    self.galleryDelete = channel.unary_unary(
+        '/FaceRecognition/galleryDelete',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryDeleteRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.FromString,
         )
-    self.faceList = channel.unary_unary(
-        '/FaceRecognition/faceList',
-        request_serializer=faro_dot_proto_dot_face__service__pb2.FaceListRequest.SerializeToString,
+    self.enrollmentList = channel.unary_unary(
+        '/FaceRecognition/enrollmentList',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollmentListRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
+    self.enrollmentDelete = channel.unary_unary(
+        '/FaceRecognition/enrollmentDelete',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
     self.echo = channel.unary_unary(
@@ -156,14 +161,21 @@ class FaceRecognitionServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def galleryClear(self, request, context):
+  def galleryDelete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def faceList(self, request, context):
+  def enrollmentList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def enrollmentDelete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -230,14 +242,19 @@ def add_FaceRecognitionServicer_to_server(servicer, server):
           request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryListRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.GalleryList.SerializeToString,
       ),
-      'galleryClear': grpc.unary_unary_rpc_method_handler(
-          servicer.galleryClear,
-          request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryClearRequest.FromString,
+      'galleryDelete': grpc.unary_unary_rpc_method_handler(
+          servicer.galleryDelete,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryDeleteRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.SerializeToString,
       ),
-      'faceList': grpc.unary_unary_rpc_method_handler(
-          servicer.faceList,
-          request_deserializer=faro_dot_proto_dot_face__service__pb2.FaceListRequest.FromString,
+      'enrollmentList': grpc.unary_unary_rpc_method_handler(
+          servicer.enrollmentList,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollmentListRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'enrollmentDelete': grpc.unary_unary_rpc_method_handler(
+          servicer.enrollmentDelete,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),
       'echo': grpc.unary_unary_rpc_method_handler(
