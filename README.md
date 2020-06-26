@@ -68,9 +68,10 @@ $ sudo apt install wget
 ```
 
 First build the client environment and compile the proto interfaces.
+
 ```
 $ ./build-env-universal.sh
-
+#For Mac users run - $echo "export PYTHONPATH=`pwd`/src:$PYTHONPATH" >> "$HOME/.bash_profile" - after running build-env-universal.sh
 if using virtualenv,
     $ source env_faro_server/bin/activate
 
@@ -81,6 +82,7 @@ if using conda,
 
 $ ./build-proto.sh
 ```
+
 
 In one terminal run the DLIB service.  When you do this for the first time it 
 will create a "faro-storage" directory and will download and extract the machine
