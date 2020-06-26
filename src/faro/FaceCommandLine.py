@@ -34,13 +34,7 @@ def addConnectionOptions(parser):
                                 help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d" % (
                                     faro.DEFAULT_MAX_MESSAGE_SIZE))
 
-    connection_group.add_option("-p", "--port", type="str", dest="detect_port", default="localhost:50030",
-                                help="The port used for the recognition service.")
-
-    connection_group.add_option("--detect-port", type="str", dest="detect_port", default="localhost:50030",
-                                help="The port used for the recognition service.")
-
-    connection_group.add_option("--recognition-port", type="str", dest="rec_port", default="localhost:50030",
+    connection_group.add_option("-p", "--port", type="str", dest="port", default="localhost:50030",
                                 help="The port used for the recognition service.")
 
     parser.add_option_group(connection_group)
@@ -254,6 +248,81 @@ def detectParseOptions():
         parser.print_help()
         print()
         print(("Please supply exactly %d arguments." % n_args))
+        print()
+        exit(-1)
+
+    return options, args
+
+def statusParseOptions():
+    """
+    Parse command line arguments.
+    """
+    args = ['']  # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Check the server status and display algorithm and version information.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+
+    version = faro.__version__
+
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
+                                   version=version, description=description, epilog=epilog)
+
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+
+    addConnectionOptions(parser)
+    # Here are some templates for standard option formats.
+    # parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
+    #                 help="Decrease the verbosity of the program")
+
+    # parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
+    #                  help="don't print status messages to stdout")
+
+    # parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
+    #                  help="Choose an option.")
+
+    # parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
+    #                  help="A floating point value.")
+
+    # parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
+    #                  help="An integer value.")
+
+    # parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
+    #                  help="A string value.")
+
+    # parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
+    #                  help="Enroll detected faces into a gallery.")
+
+    # parser.add_option( "--search", type="str", dest="search_gallery", default=None,
+    #                  help="Search images for faces from a gallery.")
+
+    # parser.add_option( "--name", type="str", dest="subject_name", default=None,
+    #                  help="Enroll detected faces into a gallery.")
+
+    # parser.add_option( "--subject-id", type="str", dest="subject_id", default=None,
+    #                  help="Enroll detected faces into a gallery.")
+
+    # parser.add_option( "--search-log", type="str", dest="search_log", default=None,
+    #                  help="Enroll detected faces into a gallery.")
+
+    # parser.add_option( "-m","--match-log", type="str", dest="match_log", default=None,
+    #                  help="A directory to store matching faces.")
+
+    # parser.add_option( "--same-person", type="str", dest="same_person", default=None,
+    #                  help="Specifies a python function that returns true if the filenames indicate a match.  Example: lambda x,y: x[:5] == y[:5]")
+
+    # parser.add_option( "-s","--scores-csv", type="str", dest="scores_csv", default=None,
+    #                  help="Save similarity scores to this file.")
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+
+    if len(args) != 1:
+        parser.print_help()
+        print()
+        print(("Please supply exactly %d arguments." % 0))
         print()
         exit(-1)
 
@@ -772,17 +841,21 @@ SEARCH_FILE = None
 
 
 def processSearchResults(each):
-    print('Search results...')
     im, results, options = each
+    im = pv.Image(im[:,:,::-1]) # RGB to BGR
 
     if results.done():
-        print('Done')
         recs = results.result().face_records
 
         i = 0
 
+        if options.search_log is not None:
+            try:
+                os.makedirs(options.search_log)
+            except:
+                pass
+
         for face in recs:
-        #for face in recs.face_records:
             # Filter faces based on min size
             size = min(face.detection.location.width, face.detection.location.height)
             if size < options.min_size:
@@ -792,29 +865,30 @@ def processSearchResults(each):
             if not processAttributeFilter(face, options):
                 continue
 
+            face_source = face.source
+            face_detect_id = face.detection.detection_id
+            face_detect_rect = pt.rect_proto2pv(face.detection.location)
+
             # Process Detections
-            print("Face")
             if options.search_csv is not None:
-                print('******  search file: %s' % options.search_csv)
                 global SEARCH_CSV
                 global SEARCH_FILE
                 import csv
                 if SEARCH_CSV == None:
                     # if options.verbose:
-                    print('****** Opening search file: %s' % options.search_csv)
                     SEARCH_FILE = open(options.search_csv, 'w')
                     SEARCH_CSV = csv.writer(SEARCH_FILE)
                     SEARCH_CSV.writerow(['face_source', 'face_detect_id',
                                          'gal_sub_id', 'gal_name', 'gal_source',
                                          'gal_score', 'gal_key', 'x', 'y', 'w', 'h'])
 
-                face_source = face.source
-                face_detect_id = face.detection.detection_id
-                # face_detect_rect = face.detection.location.rect
 
-                for gal in face.search_results.face_records:
+            if options.search_log is not None:
+
+                if len(face.search_results.face_records) > 0:
+                    gal = face.search_results.face_records[0]
                     gal_name = gal.name
-                    gal_sub_id = gal.name
+                    gal_sub_id = gal.subject_id
                     gal_source = gal.source
                     gal_score = gal.score
                     gal_key = gal.gallery_key
@@ -828,11 +902,22 @@ def processSearchResults(each):
                     # string gallery_key = 15;
 
                     SEARCH_CSV.writerow([face_source, face_detect_id,
-                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key
+                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key, face_detect_rect.x,face_detect_rect.y,face_detect_rect.w,face_detect_rect.h
                                          ]),
+
+                    im.annotateThickRect(face_detect_rect,width=3,color='yellow')
+                    im.annotateLabel(pv.Point(face_detect_rect.x,face_detect_rect.y+face_detect_rect.h+5),"%s - %s"%(gal_sub_id,gal_name),font=16,color='yellow')
+                else:
+                    im.annotateRect(face_detect_rect,color='white')
+
                 SEARCH_FILE.flush()
 
             i += 1
+
+        if options.search_log is not None:
+            out_name = os.path.join(options.search_log,os.path.basename(face_source))
+            im.asAnnotated().save(out_name)
+
         return False
     return True
 
@@ -1195,7 +1280,7 @@ def enroll():
         results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best=options.best,
                                                   threshold=options.detect_thresh, min_size=options.min_size,
                                                   run_async=True, source=filename, frame=-1,
-                                                  subject_name=options.subject_name)
+                                                  subject_name=options.subject_name, subject_id=options.subject_id)
 
         detect_queue.append([im, results, options])
         enroll_queue.append([im, results, options])
@@ -1351,8 +1436,24 @@ def test():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
 
+def status():
+    """
+    Conects to the server and gets status information.
+    """
+    options,args = statusParseOptions()
+
+    face_client = connectToFaroClient(options)
+
+    message = face_client.status()
+
+    print()
+    print (message)
+    print()
+
+ 
 
 COMMANDS = {
+    'status' : ['Connects to the server and displays version and status information.',status],
     'detect' : ['Only run face detection.',detect],
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],

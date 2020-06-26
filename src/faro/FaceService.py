@@ -358,7 +358,7 @@ class FaceService(fs.FaceRecognitionServicer):
             global GALLERIES, STORAGE
 
             if gallery_name not in GALLERIES:
-                print("Creating gallery",gallery_name)
+                #print("Creating gallery",gallery_name)
                 GALLERIES[gallery_name] = {}
                 
                 path = os.path.join(self.gallery_storage,gallery_name+'.h5')
@@ -463,12 +463,9 @@ class FaceService(fs.FaceRecognitionServicer):
 
             count = 0
             for face_id in GALLERIES[gallery_name]:
-                print(face_id)
                 face_record = GALLERIES[gallery_name][face_id]
-                print(dir(face_record))
                 
                 face = result.face_records.add()
-                print(dir(face))
                 face.gallery_key = face_id
                 face.name = GALLERIES[gallery_name][face_id].name
                 face.subject_id = GALLERIES[gallery_name][face_id].subject_id
