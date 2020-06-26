@@ -143,16 +143,15 @@ $ ./run_arcface.sh
 ```
   
 In a second terminal run client applications for this you can use either the 
-"env_faro" or "env_faro_server" environments.  A simple test is avalible in the
-test directory that will download images and run a small test.  This test will 
-populate directories named "faces" and "matches" with results.
+"env_faro" or "env_faro_server" environments.  Test scripts are available in
+the test directory to test the workings of the different functionalities in FaRO.
+
+To test the scripts,
 
 If using virtualenv,
-
 ```
 $ source env_faro/bin/activate
 $ cd tests
-$ ./run_test.sh
 ```
 
 If usind conda,
@@ -160,20 +159,20 @@ If usind conda,
 ```
 $ source activate env_faro or conda activate env_faro
 $ cd tests
-$ ./run_test.sh
-
-The faro_recognize will read a directory and compute a distance matrix like
-this:
-
-```
-$ faro_recognize <image_dir> -s scores.csv
 ```
 
-Additional options can be found using the --help option:
+To test the detect functionality on images execute,
 
 ```
-$ faro_recognize --help
+$./test_detect.sh
 ```
+
+To test the detect functionality in videos execute,
+
+```
+$./test_detect_videos.sh
+```
+
 
 ## Install With PIP
 This is a simple way to add faro to the environment.  It should install everything needed to run client api calls, but it may not provide all the configurations or models needed to run services.
@@ -193,8 +192,93 @@ $ python -m faro.FaceService --port=localhost:50030 --worker-count=2 --algorithm
 
 Examples can be found in the Notebooks directory.  The best place to start is the [FaRO Client Usage notebook](https://github.com/ORNL/faro/blob/master/Notebooks/FaRO%20Client%20Usage.ipynb).
 
+or 
 
+FaRO_Client_Face_Detection_Video_and_Images.ipynb
 
+The client can access the services using the faro command line interface. The CLI includes the following functions/commands
+
+flist - List the faces in a gallery.
+detectExtract - Run face detection and template extraction.
+glist - List the galleries on the service.
+test - Process a probe and gallery directory and produce a distance matrix.
+extractOnly - Only run face extraction and attribute extraction.
+enroll - Extract faces and enroll faces in a gallery.
+search - Search images for faces in a gallery.
+detect - Only run face detection.
+
+```
+#client environment has to be activated
+$ cd bin
+$ ./faro 
+
+usage : ./faro <command> --help
+list the commands to be used
+Commands:
+    flist - List the faces in a gallery.
+    detectExtract - Run face detection and template extraction.
+    glist - List the galleries on the service.
+    test - Process a probe and gallery directory and produce a distance matrix.
+    extractOnly - Only run face extraction and attribute extraction.
+    enroll - Extract faces and enroll faces in a gallery.
+    search - Search images for faces in a gallery.
+    detect - Only run face detection.
+    
+#to run detect command and find its input options execute,
+$./faro detect --help
+
+Usage: ./faro command [OPTIONS] [image] [image_directory] [video] [...]
+
+Run detection on a collection of images.
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -v, --verbose         Print out more program information.
+  -n MAX_IMAGES, --max-images=MAX_IMAGES
+                        Process at N images and then stop.
+  --maximum-size=MAX_SIZE
+                        If too large, images will be scaled to have this
+                        maximum size. Default=1920
+
+  Detector Options:
+    Configuration for the face detector.
+
+    -d DETECTIONS_CSV, --detections-csv=DETECTIONS_CSV
+                        Save detection data to the file.
+    -a ATTRIBUTES_CSV, --attributes-csv=ATTRIBUTES_CSV
+                        Save attributes data to the file.
+    --detect-log=DETECT_LOG
+                        A directory for detection images.
+    --face-log=FACE_LOG
+                        A directory for faces.
+    -b, --best          Detect the 'best' highest scoring face in the image.
+    --detect-thresh=DETECT_THRESH
+                        The threshold for a detection.
+    --min-size=MIN_SIZE
+                        Faces with a height less that this will be ignored.
+    --attribute-filter=ATTRIBUTE_FILTER
+                        A comma seperated list of filters example: 'Male>0.5'
+
+  Connection Options:
+    Control the connection to the FaRO service.
+
+    --max-async=MAX_ASYNC
+                        The maximum number of asyncronous call to make at a
+                        time. Default=8
+    --max-message-size=MAX_MESSAGE_SIZE
+                        Maximum GRPC message size. Set to -1 for unlimited.
+                        Default=67108864
+    -p DETECT_PORT, --port=DETECT_PORT
+                        The port used for the recognition service.
+    --detect-port=DETECT_PORT
+                        The port used for the recognition service.
+    --recognition-port=REC_PORT
+                        The port used for the recognition service.
+
+```
+
+    
 ## Getting Help
 
 We currently have limited resources to support FaRO but will do our best to provide support.  If you encounter 
