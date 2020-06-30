@@ -172,6 +172,13 @@ message TemplateList{
 	repeated FaceTemplate templates = 1;
 }
 
+message AccessRecord{
+	float datetime = 1;
+	string notes = 2;
+	string credential = 3;
+	repeated Attribute metadata = 4;
+}
+
 
 
 message FaceRecord{
@@ -182,6 +189,10 @@ message FaceRecord{
 	int64 frame = 14;
 	string notes = 6;
 	string gallery_key = 15;
+	float collection_date = 16;
+	float enrollment_date = 17;
+	repeated Attribute metadata = 18;
+	repeated AccessRecord access_records = 19;
 
 	Image view = 7;                        // A cropped and scaled image to be viewed by humans, similar to a passport photo.
 	Image aligned = 9;                     // An aligned image used for template extraction.
@@ -294,8 +305,6 @@ message DetectExtractSearchRequest{
     SearchRequest  search_request  = 3; // The face list is replaced by the result of the extract results.
 }
 
-
-
 message FaceStatusRequest{ }
 
 message FaceServiceInfo{
@@ -322,6 +331,19 @@ message GalleryDeleteRequest {
 /********* Enrollment Management ********/
 message EnrollmentListRequest {
     string gallery_name = 1;
+}
+
+
+
+message EnrollmentInfo {
+    string subject_id = 1;
+	string name = 2;
+	int32 face_count = 3;
+}
+
+message EnrollmentListResponse {
+	string gallery_name = 1;
+	repeated EnrollmentInfo enrollments = 2;
 }
 
 message EnrollmentDeleteRequest {
@@ -364,9 +386,12 @@ service FaceRecognition{
 
     // Gallery Management
     rpc galleryList(GalleryListRequest) returns (GalleryList){};
-    rpc galleryDelete(GalleryDeleteRequest) returns (GalleryInfo){};
+    rpc galleryDelete(GalleryDeleteRequest) returns (Empty){};
     rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
-    rpc enrollmentDelete(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	rpc enrollmentDelete(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	
+	rpc enrollmentDeleteConditional(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	rpc enrollmentTransfer(EnrollmentDeleteRequest) returns (FaceRecordList){};
 
     // Test
 	rpc echo(Matrix) returns (Matrix){}; // test large messages

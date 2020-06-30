@@ -34,7 +34,7 @@ from concurrent import futures
 import traceback
 import time
 import faro.proto.proto_types as pt
-from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo
+from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,Empty
 import csv
 import multiprocessing as mp
 import optparse
@@ -246,7 +246,7 @@ class FaceService(fs.FaceRecognitionServicer):
         for each in galleries:
             gallery_name = each[:-3]
             path = os.path.join(self.gallery_storage,gallery_name+'.h5')
-            STORAGE[gallery_name] = h5py.File(path)
+            STORAGE[gallery_name] = h5py.File(path,'a') # Open in read/write mode
             GALLERIES[gallery_name] = {}
             
             #print(each,gallery_name,path)
@@ -362,7 +362,7 @@ class FaceService(fs.FaceRecognitionServicer):
                 GALLERIES[gallery_name] = {}
                 
                 path = os.path.join(self.gallery_storage,gallery_name+'.h5')
-                STORAGE[gallery_name] = h5py.File(path)
+                STORAGE[gallery_name] = h5py.File(path,'a')
 
             count = 0
             for face in request.records.face_records:
@@ -451,7 +451,7 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
-    def faceList(self, request, context):
+    def enrollmentList(self, request, context):
         ''' List the galleries for this service. '''
         try:
             start = time.time()
@@ -484,6 +484,58 @@ class FaceService(fs.FaceRecognitionServicer):
             notes = "%d faces returned."%(count,)
             global LOG_FORMAT
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes)))
+
+            return result
+        except:
+            traceback.print_exc()
+            raise
+
+
+    def enrollmentDelete(self, request, context):
+        ''' List the galleries for this service. '''
+        try:
+            start = time.time()
+
+            gallery_name = request.gallery_name
+            subject_id = request.subject_id
+
+            result = FaceRecordList()
+            
+            global GALLERIES, STORAGE
+
+            delete_list = []
+            
+            count = 0
+            for face_id in GALLERIES[gallery_name]:
+                print(type(GALLERIES[gallery_name]))
+                face_record = GALLERIES[gallery_name][face_id]
+
+    
+                if subject_id == face_record.subject_id:
+                    
+                    face = result.face_records.add()
+                    face.gallery_key = face_id
+                    face.name = face_record.name
+                    face.subject_id = face_record.subject_id
+                    face.source = face_record.source
+                    face.frame = face_record.frame
+
+                    count += 1
+
+
+            for face in result.face_records:
+                face_id = face.gallery_key
+                print('Deleting:',face_id,face.subject_id,face.name)
+
+                del GALLERIES[gallery_name][face_id]
+                if face_id in STORAGE[gallery_name]:
+                    del STORAGE[gallery_name][face_id] # delete
+                                    
+            
+            stop = time.time()
+            notes = "%d records deleted."%(len(result.face_records),)
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enrollmentDelete()",notes)))
 
             return result
         except:

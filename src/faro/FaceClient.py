@@ -340,9 +340,20 @@ class FaceClient(object):
     def faceList(self,gallery_name):
         '''Get a list faces in a gallery'''
         
-        request = fsd.FaceListRequest()
+        request = fsd.EnrollmentListRequest()
         request.gallery_name = gallery_name
-        result = self.service_stub.faceList(request)
+        result = self.service_stub.enrollmentList(request)
+        
+        return result
+
+
+    def enrollmentDelete(self,gallery_name,subject_id):
+        '''Get a list faces in a gallery'''
+        
+        request = fsd.EnrollmentDeleteRequest()
+        request.gallery_name = gallery_name
+        request.subject_id = subject_id
+        result = self.service_stub.enrollmentDelete(request)
         
         return result
 

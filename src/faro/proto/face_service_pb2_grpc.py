@@ -68,7 +68,7 @@ class FaceRecognitionStub(object):
     self.galleryDelete = channel.unary_unary(
         '/FaceRecognition/galleryDelete',
         request_serializer=faro_dot_proto_dot_face__service__pb2.GalleryDeleteRequest.SerializeToString,
-        response_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.FromString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.Empty.FromString,
         )
     self.enrollmentList = channel.unary_unary(
         '/FaceRecognition/enrollmentList',
@@ -77,6 +77,16 @@ class FaceRecognitionStub(object):
         )
     self.enrollmentDelete = channel.unary_unary(
         '/FaceRecognition/enrollmentDelete',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
+    self.enrollmentDeleteConditional = channel.unary_unary(
+        '/FaceRecognition/enrollmentDeleteConditional',
+        request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.SerializeToString,
+        response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
+        )
+    self.enrollmentTransfer = channel.unary_unary(
+        '/FaceRecognition/enrollmentTransfer',
         request_serializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.SerializeToString,
         response_deserializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.FromString,
         )
@@ -182,6 +192,20 @@ class FaceRecognitionServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def enrollmentDeleteConditional(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def enrollmentTransfer(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def echo(self, request, context):
     """Test
     """
@@ -245,7 +269,7 @@ def add_FaceRecognitionServicer_to_server(servicer, server):
       'galleryDelete': grpc.unary_unary_rpc_method_handler(
           servicer.galleryDelete,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.GalleryDeleteRequest.FromString,
-          response_serializer=faro_dot_proto_dot_face__service__pb2.GalleryInfo.SerializeToString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.Empty.SerializeToString,
       ),
       'enrollmentList': grpc.unary_unary_rpc_method_handler(
           servicer.enrollmentList,
@@ -254,6 +278,16 @@ def add_FaceRecognitionServicer_to_server(servicer, server):
       ),
       'enrollmentDelete': grpc.unary_unary_rpc_method_handler(
           servicer.enrollmentDelete,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'enrollmentDeleteConditional': grpc.unary_unary_rpc_method_handler(
+          servicer.enrollmentDeleteConditional,
+          request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.FromString,
+          response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
+      ),
+      'enrollmentTransfer': grpc.unary_unary_rpc_method_handler(
+          servicer.enrollmentTransfer,
           request_deserializer=faro_dot_proto_dot_face__service__pb2.EnrollmentDeleteRequest.FromString,
           response_serializer=faro_dot_proto_dot_face__service__pb2.FaceRecordList.SerializeToString,
       ),

@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1d\x66\x61ro/proto/face_service.proto\x1a\x16\x66\x61ro/proto/image.proto\x1a\x19\x66\x61ro/proto/geometry.proto\"\x8d\x02\n\tAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x0e\n\x06\x62uffer\x18\x03 \x01(\x0c\x12\x0e\n\x06\x66value\x18\x04 \x01(\x02\x12\x0e\n\x06ivalue\x18\x05 \x01(\x05\x12\x0c\n\x04text\x18\x06 \x01(\t\x12\x0e\n\x06pickle\x18\x07 \x01(\x0c\x12\x0c\n\x04json\x18\x08 \x01(\x0c\x12\x17\n\x06matrix\x18\t \x01(\x0b\x32\x07.Matrix\x12\x17\n\x06vector\x18\n \x01(\x0b\x32\x07.Vector\x12\x15\n\x05image\x18\x0b \x01(\x0b\x32\x06.Image\x12\x17\n\x05point\x18\x0c \x01(\x0b\x32\x08.Point2D\x12\x13\n\x04rect\x18\r \x01(\x0b\x32\x05.Rect\x12\x0b\n\x03xml\x18\x0e \x01(\x0c\"9\n\x0c\x45rrorMessage\x12\x12\n\nerror_code\x18\x03 \x01(\x05\x12\x15\n\rerror_message\x18\x04 \x01(\t\"\x82\x01\n\tDetection\x12\r\n\x05score\x18\x01 \x01(\x02\x12\x17\n\x08location\x18\x02 \x01(\x0b\x32\x05.Rect\x12\x14\n\x0c\x64\x65tection_id\x18\x03 \x01(\x05\x12\x17\n\x0f\x64\x65tection_class\x18\x04 \x01(\t\x12\x1e\n\nattributes\x18\x05 \x03(\x0b\x32\n.Attribute\";\n\x08Landmark\x12\x13\n\x0blandmark_id\x18\x01 \x01(\t\x12\x1a\n\x08location\x18\x02 \x01(\x0b\x32\x08.Point2D\"\xbc\x01\n\x10\x44\x65tectionOptions\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\t\x12\x0c\n\x04\x62\x65st\x18\x02 \x01(\x08\x12\x11\n\tthreshold\x18\x03 \x01(\x02\x12\x14\n\x0cscale_levels\x18\x04 \x01(\x05\x12\x13\n\x0bscan_levels\x18\x05 \x01(\x05\x12\x14\n\x0cscan_overlap\x18\x06 \x01(\x02\x12\x10\n\x08min_size\x18\x07 \x01(\x05\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"F\n\x0e\x45xtractOptions\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\t\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"/\n\rEnrollOptions\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"\xaf\x01\n\rDetectionList\x12\x1e\n\ndetections\x18\x01 \x03(\x0b\x32\n.Detection\x12\x16\n\x0e\x64\x65tection_time\x18\x02 \x01(\x02\x12\x13\n\x0bimage_width\x18\x03 \x01(\x05\x12\x14\n\x0cimage_height\x18\x04 \x01(\x05\x12\x17\n\x0f\x64\x65tection_count\x18\x05 \x01(\x05\x12\"\n\x07options\x18\x06 \x01(\x0b\x32\x11.DetectionOptions\"+\n\tMatchList\x12\x1e\n\nmatch_list\x18\x01 \x03(\x0b\x32\n.MatchInfo\"\x82\x01\n\tMatchInfo\x12\r\n\x05score\x18\x01 \x01(\x02\x12\x10\n\x08image_id\x18\x02 \x01(\t\x12\x14\n\x0c\x64\x65tection_id\x18\x03 \x01(\t\x12\x12\n\nsubject_id\x18\x04 \x01(\t\x12\x14\n\x0csubject_name\x18\x05 \x01(\t\x12\x14\n\x04\x66\x61\x63\x65\x18\x06 \x01(\x0b\x32\x06.Image\">\n\rTemplateInput\x12\x12\n\x02im\x18\x01 \x01(\x0b\x32\x06.Image\x12\x19\n\ndetections\x18\x02 \x03(\x0b\x32\x05.Rect\"5\n\x0c\x46\x61\x63\x65Template\x12\x15\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x07.Vector\x12\x0e\n\x06\x62uffer\x18\x02 \x01(\x0c\"0\n\x0cTemplateList\x12 \n\ttemplates\x18\x01 \x03(\x0b\x32\r.FaceTemplate\"\xf9\x02\n\nFaceRecord\x12\x12\n\nsubject_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x05 \x01(\t\x12\x0e\n\x06source\x18\x04 \x01(\t\x12\r\n\x05\x66rame\x18\x0e \x01(\x03\x12\r\n\x05notes\x18\x06 \x01(\t\x12\x13\n\x0bgallery_key\x18\x0f \x01(\t\x12\x14\n\x04view\x18\x07 \x01(\x0b\x32\x06.Image\x12\x17\n\x07\x61ligned\x18\t \x01(\x0b\x32\x06.Image\x12\x1d\n\tdetection\x18\x02 \x01(\x0b\x32\n.Detection\x12\x1c\n\tlandmarks\x18\x08 \x03(\x0b\x32\t.Landmark\x12\x1e\n\nattributes\x18\n \x03(\x0b\x32\n.Attribute\x12!\n\rinternal_data\x18\x0b \x03(\x0b\x32\n.Attribute\x12\x1f\n\x08template\x18\x03 \x01(\x0b\x32\r.FaceTemplate\x12\r\n\x05score\x18\x0c \x01(\x02\x12\'\n\x0esearch_results\x18\r \x01(\x0b\x32\x0f.FaceRecordList\"3\n\x0e\x46\x61\x63\x65RecordList\x12!\n\x0c\x66\x61\x63\x65_records\x18\x01 \x03(\x0b\x32\x0b.FaceRecord\"\\\n\x13VerificationRequest\x12\x0f\n\x07gallery\x18\x01 \x01(\t\x12\x12\n\nsubject_id\x18\x02 \x01(\t\x12 \n\x0b\x66\x61\x63\x65_record\x18\x03 \x03(\x0b\x32\x0b.FaceRecord\"\x84\x01\n\x14VerificationResponse\x12\x12\n\nerror_code\x18\x04 \x01(\x05\x12\x15\n\rerror_message\x18\x05 \x01(\t\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x12\x1c\n\x07matches\x18\x03 \x03(\x0b\x32\x0b.FaceRecord\"p\n\rSearchRequest\x12\x16\n\x0esearch_gallery\x18\x01 \x01(\t\x12\x1f\n\x06probes\x18\x03 \x01(\x0b\x32\x0f.FaceRecordList\x12\x13\n\x0bmax_results\x18\x04 \x01(\x05\x12\x11\n\tthreshold\x18\x05 \x01(\x02\"Q\n\x0eSearchResponse\x12\x1e\n\x07message\x18\x01 \x01(\x0b\x32\r.ErrorMessage\x12\x1f\n\x06probes\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\"q\n\rEnrollRequest\x12\x16\n\x0e\x65nroll_gallery\x18\x01 \x01(\t\x12 \n\x07records\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\x12&\n\x0e\x65nroll_options\x18\n \x01(\x0b\x32\x0e.EnrollOptions\"\x9a\x01\n\rDetectRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x0e\n\x06source\x18\x02 \x01(\t\x12\r\n\x05\x66rame\x18\x03 \x01(\x03\x12\x12\n\nsubject_id\x18\x04 \x01(\t\x12\x14\n\x0csubject_name\x18\x05 \x01(\t\x12)\n\x0e\x64\x65tect_options\x18\x08 \x01(\x0b\x32\x11.DetectionOptions\"s\n\x0e\x45xtractRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12 \n\x07records\x18\x04 \x01(\x0b\x32\x0f.FaceRecordList\x12(\n\x0f\x65xtract_options\x18\t \x01(\x0b\x32\x0f.ExtractOptions\"\xac\x01\n\x0cScoreRequest\x12$\n\x0b\x66\x61\x63\x65_probes\x18\x01 \x01(\x0b\x32\x0f.FaceRecordList\x12%\n\x0c\x66\x61\x63\x65_gallery\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\x12&\n\x0ftemplate_probes\x18\x03 \x01(\x0b\x32\r.TemplateList\x12\'\n\x10template_gallery\x18\x04 \x01(\x0b\x32\r.TemplateList\"h\n\x14\x44\x65tectExtractRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\"\x96\x01\n\x1a\x44\x65tectExtractEnrollRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\x12&\n\x0e\x65nroll_request\x18\x03 \x01(\x0b\x32\x0e.EnrollRequest\"\x96\x01\n\x1a\x44\x65tectExtractSearchRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\x12&\n\x0esearch_request\x18\x03 \x01(\x0b\x32\x0e.SearchRequest\"\x13\n\x11\x46\x61\x63\x65StatusRequest\"\xa5\x02\n\x0f\x46\x61\x63\x65ServiceInfo\x12\x1e\n\x06status\x18\x01 \x01(\x0e\x32\x0e.ServiceStatus\x12\x14\n\x0cworker_count\x18\x02 \x01(\x05\x12\x19\n\x11\x64\x65tection_support\x18\x03 \x01(\x08\x12\x17\n\x0f\x65xtract_support\x18\x04 \x01(\x08\x12\x15\n\rscore_support\x18\x05 \x01(\x08\x12\x19\n\x11\x61ttribute_support\x18\x06 \x01(\x08\x12\x1e\n\nscore_type\x18\x07 \x01(\x0e\x32\n.ScoreType\x12\x1b\n\x13\x64\x65tection_threshold\x18\x08 \x01(\x02\x12\x17\n\x0fmatch_threshold\x18\t \x01(\x02\x12\x11\n\talgorithm\x18\n \x01(\t\x12\r\n\x05notes\x18\x0b \x01(\t\"\x14\n\x12GalleryListRequest\",\n\x14GalleryDeleteRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\"-\n\x15\x45nrollmentListRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\"C\n\x17\x45nrollmentDeleteRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\x12\x12\n\nsubject_id\x18\x02 \x01(\t\"7\n\x0bGalleryInfo\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\x12\x12\n\nface_count\x18\x02 \x01(\x03\".\n\x0bGalleryList\x12\x1f\n\tgalleries\x18\x01 \x03(\x0b\x32\x0c.GalleryInfo\"\x07\n\x05\x45mpty*<\n\rServiceStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05READY\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x08\n\x04\x42USY\x10\x03*k\n\x08\x44\x61taType\x12\t\n\x05\x45MPTY\x10\x00\x12\n\n\x06STRING\x10\x01\x12\x07\n\x03INT\x10\x02\x12\t\n\x05\x46LOAT\x10\x03\x12\t\n\x05\x42YTES\x10\x04\x12\n\n\x06VECTOR\x10\x05\x12\n\n\x06PICKLE\x10\x06\x12\x07\n\x03XML\x10\x07\x12\x08\n\x04JSON\x10\x08*4\n\tScoreType\x12\n\n\x06SERVER\x10\x00\x12\x06\n\x02L1\x10\x01\x12\x06\n\x02L2\x10\x02\x12\x0b\n\x07NEG_DOT\x10\x03\x32\xeb\x05\n\x0f\x46\x61\x63\x65Recognition\x12\x30\n\x06status\x12\x12.FaceStatusRequest\x1a\x10.FaceServiceInfo\"\x00\x12+\n\x06\x64\x65tect\x12\x0e.DetectRequest\x1a\x0f.FaceRecordList\"\x00\x12-\n\x07\x65xtract\x12\x0f.ExtractRequest\x1a\x0f.FaceRecordList\"\x00\x12!\n\x05score\x12\r.ScoreRequest\x1a\x07.Matrix\"\x00\x12+\n\x06\x65nroll\x12\x0e.EnrollRequest\x1a\x0f.FaceRecordList\"\x00\x12+\n\x06search\x12\x0e.SearchRequest\x1a\x0f.FaceRecordList\"\x00\x12\x39\n\rdetectExtract\x12\x15.DetectExtractRequest\x1a\x0f.FaceRecordList\"\x00\x12\x45\n\x13\x64\x65tectExtractEnroll\x12\x1b.DetectExtractEnrollRequest\x1a\x0f.FaceRecordList\"\x00\x12\x45\n\x13\x64\x65tectExtractSearch\x12\x1b.DetectExtractSearchRequest\x1a\x0f.FaceRecordList\"\x00\x12\x32\n\x0bgalleryList\x12\x13.GalleryListRequest\x1a\x0c.GalleryList\"\x00\x12\x36\n\rgalleryDelete\x12\x15.GalleryDeleteRequest\x1a\x0c.GalleryInfo\"\x00\x12;\n\x0e\x65nrollmentList\x12\x16.EnrollmentListRequest\x1a\x0f.FaceRecordList\"\x00\x12?\n\x10\x65nrollmentDelete\x12\x18.EnrollmentDeleteRequest\x1a\x0f.FaceRecordList\"\x00\x12\x1a\n\x04\x65\x63ho\x12\x07.Matrix\x1a\x07.Matrix\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x1d\x66\x61ro/proto/face_service.proto\x1a\x16\x66\x61ro/proto/image.proto\x1a\x19\x66\x61ro/proto/geometry.proto\"\x8d\x02\n\tAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x0e\n\x06\x62uffer\x18\x03 \x01(\x0c\x12\x0e\n\x06\x66value\x18\x04 \x01(\x02\x12\x0e\n\x06ivalue\x18\x05 \x01(\x05\x12\x0c\n\x04text\x18\x06 \x01(\t\x12\x0e\n\x06pickle\x18\x07 \x01(\x0c\x12\x0c\n\x04json\x18\x08 \x01(\x0c\x12\x17\n\x06matrix\x18\t \x01(\x0b\x32\x07.Matrix\x12\x17\n\x06vector\x18\n \x01(\x0b\x32\x07.Vector\x12\x15\n\x05image\x18\x0b \x01(\x0b\x32\x06.Image\x12\x17\n\x05point\x18\x0c \x01(\x0b\x32\x08.Point2D\x12\x13\n\x04rect\x18\r \x01(\x0b\x32\x05.Rect\x12\x0b\n\x03xml\x18\x0e \x01(\x0c\"9\n\x0c\x45rrorMessage\x12\x12\n\nerror_code\x18\x03 \x01(\x05\x12\x15\n\rerror_message\x18\x04 \x01(\t\"\x82\x01\n\tDetection\x12\r\n\x05score\x18\x01 \x01(\x02\x12\x17\n\x08location\x18\x02 \x01(\x0b\x32\x05.Rect\x12\x14\n\x0c\x64\x65tection_id\x18\x03 \x01(\x05\x12\x17\n\x0f\x64\x65tection_class\x18\x04 \x01(\t\x12\x1e\n\nattributes\x18\x05 \x03(\x0b\x32\n.Attribute\";\n\x08Landmark\x12\x13\n\x0blandmark_id\x18\x01 \x01(\t\x12\x1a\n\x08location\x18\x02 \x01(\x0b\x32\x08.Point2D\"\xbc\x01\n\x10\x44\x65tectionOptions\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\t\x12\x0c\n\x04\x62\x65st\x18\x02 \x01(\x08\x12\x11\n\tthreshold\x18\x03 \x01(\x02\x12\x14\n\x0cscale_levels\x18\x04 \x01(\x05\x12\x13\n\x0bscan_levels\x18\x05 \x01(\x05\x12\x14\n\x0cscan_overlap\x18\x06 \x01(\x02\x12\x10\n\x08min_size\x18\x07 \x01(\x05\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"F\n\x0e\x45xtractOptions\x12\x14\n\x0c\x61lgorithm_id\x18\x01 \x01(\t\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"/\n\rEnrollOptions\x12\x1e\n\nattributes\x18\x08 \x03(\x0b\x32\n.Attribute\"\xaf\x01\n\rDetectionList\x12\x1e\n\ndetections\x18\x01 \x03(\x0b\x32\n.Detection\x12\x16\n\x0e\x64\x65tection_time\x18\x02 \x01(\x02\x12\x13\n\x0bimage_width\x18\x03 \x01(\x05\x12\x14\n\x0cimage_height\x18\x04 \x01(\x05\x12\x17\n\x0f\x64\x65tection_count\x18\x05 \x01(\x05\x12\"\n\x07options\x18\x06 \x01(\x0b\x32\x11.DetectionOptions\"+\n\tMatchList\x12\x1e\n\nmatch_list\x18\x01 \x03(\x0b\x32\n.MatchInfo\"\x82\x01\n\tMatchInfo\x12\r\n\x05score\x18\x01 \x01(\x02\x12\x10\n\x08image_id\x18\x02 \x01(\t\x12\x14\n\x0c\x64\x65tection_id\x18\x03 \x01(\t\x12\x12\n\nsubject_id\x18\x04 \x01(\t\x12\x14\n\x0csubject_name\x18\x05 \x01(\t\x12\x14\n\x04\x66\x61\x63\x65\x18\x06 \x01(\x0b\x32\x06.Image\">\n\rTemplateInput\x12\x12\n\x02im\x18\x01 \x01(\x0b\x32\x06.Image\x12\x19\n\ndetections\x18\x02 \x03(\x0b\x32\x05.Rect\"5\n\x0c\x46\x61\x63\x65Template\x12\x15\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x07.Vector\x12\x0e\n\x06\x62uffer\x18\x02 \x01(\x0c\"0\n\x0cTemplateList\x12 \n\ttemplates\x18\x01 \x03(\x0b\x32\r.FaceTemplate\"a\n\x0c\x41\x63\x63\x65ssRecord\x12\x10\n\x08\x64\x61tetime\x18\x01 \x01(\x02\x12\r\n\x05notes\x18\x02 \x01(\t\x12\x12\n\ncredential\x18\x03 \x01(\t\x12\x1c\n\x08metadata\x18\x04 \x03(\x0b\x32\n.Attribute\"\xf0\x03\n\nFaceRecord\x12\x12\n\nsubject_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x05 \x01(\t\x12\x0e\n\x06source\x18\x04 \x01(\t\x12\r\n\x05\x66rame\x18\x0e \x01(\x03\x12\r\n\x05notes\x18\x06 \x01(\t\x12\x13\n\x0bgallery_key\x18\x0f \x01(\t\x12\x17\n\x0f\x63ollection_date\x18\x10 \x01(\x02\x12\x17\n\x0f\x65nrollment_date\x18\x11 \x01(\x02\x12\x1c\n\x08metadata\x18\x12 \x03(\x0b\x32\n.Attribute\x12%\n\x0e\x61\x63\x63\x65ss_records\x18\x13 \x03(\x0b\x32\r.AccessRecord\x12\x14\n\x04view\x18\x07 \x01(\x0b\x32\x06.Image\x12\x17\n\x07\x61ligned\x18\t \x01(\x0b\x32\x06.Image\x12\x1d\n\tdetection\x18\x02 \x01(\x0b\x32\n.Detection\x12\x1c\n\tlandmarks\x18\x08 \x03(\x0b\x32\t.Landmark\x12\x1e\n\nattributes\x18\n \x03(\x0b\x32\n.Attribute\x12!\n\rinternal_data\x18\x0b \x03(\x0b\x32\n.Attribute\x12\x1f\n\x08template\x18\x03 \x01(\x0b\x32\r.FaceTemplate\x12\r\n\x05score\x18\x0c \x01(\x02\x12\'\n\x0esearch_results\x18\r \x01(\x0b\x32\x0f.FaceRecordList\"3\n\x0e\x46\x61\x63\x65RecordList\x12!\n\x0c\x66\x61\x63\x65_records\x18\x01 \x03(\x0b\x32\x0b.FaceRecord\"\\\n\x13VerificationRequest\x12\x0f\n\x07gallery\x18\x01 \x01(\t\x12\x12\n\nsubject_id\x18\x02 \x01(\t\x12 \n\x0b\x66\x61\x63\x65_record\x18\x03 \x03(\x0b\x32\x0b.FaceRecord\"\x84\x01\n\x14VerificationResponse\x12\x12\n\nerror_code\x18\x04 \x01(\x05\x12\x15\n\rerror_message\x18\x05 \x01(\t\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x12\x1c\n\x07matches\x18\x03 \x03(\x0b\x32\x0b.FaceRecord\"p\n\rSearchRequest\x12\x16\n\x0esearch_gallery\x18\x01 \x01(\t\x12\x1f\n\x06probes\x18\x03 \x01(\x0b\x32\x0f.FaceRecordList\x12\x13\n\x0bmax_results\x18\x04 \x01(\x05\x12\x11\n\tthreshold\x18\x05 \x01(\x02\"Q\n\x0eSearchResponse\x12\x1e\n\x07message\x18\x01 \x01(\x0b\x32\r.ErrorMessage\x12\x1f\n\x06probes\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\"q\n\rEnrollRequest\x12\x16\n\x0e\x65nroll_gallery\x18\x01 \x01(\t\x12 \n\x07records\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\x12&\n\x0e\x65nroll_options\x18\n \x01(\x0b\x32\x0e.EnrollOptions\"\x9a\x01\n\rDetectRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x0e\n\x06source\x18\x02 \x01(\t\x12\r\n\x05\x66rame\x18\x03 \x01(\x03\x12\x12\n\nsubject_id\x18\x04 \x01(\t\x12\x14\n\x0csubject_name\x18\x05 \x01(\t\x12)\n\x0e\x64\x65tect_options\x18\x08 \x01(\x0b\x32\x11.DetectionOptions\"s\n\x0e\x45xtractRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12 \n\x07records\x18\x04 \x01(\x0b\x32\x0f.FaceRecordList\x12(\n\x0f\x65xtract_options\x18\t \x01(\x0b\x32\x0f.ExtractOptions\"\xac\x01\n\x0cScoreRequest\x12$\n\x0b\x66\x61\x63\x65_probes\x18\x01 \x01(\x0b\x32\x0f.FaceRecordList\x12%\n\x0c\x66\x61\x63\x65_gallery\x18\x02 \x01(\x0b\x32\x0f.FaceRecordList\x12&\n\x0ftemplate_probes\x18\x03 \x01(\x0b\x32\r.TemplateList\x12\'\n\x10template_gallery\x18\x04 \x01(\x0b\x32\r.TemplateList\"h\n\x14\x44\x65tectExtractRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\"\x96\x01\n\x1a\x44\x65tectExtractEnrollRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\x12&\n\x0e\x65nroll_request\x18\x03 \x01(\x0b\x32\x0e.EnrollRequest\"\x96\x01\n\x1a\x44\x65tectExtractSearchRequest\x12&\n\x0e\x64\x65tect_request\x18\x01 \x01(\x0b\x32\x0e.DetectRequest\x12(\n\x0f\x65xtract_request\x18\x02 \x01(\x0b\x32\x0f.ExtractRequest\x12&\n\x0esearch_request\x18\x03 \x01(\x0b\x32\x0e.SearchRequest\"\x13\n\x11\x46\x61\x63\x65StatusRequest\"\xa5\x02\n\x0f\x46\x61\x63\x65ServiceInfo\x12\x1e\n\x06status\x18\x01 \x01(\x0e\x32\x0e.ServiceStatus\x12\x14\n\x0cworker_count\x18\x02 \x01(\x05\x12\x19\n\x11\x64\x65tection_support\x18\x03 \x01(\x08\x12\x17\n\x0f\x65xtract_support\x18\x04 \x01(\x08\x12\x15\n\rscore_support\x18\x05 \x01(\x08\x12\x19\n\x11\x61ttribute_support\x18\x06 \x01(\x08\x12\x1e\n\nscore_type\x18\x07 \x01(\x0e\x32\n.ScoreType\x12\x1b\n\x13\x64\x65tection_threshold\x18\x08 \x01(\x02\x12\x17\n\x0fmatch_threshold\x18\t \x01(\x02\x12\x11\n\talgorithm\x18\n \x01(\t\x12\r\n\x05notes\x18\x0b \x01(\t\"\x14\n\x12GalleryListRequest\",\n\x14GalleryDeleteRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\"-\n\x15\x45nrollmentListRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\"F\n\x0e\x45nrollmentInfo\x12\x12\n\nsubject_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nface_count\x18\x03 \x01(\x05\"T\n\x16\x45nrollmentListResponse\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\x12$\n\x0b\x65nrollments\x18\x02 \x03(\x0b\x32\x0f.EnrollmentInfo\"C\n\x17\x45nrollmentDeleteRequest\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\x12\x12\n\nsubject_id\x18\x02 \x01(\t\"7\n\x0bGalleryInfo\x12\x14\n\x0cgallery_name\x18\x01 \x01(\t\x12\x12\n\nface_count\x18\x02 \x01(\x03\".\n\x0bGalleryList\x12\x1f\n\tgalleries\x18\x01 \x03(\x0b\x32\x0c.GalleryInfo\"\x07\n\x05\x45mpty*<\n\rServiceStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05READY\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x08\n\x04\x42USY\x10\x03*k\n\x08\x44\x61taType\x12\t\n\x05\x45MPTY\x10\x00\x12\n\n\x06STRING\x10\x01\x12\x07\n\x03INT\x10\x02\x12\t\n\x05\x46LOAT\x10\x03\x12\t\n\x05\x42YTES\x10\x04\x12\n\n\x06VECTOR\x10\x05\x12\n\n\x06PICKLE\x10\x06\x12\x07\n\x03XML\x10\x07\x12\x08\n\x04JSON\x10\x08*4\n\tScoreType\x12\n\n\x06SERVER\x10\x00\x12\x06\n\x02L1\x10\x01\x12\x06\n\x02L2\x10\x02\x12\x0b\n\x07NEG_DOT\x10\x03\x32\xf4\x06\n\x0f\x46\x61\x63\x65Recognition\x12\x30\n\x06status\x12\x12.FaceStatusRequest\x1a\x10.FaceServiceInfo\"\x00\x12+\n\x06\x64\x65tect\x12\x0e.DetectRequest\x1a\x0f.FaceRecordList\"\x00\x12-\n\x07\x65xtract\x12\x0f.ExtractRequest\x1a\x0f.FaceRecordList\"\x00\x12!\n\x05score\x12\r.ScoreRequest\x1a\x07.Matrix\"\x00\x12+\n\x06\x65nroll\x12\x0e.EnrollRequest\x1a\x0f.FaceRecordList\"\x00\x12+\n\x06search\x12\x0e.SearchRequest\x1a\x0f.FaceRecordList\"\x00\x12\x39\n\rdetectExtract\x12\x15.DetectExtractRequest\x1a\x0f.FaceRecordList\"\x00\x12\x45\n\x13\x64\x65tectExtractEnroll\x12\x1b.DetectExtractEnrollRequest\x1a\x0f.FaceRecordList\"\x00\x12\x45\n\x13\x64\x65tectExtractSearch\x12\x1b.DetectExtractSearchRequest\x1a\x0f.FaceRecordList\"\x00\x12\x32\n\x0bgalleryList\x12\x13.GalleryListRequest\x1a\x0c.GalleryList\"\x00\x12\x30\n\rgalleryDelete\x12\x15.GalleryDeleteRequest\x1a\x06.Empty\"\x00\x12;\n\x0e\x65nrollmentList\x12\x16.EnrollmentListRequest\x1a\x0f.FaceRecordList\"\x00\x12?\n\x10\x65nrollmentDelete\x12\x18.EnrollmentDeleteRequest\x1a\x0f.FaceRecordList\"\x00\x12J\n\x1b\x65nrollmentDeleteConditional\x12\x18.EnrollmentDeleteRequest\x1a\x0f.FaceRecordList\"\x00\x12\x41\n\x12\x65nrollmentTransfer\x12\x18.EnrollmentDeleteRequest\x1a\x0f.FaceRecordList\"\x00\x12\x1a\n\x04\x65\x63ho\x12\x07.Matrix\x1a\x07.Matrix\"\x00\x62\x06proto3')
   ,
   dependencies=[faro_dot_proto_dot_image__pb2.DESCRIPTOR,faro_dot_proto_dot_geometry__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _SERVICESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3896,
-  serialized_end=3956,
+  serialized_start=4272,
+  serialized_end=4332,
 )
 _sym_db.RegisterEnumDescriptor(_SERVICESTATUS)
 
@@ -102,8 +102,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3958,
-  serialized_end=4065,
+  serialized_start=4334,
+  serialized_end=4441,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -133,8 +133,8 @@ _SCORETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4067,
-  serialized_end=4119,
+  serialized_start=4443,
+  serialized_end=4495,
 )
 _sym_db.RegisterEnumDescriptor(_SCORETYPE)
 
@@ -835,6 +835,58 @@ _TEMPLATELIST = _descriptor.Descriptor(
 )
 
 
+_ACCESSRECORD = _descriptor.Descriptor(
+  name='AccessRecord',
+  full_name='AccessRecord',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='datetime', full_name='AccessRecord.datetime', index=0,
+      number=1, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='notes', full_name='AccessRecord.notes', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='credential', full_name='AccessRecord.credential', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='metadata', full_name='AccessRecord.metadata', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1446,
+  serialized_end=1543,
+)
+
+
 _FACERECORD = _descriptor.Descriptor(
   name='FaceRecord',
   full_name='FaceRecord',
@@ -885,63 +937,91 @@ _FACERECORD = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='view', full_name='FaceRecord.view', index=6,
+      name='collection_date', full_name='FaceRecord.collection_date', index=6,
+      number=16, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='enrollment_date', full_name='FaceRecord.enrollment_date', index=7,
+      number=17, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='metadata', full_name='FaceRecord.metadata', index=8,
+      number=18, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='access_records', full_name='FaceRecord.access_records', index=9,
+      number=19, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='view', full_name='FaceRecord.view', index=10,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='aligned', full_name='FaceRecord.aligned', index=7,
+      name='aligned', full_name='FaceRecord.aligned', index=11,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='detection', full_name='FaceRecord.detection', index=8,
+      name='detection', full_name='FaceRecord.detection', index=12,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='landmarks', full_name='FaceRecord.landmarks', index=9,
+      name='landmarks', full_name='FaceRecord.landmarks', index=13,
       number=8, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='attributes', full_name='FaceRecord.attributes', index=10,
+      name='attributes', full_name='FaceRecord.attributes', index=14,
       number=10, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='internal_data', full_name='FaceRecord.internal_data', index=11,
+      name='internal_data', full_name='FaceRecord.internal_data', index=15,
       number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='template', full_name='FaceRecord.template', index=12,
+      name='template', full_name='FaceRecord.template', index=16,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='score', full_name='FaceRecord.score', index=13,
+      name='score', full_name='FaceRecord.score', index=17,
       number=12, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='search_results', full_name='FaceRecord.search_results', index=14,
+      name='search_results', full_name='FaceRecord.search_results', index=18,
       number=13, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -959,8 +1039,8 @@ _FACERECORD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1447,
-  serialized_end=1824,
+  serialized_start=1546,
+  serialized_end=2042,
 )
 
 
@@ -990,8 +1070,8 @@ _FACERECORDLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1826,
-  serialized_end=1877,
+  serialized_start=2044,
+  serialized_end=2095,
 )
 
 
@@ -1035,8 +1115,8 @@ _VERIFICATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1879,
-  serialized_end=1971,
+  serialized_start=2097,
+  serialized_end=2189,
 )
 
 
@@ -1094,8 +1174,8 @@ _VERIFICATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1974,
-  serialized_end=2106,
+  serialized_start=2192,
+  serialized_end=2324,
 )
 
 
@@ -1146,8 +1226,8 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2108,
-  serialized_end=2220,
+  serialized_start=2326,
+  serialized_end=2438,
 )
 
 
@@ -1184,8 +1264,8 @@ _SEARCHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2222,
-  serialized_end=2303,
+  serialized_start=2440,
+  serialized_end=2521,
 )
 
 
@@ -1229,8 +1309,8 @@ _ENROLLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2305,
-  serialized_end=2418,
+  serialized_start=2523,
+  serialized_end=2636,
 )
 
 
@@ -1295,8 +1375,8 @@ _DETECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2421,
-  serialized_end=2575,
+  serialized_start=2639,
+  serialized_end=2793,
 )
 
 
@@ -1340,8 +1420,8 @@ _EXTRACTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2577,
-  serialized_end=2692,
+  serialized_start=2795,
+  serialized_end=2910,
 )
 
 
@@ -1392,8 +1472,8 @@ _SCOREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2695,
-  serialized_end=2867,
+  serialized_start=2913,
+  serialized_end=3085,
 )
 
 
@@ -1430,8 +1510,8 @@ _DETECTEXTRACTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2869,
-  serialized_end=2973,
+  serialized_start=3087,
+  serialized_end=3191,
 )
 
 
@@ -1475,8 +1555,8 @@ _DETECTEXTRACTENROLLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2976,
-  serialized_end=3126,
+  serialized_start=3194,
+  serialized_end=3344,
 )
 
 
@@ -1520,8 +1600,8 @@ _DETECTEXTRACTSEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3129,
-  serialized_end=3279,
+  serialized_start=3347,
+  serialized_end=3497,
 )
 
 
@@ -1544,8 +1624,8 @@ _FACESTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3281,
-  serialized_end=3300,
+  serialized_start=3499,
+  serialized_end=3518,
 )
 
 
@@ -1645,8 +1725,8 @@ _FACESERVICEINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3303,
-  serialized_end=3596,
+  serialized_start=3521,
+  serialized_end=3814,
 )
 
 
@@ -1669,8 +1749,8 @@ _GALLERYLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3598,
-  serialized_end=3618,
+  serialized_start=3816,
+  serialized_end=3836,
 )
 
 
@@ -1700,8 +1780,8 @@ _GALLERYDELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3620,
-  serialized_end=3664,
+  serialized_start=3838,
+  serialized_end=3882,
 )
 
 
@@ -1731,8 +1811,91 @@ _ENROLLMENTLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3666,
-  serialized_end=3711,
+  serialized_start=3884,
+  serialized_end=3929,
+)
+
+
+_ENROLLMENTINFO = _descriptor.Descriptor(
+  name='EnrollmentInfo',
+  full_name='EnrollmentInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='subject_id', full_name='EnrollmentInfo.subject_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='EnrollmentInfo.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='face_count', full_name='EnrollmentInfo.face_count', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3931,
+  serialized_end=4001,
+)
+
+
+_ENROLLMENTLISTRESPONSE = _descriptor.Descriptor(
+  name='EnrollmentListResponse',
+  full_name='EnrollmentListResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='gallery_name', full_name='EnrollmentListResponse.gallery_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='enrollments', full_name='EnrollmentListResponse.enrollments', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4003,
+  serialized_end=4087,
 )
 
 
@@ -1769,8 +1932,8 @@ _ENROLLMENTDELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3713,
-  serialized_end=3780,
+  serialized_start=4089,
+  serialized_end=4156,
 )
 
 
@@ -1807,8 +1970,8 @@ _GALLERYINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3782,
-  serialized_end=3837,
+  serialized_start=4158,
+  serialized_end=4213,
 )
 
 
@@ -1838,8 +2001,8 @@ _GALLERYLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3839,
-  serialized_end=3885,
+  serialized_start=4215,
+  serialized_end=4261,
 )
 
 
@@ -1862,8 +2025,8 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3887,
-  serialized_end=3894,
+  serialized_start=4263,
+  serialized_end=4270,
 )
 
 _ATTRIBUTE.fields_by_name['matrix'].message_type = faro_dot_proto_dot_geometry__pb2._MATRIX
@@ -1885,6 +2048,9 @@ _TEMPLATEINPUT.fields_by_name['im'].message_type = faro_dot_proto_dot_image__pb2
 _TEMPLATEINPUT.fields_by_name['detections'].message_type = faro_dot_proto_dot_geometry__pb2._RECT
 _FACETEMPLATE.fields_by_name['data'].message_type = faro_dot_proto_dot_geometry__pb2._VECTOR
 _TEMPLATELIST.fields_by_name['templates'].message_type = _FACETEMPLATE
+_ACCESSRECORD.fields_by_name['metadata'].message_type = _ATTRIBUTE
+_FACERECORD.fields_by_name['metadata'].message_type = _ATTRIBUTE
+_FACERECORD.fields_by_name['access_records'].message_type = _ACCESSRECORD
 _FACERECORD.fields_by_name['view'].message_type = faro_dot_proto_dot_image__pb2._IMAGE
 _FACERECORD.fields_by_name['aligned'].message_type = faro_dot_proto_dot_image__pb2._IMAGE
 _FACERECORD.fields_by_name['detection'].message_type = _DETECTION
@@ -1920,6 +2086,7 @@ _DETECTEXTRACTSEARCHREQUEST.fields_by_name['extract_request'].message_type = _EX
 _DETECTEXTRACTSEARCHREQUEST.fields_by_name['search_request'].message_type = _SEARCHREQUEST
 _FACESERVICEINFO.fields_by_name['status'].enum_type = _SERVICESTATUS
 _FACESERVICEINFO.fields_by_name['score_type'].enum_type = _SCORETYPE
+_ENROLLMENTLISTRESPONSE.fields_by_name['enrollments'].message_type = _ENROLLMENTINFO
 _GALLERYLIST.fields_by_name['galleries'].message_type = _GALLERYINFO
 DESCRIPTOR.message_types_by_name['Attribute'] = _ATTRIBUTE
 DESCRIPTOR.message_types_by_name['ErrorMessage'] = _ERRORMESSAGE
@@ -1934,6 +2101,7 @@ DESCRIPTOR.message_types_by_name['MatchInfo'] = _MATCHINFO
 DESCRIPTOR.message_types_by_name['TemplateInput'] = _TEMPLATEINPUT
 DESCRIPTOR.message_types_by_name['FaceTemplate'] = _FACETEMPLATE
 DESCRIPTOR.message_types_by_name['TemplateList'] = _TEMPLATELIST
+DESCRIPTOR.message_types_by_name['AccessRecord'] = _ACCESSRECORD
 DESCRIPTOR.message_types_by_name['FaceRecord'] = _FACERECORD
 DESCRIPTOR.message_types_by_name['FaceRecordList'] = _FACERECORDLIST
 DESCRIPTOR.message_types_by_name['VerificationRequest'] = _VERIFICATIONREQUEST
@@ -1952,6 +2120,8 @@ DESCRIPTOR.message_types_by_name['FaceServiceInfo'] = _FACESERVICEINFO
 DESCRIPTOR.message_types_by_name['GalleryListRequest'] = _GALLERYLISTREQUEST
 DESCRIPTOR.message_types_by_name['GalleryDeleteRequest'] = _GALLERYDELETEREQUEST
 DESCRIPTOR.message_types_by_name['EnrollmentListRequest'] = _ENROLLMENTLISTREQUEST
+DESCRIPTOR.message_types_by_name['EnrollmentInfo'] = _ENROLLMENTINFO
+DESCRIPTOR.message_types_by_name['EnrollmentListResponse'] = _ENROLLMENTLISTRESPONSE
 DESCRIPTOR.message_types_by_name['EnrollmentDeleteRequest'] = _ENROLLMENTDELETEREQUEST
 DESCRIPTOR.message_types_by_name['GalleryInfo'] = _GALLERYINFO
 DESCRIPTOR.message_types_by_name['GalleryList'] = _GALLERYLIST
@@ -2051,6 +2221,13 @@ TemplateList = _reflection.GeneratedProtocolMessageType('TemplateList', (_messag
   # @@protoc_insertion_point(class_scope:TemplateList)
   ))
 _sym_db.RegisterMessage(TemplateList)
+
+AccessRecord = _reflection.GeneratedProtocolMessageType('AccessRecord', (_message.Message,), dict(
+  DESCRIPTOR = _ACCESSRECORD,
+  __module__ = 'faro.proto.face_service_pb2'
+  # @@protoc_insertion_point(class_scope:AccessRecord)
+  ))
+_sym_db.RegisterMessage(AccessRecord)
 
 FaceRecord = _reflection.GeneratedProtocolMessageType('FaceRecord', (_message.Message,), dict(
   DESCRIPTOR = _FACERECORD,
@@ -2178,6 +2355,20 @@ EnrollmentListRequest = _reflection.GeneratedProtocolMessageType('EnrollmentList
   ))
 _sym_db.RegisterMessage(EnrollmentListRequest)
 
+EnrollmentInfo = _reflection.GeneratedProtocolMessageType('EnrollmentInfo', (_message.Message,), dict(
+  DESCRIPTOR = _ENROLLMENTINFO,
+  __module__ = 'faro.proto.face_service_pb2'
+  # @@protoc_insertion_point(class_scope:EnrollmentInfo)
+  ))
+_sym_db.RegisterMessage(EnrollmentInfo)
+
+EnrollmentListResponse = _reflection.GeneratedProtocolMessageType('EnrollmentListResponse', (_message.Message,), dict(
+  DESCRIPTOR = _ENROLLMENTLISTRESPONSE,
+  __module__ = 'faro.proto.face_service_pb2'
+  # @@protoc_insertion_point(class_scope:EnrollmentListResponse)
+  ))
+_sym_db.RegisterMessage(EnrollmentListResponse)
+
 EnrollmentDeleteRequest = _reflection.GeneratedProtocolMessageType('EnrollmentDeleteRequest', (_message.Message,), dict(
   DESCRIPTOR = _ENROLLMENTDELETEREQUEST,
   __module__ = 'faro.proto.face_service_pb2'
@@ -2214,8 +2405,8 @@ _FACERECOGNITION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=4122,
-  serialized_end=4869,
+  serialized_start=4498,
+  serialized_end=5382,
   methods=[
   _descriptor.MethodDescriptor(
     name='status',
@@ -2313,7 +2504,7 @@ _FACERECOGNITION = _descriptor.ServiceDescriptor(
     index=10,
     containing_service=None,
     input_type=_GALLERYDELETEREQUEST,
-    output_type=_GALLERYINFO,
+    output_type=_EMPTY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -2335,9 +2526,27 @@ _FACERECOGNITION = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='enrollmentDeleteConditional',
+    full_name='FaceRecognition.enrollmentDeleteConditional',
+    index=13,
+    containing_service=None,
+    input_type=_ENROLLMENTDELETEREQUEST,
+    output_type=_FACERECORDLIST,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='enrollmentTransfer',
+    full_name='FaceRecognition.enrollmentTransfer',
+    index=14,
+    containing_service=None,
+    input_type=_ENROLLMENTDELETEREQUEST,
+    output_type=_FACERECORDLIST,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
     name='echo',
     full_name='FaceRecognition.echo',
-    index=13,
+    index=15,
     containing_service=None,
     input_type=faro_dot_proto_dot_geometry__pb2._MATRIX,
     output_type=faro_dot_proto_dot_geometry__pb2._MATRIX,
