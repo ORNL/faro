@@ -6,6 +6,11 @@ docker/vggface2/src
 docker/rcnn/face_rcnn/faro
 .ipynb_checkpoints
 
+grpc_*_plugin
+protoc
+grpc-protoc*.tar.gz
+
+.vscode
 *.weights
 #*pb2.py
 *.csv
