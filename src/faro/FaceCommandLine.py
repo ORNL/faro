@@ -99,6 +99,29 @@ def addEnrollOptions(parser):
     parser.add_option_group(enroll_group)
 
 
+def addFaceDeleteOptions(parser):
+    """
+    Add options for deleting faces.
+    """
+
+    enroll_group = optparse.OptionGroup(parser, "Enrollment Options",
+                                        "Configuration for enrollment.")
+
+    enroll_group.add_option("-e", "--enroll-csv", type="str", dest="enroll_csv", default=None,
+                            help="Save a log of the enrollments.")
+
+    enroll_group.add_option("--gallery", type="str", dest="enroll_gallery", default='default',
+                            help="Select the gallery to enroll into.")
+
+    enroll_group.add_option("--name", type="str", dest="subject_name", default='UNKNOWN',
+                            help="Enroll detected faces into a gallery.")
+
+    enroll_group.add_option("--subject-id", type="str", dest="subject_id", default='unknown',
+                            help="Enroll detected faces into a gallery.")
+
+    parser.add_option_group(enroll_group)
+
+
 def addSearchOptions(parser):
     """
     Add options for search of a gallery.
@@ -433,6 +456,41 @@ def faceListOptions():
     (options, args) = parser.parse_args()
     
     if len(args) < 1:
+        parser.print_help()
+        print()
+        print(( "Error: No position arguments required."))
+        print()
+        exit(-1)
+        
+        
+    return options,args
+
+def enrollmentDeleteOptions():
+    '''
+    Parse command line arguments.
+    '''
+    args = ['gallery_name','subject_id'] # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Delete enrollments in a gallery.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+    
+    version = faro.__version__
+    
+    
+    
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
+
+    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+    
+    if len(args) < n_args:
         parser.print_help()
         print()
         print(( "Error: No position arguments required."))
@@ -1320,7 +1378,7 @@ def glist():
         print("%-24s | %10d"%(gallery.gallery_name,gallery.face_count))
     print()
     
-def flist():
+def elist():
     options,args = faceListOptions()
     face_client = connectToFaroClient(options)
     
@@ -1330,6 +1388,24 @@ def flist():
     print()
     print("%-48s | %-16s | %-32s | %-40s | %10s"%('KEY','SUBJECT_ID','NAME','SOURCE','FRAME'))
     print('-'*158)
+    for face in result.face_records:
+        print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
+    print()
+    
+def edelete():
+    options,args = enrollmentDeleteOptions()
+    face_client = connectToFaroClient(options)
+    
+    gallery_name = args[1]
+    subject_id = args[2]
+    result = face_client.enrollmentDelete(gallery_name,subject_id)
+    
+    print()
+    print("%-48s | %-16s | %-32s | %-40s | %10s"%('KEY','SUBJECT_ID','NAME','SOURCE','FRAME'))
+    print('-'*158)
+    #print( type(result) )
+    #print( dir(result) )
+    #print( result )
     for face in result.face_records:
         print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
     print()
@@ -1458,7 +1534,8 @@ COMMANDS = {
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
-    'flist' : ['List the faces in a gallery.',flist],
+    'elist' : ['List the enrollments in a gallery.',elist],
+    'edelete' : ['Delete enrollments in a gallery.',edelete],
     'glist' : ['List the galleries on the service.',glist],
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
