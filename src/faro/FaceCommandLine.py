@@ -840,7 +840,7 @@ def processDetections(each):
                 if not os.path.lexists(out_path):
                     os.symlink(os.path.abspath(face.source), out_path)
             i += 1
-        if options.detect_log:
+        if options.detect_log and dimg is not None:
             dimg.asAnnotated().save(os.path.join(options.detect_log, os.path.basename(base_name) + ext))
         return False
     return True

@@ -5,11 +5,7 @@
 
 HOST=localhost
 PORT=50030
-<<<<<<< HEAD
 WORKER_COUNT=1
-=======
-WORKER_COUNT=2
->>>>>>> a3fd82edce795ab49b77532105b86087687ebd20
 USE_GPUS=''
 
 if lsof -i:$PORT
