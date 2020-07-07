@@ -37,6 +37,9 @@ message Image {
 		UINT8 = 0;
 		UINT16 = 1;
 		FLOAT32 = 2;
+        URL = 3;
+        PNG = 4;
+        JPG = 5;
 	}
 	DataType type = 4;
 	string description = 5;
