@@ -29,6 +29,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       value :UINT8, 0
       value :UINT16, 1
       value :FLOAT32, 2
+      value :URL, 3
+      value :PNG, 4
+      value :JPG, 5
     end
   end
 end

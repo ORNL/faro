@@ -1157,12 +1157,6 @@ class DetectionOptions :
   std::string* release_algorithm_id();
   void set_allocated_algorithm_id(std::string* algorithm_id);
 
-  // bool best = 2;
-  void clear_best();
-  static const int kBestFieldNumber = 2;
-  bool best() const;
-  void set_best(bool value);
-
   // float threshold = 3;
   void clear_threshold();
   static const int kThresholdFieldNumber = 3;
@@ -1193,6 +1187,24 @@ class DetectionOptions :
   ::PROTOBUF_NAMESPACE_ID::int32 min_size() const;
   void set_min_size(::PROTOBUF_NAMESPACE_ID::int32 value);
 
+  // bool best = 2;
+  void clear_best();
+  static const int kBestFieldNumber = 2;
+  bool best() const;
+  void set_best(bool value);
+
+  // bool save_request = 9;
+  void clear_save_request();
+  static const int kSaveRequestFieldNumber = 9;
+  bool save_request() const;
+  void set_save_request(bool value);
+
+  // bool debug = 10;
+  void clear_debug();
+  static const int kDebugFieldNumber = 10;
+  bool debug() const;
+  void set_debug(bool value);
+
   // @@protoc_insertion_point(class_scope:DetectionOptions)
  private:
   class HasBitSetters;
@@ -1200,12 +1212,14 @@ class DetectionOptions :
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Attribute > attributes_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr algorithm_id_;
-  bool best_;
   float threshold_;
   ::PROTOBUF_NAMESPACE_ID::int32 scale_levels_;
   ::PROTOBUF_NAMESPACE_ID::int32 scan_levels_;
   float scan_overlap_;
   ::PROTOBUF_NAMESPACE_ID::int32 min_size_;
+  bool best_;
+  bool save_request_;
+  bool debug_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_faro_2fproto_2fface_5fservice_2eproto;
 };
@@ -1344,6 +1358,18 @@ class ExtractOptions :
   std::string* release_algorithm_id();
   void set_allocated_algorithm_id(std::string* algorithm_id);
 
+  // bool save_request = 2;
+  void clear_save_request();
+  static const int kSaveRequestFieldNumber = 2;
+  bool save_request() const;
+  void set_save_request(bool value);
+
+  // bool debug = 3;
+  void clear_debug();
+  static const int kDebugFieldNumber = 3;
+  bool debug() const;
+  void set_debug(bool value);
+
   // @@protoc_insertion_point(class_scope:ExtractOptions)
  private:
   class HasBitSetters;
@@ -1351,6 +1377,8 @@ class ExtractOptions :
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Attribute > attributes_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr algorithm_id_;
+  bool save_request_;
+  bool debug_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_faro_2fproto_2fface_5fservice_2eproto;
 };
@@ -1477,12 +1505,26 @@ class EnrollOptions :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Attribute >&
       attributes() const;
 
+  // bool save_request = 2;
+  void clear_save_request();
+  static const int kSaveRequestFieldNumber = 2;
+  bool save_request() const;
+  void set_save_request(bool value);
+
+  // bool debug = 3;
+  void clear_debug();
+  static const int kDebugFieldNumber = 3;
+  bool debug() const;
+  void set_debug(bool value);
+
   // @@protoc_insertion_point(class_scope:EnrollOptions)
  private:
   class HasBitSetters;
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Attribute > attributes_;
+  bool save_request_;
+  bool debug_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_faro_2fproto_2fface_5fservice_2eproto;
 };
@@ -7346,6 +7388,34 @@ inline void DetectionOptions::set_min_size(::PROTOBUF_NAMESPACE_ID::int32 value)
   // @@protoc_insertion_point(field_set:DetectionOptions.min_size)
 }
 
+// bool save_request = 9;
+inline void DetectionOptions::clear_save_request() {
+  save_request_ = false;
+}
+inline bool DetectionOptions::save_request() const {
+  // @@protoc_insertion_point(field_get:DetectionOptions.save_request)
+  return save_request_;
+}
+inline void DetectionOptions::set_save_request(bool value) {
+  
+  save_request_ = value;
+  // @@protoc_insertion_point(field_set:DetectionOptions.save_request)
+}
+
+// bool debug = 10;
+inline void DetectionOptions::clear_debug() {
+  debug_ = false;
+}
+inline bool DetectionOptions::debug() const {
+  // @@protoc_insertion_point(field_get:DetectionOptions.debug)
+  return debug_;
+}
+inline void DetectionOptions::set_debug(bool value) {
+  
+  debug_ = value;
+  // @@protoc_insertion_point(field_set:DetectionOptions.debug)
+}
+
 // repeated .Attribute attributes = 8;
 inline int DetectionOptions::attributes_size() const {
   return attributes_.size();
@@ -7431,6 +7501,34 @@ inline void ExtractOptions::set_allocated_algorithm_id(std::string* algorithm_id
   // @@protoc_insertion_point(field_set_allocated:ExtractOptions.algorithm_id)
 }
 
+// bool save_request = 2;
+inline void ExtractOptions::clear_save_request() {
+  save_request_ = false;
+}
+inline bool ExtractOptions::save_request() const {
+  // @@protoc_insertion_point(field_get:ExtractOptions.save_request)
+  return save_request_;
+}
+inline void ExtractOptions::set_save_request(bool value) {
+  
+  save_request_ = value;
+  // @@protoc_insertion_point(field_set:ExtractOptions.save_request)
+}
+
+// bool debug = 3;
+inline void ExtractOptions::clear_debug() {
+  debug_ = false;
+}
+inline bool ExtractOptions::debug() const {
+  // @@protoc_insertion_point(field_get:ExtractOptions.debug)
+  return debug_;
+}
+inline void ExtractOptions::set_debug(bool value) {
+  
+  debug_ = value;
+  // @@protoc_insertion_point(field_set:ExtractOptions.debug)
+}
+
 // repeated .Attribute attributes = 8;
 inline int ExtractOptions::attributes_size() const {
   return attributes_.size();
@@ -7464,6 +7562,34 @@ ExtractOptions::attributes() const {
 // -------------------------------------------------------------------
 
 // EnrollOptions
+
+// bool save_request = 2;
+inline void EnrollOptions::clear_save_request() {
+  save_request_ = false;
+}
+inline bool EnrollOptions::save_request() const {
+  // @@protoc_insertion_point(field_get:EnrollOptions.save_request)
+  return save_request_;
+}
+inline void EnrollOptions::set_save_request(bool value) {
+  
+  save_request_ = value;
+  // @@protoc_insertion_point(field_set:EnrollOptions.save_request)
+}
+
+// bool debug = 3;
+inline void EnrollOptions::clear_debug() {
+  debug_ = false;
+}
+inline bool EnrollOptions::debug() const {
+  // @@protoc_insertion_point(field_get:EnrollOptions.debug)
+  return debug_;
+}
+inline void EnrollOptions::set_debug(bool value) {
+  
+  debug_ = value;
+  // @@protoc_insertion_point(field_set:EnrollOptions.debug)
+}
 
 // repeated .Attribute attributes = 8;
 inline int EnrollOptions::attributes_size() const {

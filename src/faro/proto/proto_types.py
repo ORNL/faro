@@ -29,6 +29,9 @@ Created on Jul 26, 2018
 
 import numpy as np
 import pyvision as pv
+import cv2
+import urllib
+
 
 import faro.proto.geometry_pb2 as geometry
 import faro.proto.image_pb2 as image
@@ -65,26 +68,36 @@ def image_pv2proto(im):
     result.data = im.tostring()
     return result
     
+def image_proto2cv(pb_data):
+    '''Convert a protobuf image to a opencv array.'''
+    shape = pb_data.height,pb_data.width,pb_data.channels
+    if pb_data.type == image.Image.UINT8:
+        data = np.fromstring(pb_data.data,dtype=np.uint8)
+        data.shape = shape
+        data = data[:,:,::-1]
+    elif pb_data.type in (image.Image.PNG,image.Image.JPG):
+        tmp = np.fromstring(pb_data.data,dtype='uint8')
+        data = cv2.imdecode(tmp,cv2.IMREAD_COLOR)
+    elif pb_data.type in (image.Image.URL):
+        link = pb_data.data
+        f = urllib.urlopen(link)
+        tmp = f.read()
+        data = cv2.imdecode(tmp,cv2.IMREAD_COLOR)
+    else:
+        raise ValueError("ImageType not supported: "+repr(pb_data.type))
+        
+    return data
+
 def image_proto2np(pb_data):
     '''Convert a protobuf image to a numpy array.'''
-    shape = pb_data.height,pb_data.width,pb_data.channels
-    assert pb_data.type == image.Image.UINT8 # Currently only uint8 supported
-    data = np.fromstring(pb_data.data,dtype=np.uint8)
-    data.shape = shape
+    data = image_proto2cv(pb_data)
+    data = data[:,:,::-1] # Convert BGR to RGB
     return data
 
 def image_proto2pv(pb_data):
     '''Convert a protobuf image to a numpy array.'''
-    shape = pb_data.height,pb_data.width,pb_data.channels
-    assert pb_data.type == image.Image.UINT8 # Currently only uint8 supported
-    data = np.fromstring(pb_data.data,dtype=np.uint8)
-    data.shape = shape
-    if shape[2] == 3:
-        data = pv.Image(data[:,:,::-1]) # convert rgb to bgr
-    elif shape[2] == 1:
-        data = pv.Image(1.0*data[:,:,0].T) # convert rgb to bgr
-    else:
-        raise ValueError("Unhandled image format. shape=%s  type=%s"%(shape,data.dtype))
+    data = image_proto2cv(pb_data)
+    data = pv.Image(data) # OpenCV to pyvision
     return data
 
 

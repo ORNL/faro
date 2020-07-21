@@ -294,18 +294,23 @@ GPBEnumDescriptor *Image_DataType_EnumDescriptor(void) {
   static _Atomic(GPBEnumDescriptor*) descriptor = nil;
   if (!descriptor) {
     static const char *valueNames =
-        "Uint8\000Uint16\000Float32\000";
+        "Uint8\000Uint16\000Float32\000URL\000Png\000Jpg\000";
     static const int32_t values[] = {
         Image_DataType_Uint8,
         Image_DataType_Uint16,
         Image_DataType_Float32,
+        Image_DataType_URL,
+        Image_DataType_Png,
+        Image_DataType_Jpg,
     };
+    static const char *extraTextFormatInfo = "\001\003\003\000";
     GPBEnumDescriptor *worker =
         [GPBEnumDescriptor allocDescriptorForName:GPBNSStringifySymbol(Image_DataType)
                                        valueNames:valueNames
                                            values:values
                                             count:(uint32_t)(sizeof(values) / sizeof(int32_t))
-                                     enumVerifier:Image_DataType_IsValidValue];
+                                     enumVerifier:Image_DataType_IsValidValue
+                              extraTextFormatInfo:extraTextFormatInfo];
     GPBEnumDescriptor *expected = nil;
     if (!atomic_compare_exchange_strong(&descriptor, &expected, worker)) {
       [worker release];
@@ -319,6 +324,9 @@ BOOL Image_DataType_IsValidValue(int32_t value__) {
     case Image_DataType_Uint8:
     case Image_DataType_Uint16:
     case Image_DataType_Float32:
+    case Image_DataType_URL:
+    case Image_DataType_Png:
+    case Image_DataType_Jpg:
       return YES;
     default:
       return NO;

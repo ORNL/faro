@@ -43,9 +43,9 @@ import socket
 import faro
 import os
 import h5py
+import skimage.io
 
-
-LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s"
+LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s    < %s >"
 #FFD = dlib.get_frontal_face_detector()
 
 
@@ -268,14 +268,24 @@ class FaceService(fs.FaceRecognitionServicer):
         
     def status(self,request,context):
         ''' Returns the status of the service. '''
-        worker_result = self.workers.apply_async(worker_status,[])
-        status_message = worker_result.get()
-        #status_message.worker_count = len(self.workers);
+        try:
+            start = time.time()
 
-        
-        print('Status Request', '<',status_message,'>')
+            worker_result = self.workers.apply_async(worker_status,[])
+            status_message = worker_result.get()
+            status_message.worker_count = len(self.workers._pool);
+            # print('Status Request', '<',status_message,'>')
+            # print(context.peer())
+            notes = None
+            stop = time.time()
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"status()",notes,context.peer())))
 
-        return status_message
+            return status_message
+        except:
+            traceback.print_exc()
+            raise
+
 
     def detect(self,request,context):
         ''' Runs a face detector and return rectangles. '''
@@ -283,15 +293,14 @@ class FaceService(fs.FaceRecognitionServicer):
             
             start = time.time()
             mat = pt.image_proto2np(request.image)
+            
+            #skimage.io.imsave("test.png",mat)
             options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
-            #print('time_check AA:',time.time()-start)
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
-            #print('time_check BB:',time.time()-start)
             face_records_list = worker_result.get()
             
             notes += ", Detections %s"%(len(face_records_list.face_records),)
-            #print('time_check CC:',time.time()-start)
                         
             for face in face_records_list.face_records:
                 face.source = request.source
@@ -308,7 +317,7 @@ class FaceService(fs.FaceRecognitionServicer):
 
             stop = time.time()
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes,context.peer())))
     
             #print (face_records_list)
             return face_records_list
@@ -339,7 +348,7 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"extract()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"extract()",notes,context.peer())))
 
             return face_records_list
     
@@ -382,7 +391,7 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             notes = "Enrolled %d faces into gallery '%s'.  Gallery size = %d."%(count,gallery_name,len(GALLERIES[gallery_name]))
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes,context.peer())))
 
             return request.records
         except:
@@ -412,7 +421,7 @@ class FaceService(fs.FaceRecognitionServicer):
             notes += "Matrix %s - %s"%(size,speed)
 
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"score()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"score()",notes,context.peer())))
 
             return dist_mat
     
@@ -443,7 +452,7 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             notes = "%d galleries returned."%(count,)
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes,context.peer())))
 
             return result
         except:
@@ -483,7 +492,7 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             notes = "%d faces returned."%(count,)
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes,context.peer())))
 
             return result
         except:
@@ -535,7 +544,7 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             notes = "%d records deleted."%(len(result.face_records),)
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enrollmentDelete()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enrollmentDelete()",notes,context.peer())))
 
             return result
         except:
@@ -566,7 +575,7 @@ class FaceService(fs.FaceRecognitionServicer):
             notes += "Matrix %s"%(size)
 
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"echo()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"echo()",notes,context.peer())))
 
             return request
     
@@ -606,7 +615,7 @@ class FaceService(fs.FaceRecognitionServicer):
             score_request.face_gallery.CopyFrom(gallery)
             
             # Compute the scores matrix
-            scores = self.score(score_request,None)
+            scores = self.score(score_request,context)
             scores = pt.matrix_proto2np(scores)
             
             matched = 0
@@ -634,7 +643,7 @@ class FaceService(fs.FaceRecognitionServicer):
             count = len(probes.face_records)
             notes = "Processed %d probes. %d matched."%(count,matched)
             stop = time.time()
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"search()",notes)))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"search()",notes,context.peer())))
             return probes
         except:
             traceback.print_exc()

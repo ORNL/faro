@@ -23,11 +23,26 @@ class DataType
      * Generated from protobuf enum <code>FLOAT32 = 2;</code>
      */
     const FLOAT32 = 2;
+    /**
+     * Generated from protobuf enum <code>URL = 3;</code>
+     */
+    const URL = 3;
+    /**
+     * Generated from protobuf enum <code>PNG = 4;</code>
+     */
+    const PNG = 4;
+    /**
+     * Generated from protobuf enum <code>JPG = 5;</code>
+     */
+    const JPG = 5;
 
     private static $valueToName = [
         self::UINT8 => 'UINT8',
         self::UINT16 => 'UINT16',
         self::FLOAT32 => 'FLOAT32',
+        self::URL => 'URL',
+        self::PNG => 'PNG',
+        self::JPG => 'JPG',
     ];
 
     public static function name($value)

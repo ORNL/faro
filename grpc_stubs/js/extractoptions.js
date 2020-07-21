@@ -75,6 +75,8 @@ proto.ExtractOptions.prototype.toObject = function(opt_includeInstance) {
 proto.ExtractOptions.toObject = function(includeInstance, msg) {
   var f, obj = {
     algorithmId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    saveRequest: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+    debug: jspb.Message.getBooleanFieldWithDefault(msg, 3, false),
     attributesList: jspb.Message.toObjectList(msg.getAttributesList(),
     proto.Attribute.toObject, includeInstance)
   };
@@ -117,6 +119,14 @@ proto.ExtractOptions.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setAlgorithmId(value);
       break;
+    case 2:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setSaveRequest(value);
+      break;
+    case 3:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setDebug(value);
+      break;
     case 8:
       var value = new proto.Attribute;
       reader.readMessage(value,proto.Attribute.deserializeBinaryFromReader);
@@ -158,6 +168,20 @@ proto.ExtractOptions.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getSaveRequest();
+  if (f) {
+    writer.writeBool(
+      2,
+      f
+    );
+  }
+  f = message.getDebug();
+  if (f) {
+    writer.writeBool(
+      3,
+      f
+    );
+  }
   f = message.getAttributesList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
@@ -181,6 +205,36 @@ proto.ExtractOptions.prototype.getAlgorithmId = function() {
 /** @param {string} value */
 proto.ExtractOptions.prototype.setAlgorithmId = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional bool save_request = 2;
+ * @return {boolean}
+ */
+proto.ExtractOptions.prototype.getSaveRequest = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
+};
+
+
+/** @param {boolean} value */
+proto.ExtractOptions.prototype.setSaveRequest = function(value) {
+  jspb.Message.setProto3BooleanField(this, 2, value);
+};
+
+
+/**
+ * optional bool debug = 3;
+ * @return {boolean}
+ */
+proto.ExtractOptions.prototype.getDebug = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
+};
+
+
+/** @param {boolean} value */
+proto.ExtractOptions.prototype.setDebug = function(value) {
+  jspb.Message.setProto3BooleanField(this, 3, value);
 };
 
 

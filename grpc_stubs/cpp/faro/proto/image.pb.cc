@@ -71,7 +71,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_faro_2fproto_2fimage_2eproto[] =
-  "\n\026faro/proto/image.proto\"\373\002\n\005Image\022\r\n\005wi"
+  "\n\026faro/proto/image.proto\"\226\003\n\005Image\022\r\n\005wi"
   "dth\030\001 \001(\005\022\016\n\006height\030\002 \001(\005\022\020\n\010channels\030\003 "
   "\001(\005\022\035\n\004type\030\004 \001(\0162\017.Image.DataType\022\023\n\013de"
   "scription\030\005 \001(\t\022\014\n\004data\030\006 \001(\014\022\014\n\004date\030\010 "
@@ -79,9 +79,10 @@ const char descriptor_table_protodef_faro_2fproto_2fimage_2eproto[] =
   "era\030\013 \001(\005\022\r\n\005event\030\014 \001(\005\022\021\n\timage_num\030\r "
   "\001(\005\022\025\n\rexposure_time\030\016 \001(\002\022\020\n\010gain_raw\030\017"
   " \001(\002\022\016\n\006f_stop\030\020 \001(\002\022\021\n\tnd_filter\030\021 \001(\002\022"
-  "\025\n\rpolarizer_ang\030\022 \001(\002\022\016\n\006source\030\023 \001(\t\"."
+  "\025\n\rpolarizer_ang\030\022 \001(\002\022\016\n\006source\030\023 \001(\t\"I"
   "\n\010DataType\022\t\n\005UINT8\020\000\022\n\n\006UINT16\020\001\022\013\n\007FLO"
-  "AT32\020\002b\006proto3"
+  "AT32\020\002\022\007\n\003URL\020\003\022\007\n\003PNG\020\004\022\007\n\003JPG\020\005b\006proto"
+  "3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_faro_2fproto_2fimage_2eproto_deps[1] = {
 };
@@ -91,7 +92,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_far
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_faro_2fproto_2fimage_2eproto_once;
 static bool descriptor_table_faro_2fproto_2fimage_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_faro_2fproto_2fimage_2eproto = {
-  &descriptor_table_faro_2fproto_2fimage_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fimage_2eproto, "faro/proto/image.proto", 414,
+  &descriptor_table_faro_2fproto_2fimage_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fimage_2eproto, "faro/proto/image.proto", 441,
   &descriptor_table_faro_2fproto_2fimage_2eproto_once, descriptor_table_faro_2fproto_2fimage_2eproto_sccs, descriptor_table_faro_2fproto_2fimage_2eproto_deps, 1, 0,
   schemas, file_default_instances, TableStruct_faro_2fproto_2fimage_2eproto::offsets,
   file_level_metadata_faro_2fproto_2fimage_2eproto, 1, file_level_enum_descriptors_faro_2fproto_2fimage_2eproto, file_level_service_descriptors_faro_2fproto_2fimage_2eproto,
@@ -108,6 +109,9 @@ bool Image_DataType_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
+    case 4:
+    case 5:
       return true;
     default:
       return false;
@@ -118,6 +122,9 @@ bool Image_DataType_IsValid(int value) {
 constexpr Image_DataType Image::UINT8;
 constexpr Image_DataType Image::UINT16;
 constexpr Image_DataType Image::FLOAT32;
+constexpr Image_DataType Image::URL;
+constexpr Image_DataType Image::PNG;
+constexpr Image_DataType Image::JPG;
 constexpr Image_DataType Image::DataType_MIN;
 constexpr Image_DataType Image::DataType_MAX;
 constexpr int Image::DataType_ARRAYSIZE;

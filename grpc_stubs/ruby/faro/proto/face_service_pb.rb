@@ -46,13 +46,19 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :scan_levels, :int32, 5
       optional :scan_overlap, :float, 6
       optional :min_size, :int32, 7
+      optional :save_request, :bool, 9
+      optional :debug, :bool, 10
       repeated :attributes, :message, 8, "Attribute"
     end
     add_message "ExtractOptions" do
       optional :algorithm_id, :string, 1
+      optional :save_request, :bool, 2
+      optional :debug, :bool, 3
       repeated :attributes, :message, 8, "Attribute"
     end
     add_message "EnrollOptions" do
+      optional :save_request, :bool, 2
+      optional :debug, :bool, 3
       repeated :attributes, :message, 8, "Attribute"
     end
     add_message "DetectionList" do

@@ -289,6 +289,8 @@ typedef GPB_ENUM(DetectionOptions_FieldNumber) {
   DetectionOptions_FieldNumber_ScanOverlap = 6,
   DetectionOptions_FieldNumber_MinSize = 7,
   DetectionOptions_FieldNumber_AttributesArray = 8,
+  DetectionOptions_FieldNumber_SaveRequest = 9,
+  DetectionOptions_FieldNumber_Debug = 10,
 };
 
 @interface DetectionOptions : GPBMessage
@@ -299,7 +301,7 @@ typedef GPB_ENUM(DetectionOptions_FieldNumber) {
 
 @property(nonatomic, readwrite) float threshold;
 
-/** number of times to reduce the image by half (pyrDown) before detection */
+/** optional - break the image up for larger images */
 @property(nonatomic, readwrite) int32_t scaleLevels;
 
 /** number of times to reduce the image by half and then scan using the detector */
@@ -309,6 +311,12 @@ typedef GPB_ENUM(DetectionOptions_FieldNumber) {
 @property(nonatomic, readwrite) float scanOverlap;
 
 @property(nonatomic, readwrite) int32_t minSize;
+
+/** log the image on the server - Useful for debugging and record keeping */
+@property(nonatomic, readwrite) BOOL saveRequest;
+
+/** Save or print more info on the server side */
+@property(nonatomic, readwrite) BOOL debug;
 
 /** Used for passing algorithm specific options */
 @property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<Attribute*> *attributesArray;
@@ -321,12 +329,20 @@ typedef GPB_ENUM(DetectionOptions_FieldNumber) {
 
 typedef GPB_ENUM(ExtractOptions_FieldNumber) {
   ExtractOptions_FieldNumber_AlgorithmId = 1,
+  ExtractOptions_FieldNumber_SaveRequest = 2,
+  ExtractOptions_FieldNumber_Debug = 3,
   ExtractOptions_FieldNumber_AttributesArray = 8,
 };
 
 @interface ExtractOptions : GPBMessage
 
 @property(nonatomic, readwrite, copy, null_resettable) NSString *algorithmId;
+
+/** log the image on the server - Useful for debugging and record keeping */
+@property(nonatomic, readwrite) BOOL saveRequest;
+
+/** Save or print more info on the server side */
+@property(nonatomic, readwrite) BOOL debug;
 
 /** Used for passing algorithm specific options */
 @property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<Attribute*> *attributesArray;
@@ -338,10 +354,18 @@ typedef GPB_ENUM(ExtractOptions_FieldNumber) {
 #pragma mark - EnrollOptions
 
 typedef GPB_ENUM(EnrollOptions_FieldNumber) {
+  EnrollOptions_FieldNumber_SaveRequest = 2,
+  EnrollOptions_FieldNumber_Debug = 3,
   EnrollOptions_FieldNumber_AttributesArray = 8,
 };
 
 @interface EnrollOptions : GPBMessage
+
+/** log the image on the server - Useful for debugging and record keeping */
+@property(nonatomic, readwrite) BOOL saveRequest;
+
+/** Save or print more info on the server side */
+@property(nonatomic, readwrite) BOOL debug;
 
 /** Used for passing algorithm specific options */
 @property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<Attribute*> *attributesArray;

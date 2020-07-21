@@ -16,6 +16,18 @@ class ExtractOptions extends \Google\Protobuf\Internal\Message
      */
     private $algorithm_id = '';
     /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 2;</code>
+     */
+    private $save_request = false;
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 3;</code>
+     */
+    private $debug = false;
+    /**
      * Used for passing algorithm specific options
      *
      * Generated from protobuf field <code>repeated .Attribute attributes = 8;</code>
@@ -29,6 +41,10 @@ class ExtractOptions extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type string $algorithm_id
+     *     @type bool $save_request
+     *           log the image on the server - Useful for debugging and record keeping
+     *     @type bool $debug
+     *           Save or print more info on the server side
      *     @type \Attribute[]|\Google\Protobuf\Internal\RepeatedField $attributes
      *           Used for passing algorithm specific options
      * }
@@ -56,6 +72,58 @@ class ExtractOptions extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->algorithm_id = $var;
+
+        return $this;
+    }
+
+    /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 2;</code>
+     * @return bool
+     */
+    public function getSaveRequest()
+    {
+        return $this->save_request;
+    }
+
+    /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 2;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSaveRequest($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->save_request = $var;
+
+        return $this;
+    }
+
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 3;</code>
+     * @return bool
+     */
+    public function getDebug()
+    {
+        return $this->debug;
+    }
+
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 3;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setDebug($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->debug = $var;
 
         return $this;
     }

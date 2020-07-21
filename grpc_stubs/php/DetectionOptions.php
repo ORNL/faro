@@ -24,7 +24,7 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
      */
     private $threshold = 0.0;
     /**
-     * number of times to reduce the image by half (pyrDown) before detection
+     * optional - break the image up for larger images
      *
      * Generated from protobuf field <code>int32 scale_levels = 4;</code>
      */
@@ -46,6 +46,18 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
      */
     private $min_size = 0;
     /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 9;</code>
+     */
+    private $save_request = false;
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 10;</code>
+     */
+    private $debug = false;
+    /**
      * Used for passing algorithm specific options
      *
      * Generated from protobuf field <code>repeated .Attribute attributes = 8;</code>
@@ -62,12 +74,16 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
      *     @type bool $best
      *     @type float $threshold
      *     @type int $scale_levels
-     *           number of times to reduce the image by half (pyrDown) before detection
+     *           optional - break the image up for larger images
      *     @type int $scan_levels
      *           number of times to reduce the image by half and then scan using the detector
      *     @type float $scan_overlap
      *           amount of overlap to use at each scan level.
      *     @type int $min_size
+     *     @type bool $save_request
+     *           log the image on the server - Useful for debugging and record keeping
+     *     @type bool $debug
+     *           Save or print more info on the server side
      *     @type \Attribute[]|\Google\Protobuf\Internal\RepeatedField $attributes
      *           Used for passing algorithm specific options
      * }
@@ -144,7 +160,7 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * number of times to reduce the image by half (pyrDown) before detection
+     * optional - break the image up for larger images
      *
      * Generated from protobuf field <code>int32 scale_levels = 4;</code>
      * @return int
@@ -155,7 +171,7 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * number of times to reduce the image by half (pyrDown) before detection
+     * optional - break the image up for larger images
      *
      * Generated from protobuf field <code>int32 scale_levels = 4;</code>
      * @param int $var
@@ -239,6 +255,58 @@ class DetectionOptions extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt32($var);
         $this->min_size = $var;
+
+        return $this;
+    }
+
+    /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 9;</code>
+     * @return bool
+     */
+    public function getSaveRequest()
+    {
+        return $this->save_request;
+    }
+
+    /**
+     * log the image on the server - Useful for debugging and record keeping
+     *
+     * Generated from protobuf field <code>bool save_request = 9;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSaveRequest($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->save_request = $var;
+
+        return $this;
+    }
+
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 10;</code>
+     * @return bool
+     */
+    public function getDebug()
+    {
+        return $this->debug;
+    }
+
+    /**
+     * Save or print more info on the server side
+     *
+     * Generated from protobuf field <code>bool debug = 10;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setDebug($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->debug = $var;
 
         return $this;
     }

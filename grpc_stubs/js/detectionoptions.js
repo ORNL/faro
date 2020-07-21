@@ -81,6 +81,8 @@ proto.DetectionOptions.toObject = function(includeInstance, msg) {
     scanLevels: jspb.Message.getFieldWithDefault(msg, 5, 0),
     scanOverlap: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
     minSize: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    saveRequest: jspb.Message.getBooleanFieldWithDefault(msg, 9, false),
+    debug: jspb.Message.getBooleanFieldWithDefault(msg, 10, false),
     attributesList: jspb.Message.toObjectList(msg.getAttributesList(),
     proto.Attribute.toObject, includeInstance)
   };
@@ -146,6 +148,14 @@ proto.DetectionOptions.deserializeBinaryFromReader = function(msg, reader) {
     case 7:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setMinSize(value);
+      break;
+    case 9:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setSaveRequest(value);
+      break;
+    case 10:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setDebug(value);
       break;
     case 8:
       var value = new proto.Attribute;
@@ -227,6 +237,20 @@ proto.DetectionOptions.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0) {
     writer.writeInt32(
       7,
+      f
+    );
+  }
+  f = message.getSaveRequest();
+  if (f) {
+    writer.writeBool(
+      9,
+      f
+    );
+  }
+  f = message.getDebug();
+  if (f) {
+    writer.writeBool(
+      10,
       f
     );
   }
@@ -343,6 +367,36 @@ proto.DetectionOptions.prototype.getMinSize = function() {
 /** @param {number} value */
 proto.DetectionOptions.prototype.setMinSize = function(value) {
   jspb.Message.setProto3IntField(this, 7, value);
+};
+
+
+/**
+ * optional bool save_request = 9;
+ * @return {boolean}
+ */
+proto.DetectionOptions.prototype.getSaveRequest = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 9, false));
+};
+
+
+/** @param {boolean} value */
+proto.DetectionOptions.prototype.setSaveRequest = function(value) {
+  jspb.Message.setProto3BooleanField(this, 9, value);
+};
+
+
+/**
+ * optional bool debug = 10;
+ * @return {boolean}
+ */
+proto.DetectionOptions.prototype.getDebug = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 10, false));
+};
+
+
+/** @param {boolean} value */
+proto.DetectionOptions.prototype.setDebug = function(value) {
+  jspb.Message.setProto3BooleanField(this, 10, value);
 };
 
 

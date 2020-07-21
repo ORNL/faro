@@ -60,7 +60,7 @@ class DlibFaceWorker(faro.FaceWorker):
         # This may run on the GPU.
         self.face_rec = dlib.face_recognition_model_v1(os.path.join(options.storage_dir,'models',"dlib_face_recognition_resnet_model_v1.dat"))
 
-        print("DLIB Models Loaded.")
+        #print("DLIB Models Loaded.")
 
         
     def detect(self,img,face_records,options):
@@ -100,7 +100,6 @@ class DlibFaceWorker(faro.FaceWorker):
     def locate(self,img,face_records,options):
         '''Locate facial features.'''
             # Get the landmarks/parts for the face in box d.
-        print('locate')
         for face_record in face_records.face_records:
             rect = pt.rect_proto2pv(face_record.detection.location)
             x,y,w,h = rect.asTuple()
@@ -181,7 +180,6 @@ class DlibFaceWorker(faro.FaceWorker):
     
     def status(self):
         '''Return a simple status message.'''
-        print("Handeling status request.")
         status_message = fsd.FaceServiceInfo()
         status_message.status = fsd.READY
         status_message.detection_support = True

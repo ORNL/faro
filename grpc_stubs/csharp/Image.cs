@@ -22,16 +22,16 @@ public static partial class ImageReflection {
   static ImageReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChZmYXJvL3Byb3RvL2ltYWdlLnByb3RvIvsCCgVJbWFnZRINCgV3aWR0aBgB",
+          "ChZmYXJvL3Byb3RvL2ltYWdlLnByb3RvIpYDCgVJbWFnZRINCgV3aWR0aBgB",
           "IAEoBRIOCgZoZWlnaHQYAiABKAUSEAoIY2hhbm5lbHMYAyABKAUSHQoEdHlw",
           "ZRgEIAEoDjIPLkltYWdlLkRhdGFUeXBlEhMKC2Rlc2NyaXB0aW9uGAUgASgJ",
           "EgwKBGRhdGEYBiABKAwSDAoEZGF0ZRgIIAEoCRIMCgR0aW1lGAkgASgJEg4K",
           "Bm1vZHVsZRgKIAEoBRIOCgZjYW1lcmEYCyABKAUSDQoFZXZlbnQYDCABKAUS",
           "EQoJaW1hZ2VfbnVtGA0gASgFEhUKDWV4cG9zdXJlX3RpbWUYDiABKAISEAoI",
           "Z2Fpbl9yYXcYDyABKAISDgoGZl9zdG9wGBAgASgCEhEKCW5kX2ZpbHRlchgR",
-          "IAEoAhIVCg1wb2xhcml6ZXJfYW5nGBIgASgCEg4KBnNvdXJjZRgTIAEoCSIu",
+          "IAEoAhIVCg1wb2xhcml6ZXJfYW5nGBIgASgCEg4KBnNvdXJjZRgTIAEoCSJJ",
           "CghEYXRhVHlwZRIJCgVVSU5UOBAAEgoKBlVJTlQxNhABEgsKB0ZMT0FUMzIQ",
-          "AmIGcHJvdG8z"));
+          "AhIHCgNVUkwQAxIHCgNQTkcQBBIHCgNKUEcQBWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -656,6 +656,9 @@ public sealed partial class Image : pb::IMessage<Image> {
       [pbr::OriginalName("UINT8")] Uint8 = 0,
       [pbr::OriginalName("UINT16")] Uint16 = 1,
       [pbr::OriginalName("FLOAT32")] Float32 = 2,
+      [pbr::OriginalName("URL")] Url = 3,
+      [pbr::OriginalName("PNG")] Png = 4,
+      [pbr::OriginalName("JPG")] Jpg = 5,
     }
 
   }

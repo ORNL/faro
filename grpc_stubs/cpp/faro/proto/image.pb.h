@@ -66,12 +66,15 @@ enum Image_DataType : int {
   Image_DataType_UINT8 = 0,
   Image_DataType_UINT16 = 1,
   Image_DataType_FLOAT32 = 2,
+  Image_DataType_URL = 3,
+  Image_DataType_PNG = 4,
+  Image_DataType_JPG = 5,
   Image_DataType_Image_DataType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Image_DataType_Image_DataType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Image_DataType_IsValid(int value);
 constexpr Image_DataType Image_DataType_DataType_MIN = Image_DataType_UINT8;
-constexpr Image_DataType Image_DataType_DataType_MAX = Image_DataType_FLOAT32;
+constexpr Image_DataType Image_DataType_DataType_MAX = Image_DataType_JPG;
 constexpr int Image_DataType_DataType_ARRAYSIZE = Image_DataType_DataType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Image_DataType_descriptor();
@@ -204,6 +207,12 @@ class Image :
     Image_DataType_UINT16;
   static constexpr DataType FLOAT32 =
     Image_DataType_FLOAT32;
+  static constexpr DataType URL =
+    Image_DataType_URL;
+  static constexpr DataType PNG =
+    Image_DataType_PNG;
+  static constexpr DataType JPG =
+    Image_DataType_JPG;
   static inline bool DataType_IsValid(int value) {
     return Image_DataType_IsValid(value);
   }

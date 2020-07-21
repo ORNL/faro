@@ -105,11 +105,15 @@ message DetectionOptions{
 	bool best = 2;
 	float threshold = 3;
 	
+	// optional - break the image up for larger images
 	int32 scale_levels = 4; // number of times to reduce the image by half (pyrDown) before detection
 	int32 scan_levels = 5; // number of times to reduce the image by half and then scan using the detector
 	float scan_overlap = 6; // amount of overlap to use at each scan level.
 
 	int32 min_size = 7;
+
+	bool save_request = 9; // log the image on the server - Useful for debugging and record keeping
+	bool debug = 10; // Save or print more info on the server side
 
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
@@ -117,11 +121,15 @@ message DetectionOptions{
 message ExtractOptions{
 	string algorithm_id = 1;
 
+	bool save_request = 2; // log the image on the server - Useful for debugging and record keeping
+	bool debug = 3; // Save or print more info on the server side
+
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 
 message EnrollOptions{
-
+	bool save_request = 2; // log the image on the server - Useful for debugging and record keeping
+	bool debug = 3; // Save or print more info on the server side
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 

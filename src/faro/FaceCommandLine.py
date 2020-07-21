@@ -395,6 +395,49 @@ def enrollParseOptions():
     return options, args
 
 
+def enrollCsvParseOptions():
+    """
+    Parse command line arguments.
+    """
+    args = ['enroll_list.csv']  # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Run detection on a collection of images.'''
+    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
+
+    version = faro.__version__
+
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
+                                   version=version, description=description, epilog=epilog)
+
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+
+    parser.add_option("-n", "--max-images", type="int", dest="max_images", default=None,
+                      help="Process at N images and then stop.")
+
+    parser.add_option("--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
+                      help="If too large, images will be scaled to have this maximum size. Default=%d" % (
+                          faro.DEFAULT_MAX_SIZE))
+
+    addDetectorOptions(parser)
+    addEnrollOptions(parser)
+    addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    (options, args) = parser.parse_args()
+
+    if len(args) < 2:
+        parser.print_help()
+        print()
+        print(("Error: Please supply a csv file with fields subject_id,name,filename."))
+        print()
+        exit(-1)
+
+    return options, args
+
+
 def galleryListOptions():
     '''
     Parse command line arguments.
@@ -1365,6 +1408,79 @@ def enroll():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
 
+
+def enroll_csv():
+    import time
+
+    start = time.time()
+
+    options, args = enrollCsvParseOptions()
+    face_client = connectToFaroClient(options)
+
+    #print( args )
+    
+    csv_filename = args[1]
+    if options.verbose:
+        print("Processing files in ",csv_filename)
+
+    import csv
+
+    csv_file = csv.DictReader(open(csv_filename,'r'))
+
+    #image_list, video_list = collect_files(args[1:], options)
+
+    #if options.verbose:
+    #    print("Processing images.")
+
+    image_count = 0
+    detect_queue = []
+    enroll_queue = []
+
+    for row in csv_file:
+        print("Processing:", row)
+
+        subject_id = row['subject_id']
+        name = row['name']
+        filename = row['filename']
+
+        im = cv2.imread(filename)
+        im = im[:, :, ::-1]  # BGR to RGB
+
+        im = preprocessImage(im, options)
+
+        results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best=options.best,
+                                                  threshold=options.detect_thresh, min_size=options.min_size,
+                                                  run_async=True, source=filename, frame=-1,
+                                                  subject_name=name, subject_id=subject_id)
+
+        detect_queue.append([im, results, options])
+        enroll_queue.append([im, results, options])
+
+        # Process results that are completed.
+        detect_queue = list(filter(processDetections, detect_queue))
+        enroll_queue = list(filter(processEnrollments, enroll_queue))
+
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+
+
+    # Finish processing.
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections, detect_queue))
+        time.sleep(0.05)
+
+    while len(enroll_queue):
+        enroll_queue = list(filter(processEnrollments, enroll_queue))
+        time.sleep(0.05)
+
+    #if len(video_list) > 0:
+    #    print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
+
+    finish = time.time()
+    print("Processed %d files in %0.2fsec.  %0.2f images/sec"%(image_count,finish-start,image_count/(finish-start)))
+
+
 def glist():
     options,args = galleryListOptions()
     face_client = connectToFaroClient(options)
@@ -1534,6 +1650,7 @@ COMMANDS = {
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
+    'enrollCsv' : ['Extract faces and enroll faces in a gallery.',enroll_csv],
     'elist' : ['List the enrollments in a gallery.',elist],
     'edelete' : ['Delete enrollments in a gallery.',edelete],
     'glist' : ['List the galleries on the service.',glist],
@@ -1556,4 +1673,4 @@ def face_command_line():
 
 
 if __name__ == '__main__':
-    face_command_line()
+    raise NotImplementedError("This main function has been removed. Please use: 'python -m faro ...'")

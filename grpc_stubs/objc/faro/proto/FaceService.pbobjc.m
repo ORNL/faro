@@ -574,6 +574,8 @@ typedef struct Landmark__storage_ {
 @dynamic scanLevels;
 @dynamic scanOverlap;
 @dynamic minSize;
+@dynamic saveRequest;
+@dynamic debug;
 @dynamic attributesArray, attributesArray_Count;
 
 typedef struct DetectionOptions__storage_ {
@@ -665,6 +667,24 @@ typedef struct DetectionOptions__storage_ {
         .flags = GPBFieldRepeated,
         .dataType = GPBDataTypeMessage,
       },
+      {
+        .name = "saveRequest",
+        .dataTypeSpecific.className = NULL,
+        .number = DetectionOptions_FieldNumber_SaveRequest,
+        .hasIndex = 8,
+        .offset = 9,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
+      {
+        .name = "debug",
+        .dataTypeSpecific.className = NULL,
+        .number = DetectionOptions_FieldNumber_Debug,
+        .hasIndex = 10,
+        .offset = 11,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
     };
     GPBDescriptor *localDescriptor =
         [GPBDescriptor allocDescriptorForClass:[DetectionOptions class]
@@ -689,6 +709,8 @@ typedef struct DetectionOptions__storage_ {
 @implementation ExtractOptions
 
 @dynamic algorithmId;
+@dynamic saveRequest;
+@dynamic debug;
 @dynamic attributesArray, attributesArray_Count;
 
 typedef struct ExtractOptions__storage_ {
@@ -711,6 +733,24 @@ typedef struct ExtractOptions__storage_ {
         .offset = (uint32_t)offsetof(ExtractOptions__storage_, algorithmId),
         .flags = GPBFieldOptional,
         .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "saveRequest",
+        .dataTypeSpecific.className = NULL,
+        .number = ExtractOptions_FieldNumber_SaveRequest,
+        .hasIndex = 1,
+        .offset = 2,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
+      {
+        .name = "debug",
+        .dataTypeSpecific.className = NULL,
+        .number = ExtractOptions_FieldNumber_Debug,
+        .hasIndex = 3,
+        .offset = 4,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
       },
       {
         .name = "attributesArray",
@@ -744,6 +784,8 @@ typedef struct ExtractOptions__storage_ {
 
 @implementation EnrollOptions
 
+@dynamic saveRequest;
+@dynamic debug;
 @dynamic attributesArray, attributesArray_Count;
 
 typedef struct EnrollOptions__storage_ {
@@ -757,6 +799,24 @@ typedef struct EnrollOptions__storage_ {
   static GPBDescriptor *descriptor = nil;
   if (!descriptor) {
     static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "saveRequest",
+        .dataTypeSpecific.className = NULL,
+        .number = EnrollOptions_FieldNumber_SaveRequest,
+        .hasIndex = 0,
+        .offset = 1,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
+      {
+        .name = "debug",
+        .dataTypeSpecific.className = NULL,
+        .number = EnrollOptions_FieldNumber_Debug,
+        .hasIndex = 2,
+        .offset = 3,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
       {
         .name = "attributesArray",
         .dataTypeSpecific.className = GPBStringifySymbol(Attribute),

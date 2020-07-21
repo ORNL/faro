@@ -424,7 +424,7 @@ class FaceClient(object):
     
     
 if __name__ == '__main__':
-    faro.face_command_line()
+    raise NotImplementedError("This main function has been removed. Please use: 'python -m faro ...'")
         
 
 

@@ -824,6 +824,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_faro_2fproto_2fface_5fservice_
   PROTOBUF_FIELD_OFFSET(::DetectionOptions, scan_levels_),
   PROTOBUF_FIELD_OFFSET(::DetectionOptions, scan_overlap_),
   PROTOBUF_FIELD_OFFSET(::DetectionOptions, min_size_),
+  PROTOBUF_FIELD_OFFSET(::DetectionOptions, save_request_),
+  PROTOBUF_FIELD_OFFSET(::DetectionOptions, debug_),
   PROTOBUF_FIELD_OFFSET(::DetectionOptions, attributes_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::ExtractOptions, _internal_metadata_),
@@ -831,12 +833,16 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_faro_2fproto_2fface_5fservice_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::ExtractOptions, algorithm_id_),
+  PROTOBUF_FIELD_OFFSET(::ExtractOptions, save_request_),
+  PROTOBUF_FIELD_OFFSET(::ExtractOptions, debug_),
   PROTOBUF_FIELD_OFFSET(::ExtractOptions, attributes_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::EnrollOptions, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::EnrollOptions, save_request_),
+  PROTOBUF_FIELD_OFFSET(::EnrollOptions, debug_),
   PROTOBUF_FIELD_OFFSET(::EnrollOptions, attributes_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::DetectionList, _internal_metadata_),
@@ -1103,39 +1109,39 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 26, -1, sizeof(::Detection)},
   { 36, -1, sizeof(::Landmark)},
   { 43, -1, sizeof(::DetectionOptions)},
-  { 56, -1, sizeof(::ExtractOptions)},
-  { 63, -1, sizeof(::EnrollOptions)},
-  { 69, -1, sizeof(::DetectionList)},
-  { 80, -1, sizeof(::MatchList)},
-  { 86, -1, sizeof(::MatchInfo)},
-  { 97, -1, sizeof(::TemplateInput)},
-  { 104, -1, sizeof(::FaceTemplate)},
-  { 111, -1, sizeof(::TemplateList)},
-  { 117, -1, sizeof(::AccessRecord)},
-  { 126, -1, sizeof(::FaceRecord)},
-  { 150, -1, sizeof(::FaceRecordList)},
-  { 156, -1, sizeof(::VerificationRequest)},
-  { 164, -1, sizeof(::VerificationResponse)},
-  { 174, -1, sizeof(::SearchRequest)},
-  { 183, -1, sizeof(::SearchResponse)},
-  { 190, -1, sizeof(::EnrollRequest)},
-  { 198, -1, sizeof(::DetectRequest)},
-  { 209, -1, sizeof(::ExtractRequest)},
-  { 217, -1, sizeof(::ScoreRequest)},
-  { 226, -1, sizeof(::DetectExtractRequest)},
-  { 233, -1, sizeof(::DetectExtractEnrollRequest)},
-  { 241, -1, sizeof(::DetectExtractSearchRequest)},
-  { 249, -1, sizeof(::FaceStatusRequest)},
-  { 254, -1, sizeof(::FaceServiceInfo)},
-  { 270, -1, sizeof(::GalleryListRequest)},
-  { 275, -1, sizeof(::GalleryDeleteRequest)},
-  { 281, -1, sizeof(::EnrollmentListRequest)},
-  { 287, -1, sizeof(::EnrollmentInfo)},
-  { 295, -1, sizeof(::EnrollmentListResponse)},
-  { 302, -1, sizeof(::EnrollmentDeleteRequest)},
-  { 309, -1, sizeof(::GalleryInfo)},
-  { 316, -1, sizeof(::GalleryList)},
-  { 322, -1, sizeof(::Empty)},
+  { 58, -1, sizeof(::ExtractOptions)},
+  { 67, -1, sizeof(::EnrollOptions)},
+  { 75, -1, sizeof(::DetectionList)},
+  { 86, -1, sizeof(::MatchList)},
+  { 92, -1, sizeof(::MatchInfo)},
+  { 103, -1, sizeof(::TemplateInput)},
+  { 110, -1, sizeof(::FaceTemplate)},
+  { 117, -1, sizeof(::TemplateList)},
+  { 123, -1, sizeof(::AccessRecord)},
+  { 132, -1, sizeof(::FaceRecord)},
+  { 156, -1, sizeof(::FaceRecordList)},
+  { 162, -1, sizeof(::VerificationRequest)},
+  { 170, -1, sizeof(::VerificationResponse)},
+  { 180, -1, sizeof(::SearchRequest)},
+  { 189, -1, sizeof(::SearchResponse)},
+  { 196, -1, sizeof(::EnrollRequest)},
+  { 204, -1, sizeof(::DetectRequest)},
+  { 215, -1, sizeof(::ExtractRequest)},
+  { 223, -1, sizeof(::ScoreRequest)},
+  { 232, -1, sizeof(::DetectExtractRequest)},
+  { 239, -1, sizeof(::DetectExtractEnrollRequest)},
+  { 247, -1, sizeof(::DetectExtractSearchRequest)},
+  { 255, -1, sizeof(::FaceStatusRequest)},
+  { 260, -1, sizeof(::FaceServiceInfo)},
+  { 276, -1, sizeof(::GalleryListRequest)},
+  { 281, -1, sizeof(::GalleryDeleteRequest)},
+  { 287, -1, sizeof(::EnrollmentListRequest)},
+  { 293, -1, sizeof(::EnrollmentInfo)},
+  { 301, -1, sizeof(::EnrollmentListResponse)},
+  { 308, -1, sizeof(::EnrollmentDeleteRequest)},
+  { 315, -1, sizeof(::GalleryInfo)},
+  { 322, -1, sizeof(::GalleryList)},
+  { 328, -1, sizeof(::Empty)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -1195,126 +1201,129 @@ const char descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto[] =
   "_id\030\003 \001(\005\022\027\n\017detection_class\030\004 \001(\t\022\036\n\nat"
   "tributes\030\005 \003(\0132\n.Attribute\";\n\010Landmark\022\023"
   "\n\013landmark_id\030\001 \001(\t\022\032\n\010location\030\002 \001(\0132\010."
-  "Point2D\"\274\001\n\020DetectionOptions\022\024\n\014algorith"
+  "Point2D\"\341\001\n\020DetectionOptions\022\024\n\014algorith"
   "m_id\030\001 \001(\t\022\014\n\004best\030\002 \001(\010\022\021\n\tthreshold\030\003 "
   "\001(\002\022\024\n\014scale_levels\030\004 \001(\005\022\023\n\013scan_levels"
   "\030\005 \001(\005\022\024\n\014scan_overlap\030\006 \001(\002\022\020\n\010min_size"
-  "\030\007 \001(\005\022\036\n\nattributes\030\010 \003(\0132\n.Attribute\"F"
-  "\n\016ExtractOptions\022\024\n\014algorithm_id\030\001 \001(\t\022\036"
-  "\n\nattributes\030\010 \003(\0132\n.Attribute\"/\n\rEnroll"
-  "Options\022\036\n\nattributes\030\010 \003(\0132\n.Attribute\""
-  "\257\001\n\rDetectionList\022\036\n\ndetections\030\001 \003(\0132\n."
-  "Detection\022\026\n\016detection_time\030\002 \001(\002\022\023\n\013ima"
-  "ge_width\030\003 \001(\005\022\024\n\014image_height\030\004 \001(\005\022\027\n\017"
-  "detection_count\030\005 \001(\005\022\"\n\007options\030\006 \001(\0132\021"
-  ".DetectionOptions\"+\n\tMatchList\022\036\n\nmatch_"
-  "list\030\001 \003(\0132\n.MatchInfo\"\202\001\n\tMatchInfo\022\r\n\005"
-  "score\030\001 \001(\002\022\020\n\010image_id\030\002 \001(\t\022\024\n\014detecti"
-  "on_id\030\003 \001(\t\022\022\n\nsubject_id\030\004 \001(\t\022\024\n\014subje"
-  "ct_name\030\005 \001(\t\022\024\n\004face\030\006 \001(\0132\006.Image\">\n\rT"
-  "emplateInput\022\022\n\002im\030\001 \001(\0132\006.Image\022\031\n\ndete"
-  "ctions\030\002 \003(\0132\005.Rect\"5\n\014FaceTemplate\022\025\n\004d"
-  "ata\030\001 \001(\0132\007.Vector\022\016\n\006buffer\030\002 \001(\014\"0\n\014Te"
-  "mplateList\022 \n\ttemplates\030\001 \003(\0132\r.FaceTemp"
-  "late\"a\n\014AccessRecord\022\020\n\010datetime\030\001 \001(\002\022\r"
-  "\n\005notes\030\002 \001(\t\022\022\n\ncredential\030\003 \001(\t\022\034\n\010met"
-  "adata\030\004 \003(\0132\n.Attribute\"\360\003\n\nFaceRecord\022\022"
-  "\n\nsubject_id\030\001 \001(\t\022\014\n\004name\030\005 \001(\t\022\016\n\006sour"
-  "ce\030\004 \001(\t\022\r\n\005frame\030\016 \001(\003\022\r\n\005notes\030\006 \001(\t\022\023"
-  "\n\013gallery_key\030\017 \001(\t\022\027\n\017collection_date\030\020"
-  " \001(\002\022\027\n\017enrollment_date\030\021 \001(\002\022\034\n\010metadat"
-  "a\030\022 \003(\0132\n.Attribute\022%\n\016access_records\030\023 "
-  "\003(\0132\r.AccessRecord\022\024\n\004view\030\007 \001(\0132\006.Image"
-  "\022\027\n\007aligned\030\t \001(\0132\006.Image\022\035\n\tdetection\030\002"
-  " \001(\0132\n.Detection\022\034\n\tlandmarks\030\010 \003(\0132\t.La"
-  "ndmark\022\036\n\nattributes\030\n \003(\0132\n.Attribute\022!"
-  "\n\rinternal_data\030\013 \003(\0132\n.Attribute\022\037\n\010tem"
-  "plate\030\003 \001(\0132\r.FaceTemplate\022\r\n\005score\030\014 \001("
-  "\002\022\'\n\016search_results\030\r \001(\0132\017.FaceRecordLi"
-  "st\"3\n\016FaceRecordList\022!\n\014face_records\030\001 \003"
-  "(\0132\013.FaceRecord\"\\\n\023VerificationRequest\022\017"
-  "\n\007gallery\030\001 \001(\t\022\022\n\nsubject_id\030\002 \001(\t\022 \n\013f"
-  "ace_record\030\003 \003(\0132\013.FaceRecord\"\204\001\n\024Verifi"
-  "cationResponse\022\022\n\nerror_code\030\004 \001(\005\022\025\n\rer"
-  "ror_message\030\005 \001(\t\022\017\n\007success\030\001 \001(\010\022\022\n\nco"
-  "nfidence\030\002 \001(\002\022\034\n\007matches\030\003 \003(\0132\013.FaceRe"
-  "cord\"p\n\rSearchRequest\022\026\n\016search_gallery\030"
-  "\001 \001(\t\022\037\n\006probes\030\003 \001(\0132\017.FaceRecordList\022\023"
-  "\n\013max_results\030\004 \001(\005\022\021\n\tthreshold\030\005 \001(\002\"Q"
-  "\n\016SearchResponse\022\036\n\007message\030\001 \001(\0132\r.Erro"
-  "rMessage\022\037\n\006probes\030\002 \001(\0132\017.FaceRecordLis"
-  "t\"q\n\rEnrollRequest\022\026\n\016enroll_gallery\030\001 \001"
-  "(\t\022 \n\007records\030\002 \001(\0132\017.FaceRecordList\022&\n\016"
-  "enroll_options\030\n \001(\0132\016.EnrollOptions\"\232\001\n"
-  "\rDetectRequest\022\025\n\005image\030\001 \001(\0132\006.Image\022\016\n"
-  "\006source\030\002 \001(\t\022\r\n\005frame\030\003 \001(\003\022\022\n\nsubject_"
-  "id\030\004 \001(\t\022\024\n\014subject_name\030\005 \001(\t\022)\n\016detect"
-  "_options\030\010 \001(\0132\021.DetectionOptions\"s\n\016Ext"
-  "ractRequest\022\025\n\005image\030\001 \001(\0132\006.Image\022 \n\007re"
-  "cords\030\004 \001(\0132\017.FaceRecordList\022(\n\017extract_"
-  "options\030\t \001(\0132\017.ExtractOptions\"\254\001\n\014Score"
-  "Request\022$\n\013face_probes\030\001 \001(\0132\017.FaceRecor"
-  "dList\022%\n\014face_gallery\030\002 \001(\0132\017.FaceRecord"
-  "List\022&\n\017template_probes\030\003 \001(\0132\r.Template"
-  "List\022\'\n\020template_gallery\030\004 \001(\0132\r.Templat"
-  "eList\"h\n\024DetectExtractRequest\022&\n\016detect_"
-  "request\030\001 \001(\0132\016.DetectRequest\022(\n\017extract"
-  "_request\030\002 \001(\0132\017.ExtractRequest\"\226\001\n\032Dete"
-  "ctExtractEnrollRequest\022&\n\016detect_request"
-  "\030\001 \001(\0132\016.DetectRequest\022(\n\017extract_reques"
-  "t\030\002 \001(\0132\017.ExtractRequest\022&\n\016enroll_reque"
-  "st\030\003 \001(\0132\016.EnrollRequest\"\226\001\n\032DetectExtra"
-  "ctSearchRequest\022&\n\016detect_request\030\001 \001(\0132"
-  "\016.DetectRequest\022(\n\017extract_request\030\002 \001(\013"
-  "2\017.ExtractRequest\022&\n\016search_request\030\003 \001("
-  "\0132\016.SearchRequest\"\023\n\021FaceStatusRequest\"\245"
-  "\002\n\017FaceServiceInfo\022\036\n\006status\030\001 \001(\0162\016.Ser"
-  "viceStatus\022\024\n\014worker_count\030\002 \001(\005\022\031\n\021dete"
-  "ction_support\030\003 \001(\010\022\027\n\017extract_support\030\004"
-  " \001(\010\022\025\n\rscore_support\030\005 \001(\010\022\031\n\021attribute"
-  "_support\030\006 \001(\010\022\036\n\nscore_type\030\007 \001(\0162\n.Sco"
-  "reType\022\033\n\023detection_threshold\030\010 \001(\002\022\027\n\017m"
-  "atch_threshold\030\t \001(\002\022\021\n\talgorithm\030\n \001(\t\022"
-  "\r\n\005notes\030\013 \001(\t\"\024\n\022GalleryListRequest\",\n\024"
-  "GalleryDeleteRequest\022\024\n\014gallery_name\030\001 \001"
-  "(\t\"-\n\025EnrollmentListRequest\022\024\n\014gallery_n"
-  "ame\030\001 \001(\t\"F\n\016EnrollmentInfo\022\022\n\nsubject_i"
-  "d\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\022\n\nface_count\030\003 \001("
-  "\005\"T\n\026EnrollmentListResponse\022\024\n\014gallery_n"
-  "ame\030\001 \001(\t\022$\n\013enrollments\030\002 \003(\0132\017.Enrollm"
-  "entInfo\"C\n\027EnrollmentDeleteRequest\022\024\n\014ga"
-  "llery_name\030\001 \001(\t\022\022\n\nsubject_id\030\002 \001(\t\"7\n\013"
-  "GalleryInfo\022\024\n\014gallery_name\030\001 \001(\t\022\022\n\nfac"
-  "e_count\030\002 \001(\003\".\n\013GalleryList\022\037\n\tgallerie"
-  "s\030\001 \003(\0132\014.GalleryInfo\"\007\n\005Empty*<\n\rServic"
-  "eStatus\022\013\n\007UNKNOWN\020\000\022\t\n\005READY\020\001\022\t\n\005ERROR"
-  "\020\002\022\010\n\004BUSY\020\003*k\n\010DataType\022\t\n\005EMPTY\020\000\022\n\n\006S"
-  "TRING\020\001\022\007\n\003INT\020\002\022\t\n\005FLOAT\020\003\022\t\n\005BYTES\020\004\022\n"
-  "\n\006VECTOR\020\005\022\n\n\006PICKLE\020\006\022\007\n\003XML\020\007\022\010\n\004JSON\020"
-  "\010*4\n\tScoreType\022\n\n\006SERVER\020\000\022\006\n\002L1\020\001\022\006\n\002L2"
-  "\020\002\022\013\n\007NEG_DOT\020\0032\364\006\n\017FaceRecognition\0220\n\006s"
-  "tatus\022\022.FaceStatusRequest\032\020.FaceServiceI"
-  "nfo\"\000\022+\n\006detect\022\016.DetectRequest\032\017.FaceRe"
-  "cordList\"\000\022-\n\007extract\022\017.ExtractRequest\032\017"
-  ".FaceRecordList\"\000\022!\n\005score\022\r.ScoreReques"
-  "t\032\007.Matrix\"\000\022+\n\006enroll\022\016.EnrollRequest\032\017"
-  ".FaceRecordList\"\000\022+\n\006search\022\016.SearchRequ"
-  "est\032\017.FaceRecordList\"\000\0229\n\rdetectExtract\022"
-  "\025.DetectExtractRequest\032\017.FaceRecordList\""
-  "\000\022E\n\023detectExtractEnroll\022\033.DetectExtract"
-  "EnrollRequest\032\017.FaceRecordList\"\000\022E\n\023dete"
-  "ctExtractSearch\022\033.DetectExtractSearchReq"
-  "uest\032\017.FaceRecordList\"\000\0222\n\013galleryList\022\023"
-  ".GalleryListRequest\032\014.GalleryList\"\000\0220\n\rg"
-  "alleryDelete\022\025.GalleryDeleteRequest\032\006.Em"
-  "pty\"\000\022;\n\016enrollmentList\022\026.EnrollmentList"
-  "Request\032\017.FaceRecordList\"\000\022\?\n\020enrollment"
-  "Delete\022\030.EnrollmentDeleteRequest\032\017.FaceR"
-  "ecordList\"\000\022J\n\033enrollmentDeleteCondition"
-  "al\022\030.EnrollmentDeleteRequest\032\017.FaceRecor"
-  "dList\"\000\022A\n\022enrollmentTransfer\022\030.Enrollme"
-  "ntDeleteRequest\032\017.FaceRecordList\"\000\022\032\n\004ec"
-  "ho\022\007.Matrix\032\007.Matrix\"\000b\006proto3"
+  "\030\007 \001(\005\022\024\n\014save_request\030\t \001(\010\022\r\n\005debug\030\n "
+  "\001(\010\022\036\n\nattributes\030\010 \003(\0132\n.Attribute\"k\n\016E"
+  "xtractOptions\022\024\n\014algorithm_id\030\001 \001(\t\022\024\n\014s"
+  "ave_request\030\002 \001(\010\022\r\n\005debug\030\003 \001(\010\022\036\n\nattr"
+  "ibutes\030\010 \003(\0132\n.Attribute\"T\n\rEnrollOption"
+  "s\022\024\n\014save_request\030\002 \001(\010\022\r\n\005debug\030\003 \001(\010\022\036"
+  "\n\nattributes\030\010 \003(\0132\n.Attribute\"\257\001\n\rDetec"
+  "tionList\022\036\n\ndetections\030\001 \003(\0132\n.Detection"
+  "\022\026\n\016detection_time\030\002 \001(\002\022\023\n\013image_width\030"
+  "\003 \001(\005\022\024\n\014image_height\030\004 \001(\005\022\027\n\017detection"
+  "_count\030\005 \001(\005\022\"\n\007options\030\006 \001(\0132\021.Detectio"
+  "nOptions\"+\n\tMatchList\022\036\n\nmatch_list\030\001 \003("
+  "\0132\n.MatchInfo\"\202\001\n\tMatchInfo\022\r\n\005score\030\001 \001"
+  "(\002\022\020\n\010image_id\030\002 \001(\t\022\024\n\014detection_id\030\003 \001"
+  "(\t\022\022\n\nsubject_id\030\004 \001(\t\022\024\n\014subject_name\030\005"
+  " \001(\t\022\024\n\004face\030\006 \001(\0132\006.Image\">\n\rTemplateIn"
+  "put\022\022\n\002im\030\001 \001(\0132\006.Image\022\031\n\ndetections\030\002 "
+  "\003(\0132\005.Rect\"5\n\014FaceTemplate\022\025\n\004data\030\001 \001(\013"
+  "2\007.Vector\022\016\n\006buffer\030\002 \001(\014\"0\n\014TemplateLis"
+  "t\022 \n\ttemplates\030\001 \003(\0132\r.FaceTemplate\"a\n\014A"
+  "ccessRecord\022\020\n\010datetime\030\001 \001(\002\022\r\n\005notes\030\002"
+  " \001(\t\022\022\n\ncredential\030\003 \001(\t\022\034\n\010metadata\030\004 \003"
+  "(\0132\n.Attribute\"\360\003\n\nFaceRecord\022\022\n\nsubject"
+  "_id\030\001 \001(\t\022\014\n\004name\030\005 \001(\t\022\016\n\006source\030\004 \001(\t\022"
+  "\r\n\005frame\030\016 \001(\003\022\r\n\005notes\030\006 \001(\t\022\023\n\013gallery"
+  "_key\030\017 \001(\t\022\027\n\017collection_date\030\020 \001(\002\022\027\n\017e"
+  "nrollment_date\030\021 \001(\002\022\034\n\010metadata\030\022 \003(\0132\n"
+  ".Attribute\022%\n\016access_records\030\023 \003(\0132\r.Acc"
+  "essRecord\022\024\n\004view\030\007 \001(\0132\006.Image\022\027\n\007align"
+  "ed\030\t \001(\0132\006.Image\022\035\n\tdetection\030\002 \001(\0132\n.De"
+  "tection\022\034\n\tlandmarks\030\010 \003(\0132\t.Landmark\022\036\n"
+  "\nattributes\030\n \003(\0132\n.Attribute\022!\n\rinterna"
+  "l_data\030\013 \003(\0132\n.Attribute\022\037\n\010template\030\003 \001"
+  "(\0132\r.FaceTemplate\022\r\n\005score\030\014 \001(\002\022\'\n\016sear"
+  "ch_results\030\r \001(\0132\017.FaceRecordList\"3\n\016Fac"
+  "eRecordList\022!\n\014face_records\030\001 \003(\0132\013.Face"
+  "Record\"\\\n\023VerificationRequest\022\017\n\007gallery"
+  "\030\001 \001(\t\022\022\n\nsubject_id\030\002 \001(\t\022 \n\013face_recor"
+  "d\030\003 \003(\0132\013.FaceRecord\"\204\001\n\024VerificationRes"
+  "ponse\022\022\n\nerror_code\030\004 \001(\005\022\025\n\rerror_messa"
+  "ge\030\005 \001(\t\022\017\n\007success\030\001 \001(\010\022\022\n\nconfidence\030"
+  "\002 \001(\002\022\034\n\007matches\030\003 \003(\0132\013.FaceRecord\"p\n\rS"
+  "earchRequest\022\026\n\016search_gallery\030\001 \001(\t\022\037\n\006"
+  "probes\030\003 \001(\0132\017.FaceRecordList\022\023\n\013max_res"
+  "ults\030\004 \001(\005\022\021\n\tthreshold\030\005 \001(\002\"Q\n\016SearchR"
+  "esponse\022\036\n\007message\030\001 \001(\0132\r.ErrorMessage\022"
+  "\037\n\006probes\030\002 \001(\0132\017.FaceRecordList\"q\n\rEnro"
+  "llRequest\022\026\n\016enroll_gallery\030\001 \001(\t\022 \n\007rec"
+  "ords\030\002 \001(\0132\017.FaceRecordList\022&\n\016enroll_op"
+  "tions\030\n \001(\0132\016.EnrollOptions\"\232\001\n\rDetectRe"
+  "quest\022\025\n\005image\030\001 \001(\0132\006.Image\022\016\n\006source\030\002"
+  " \001(\t\022\r\n\005frame\030\003 \001(\003\022\022\n\nsubject_id\030\004 \001(\t\022"
+  "\024\n\014subject_name\030\005 \001(\t\022)\n\016detect_options\030"
+  "\010 \001(\0132\021.DetectionOptions\"s\n\016ExtractReque"
+  "st\022\025\n\005image\030\001 \001(\0132\006.Image\022 \n\007records\030\004 \001"
+  "(\0132\017.FaceRecordList\022(\n\017extract_options\030\t"
+  " \001(\0132\017.ExtractOptions\"\254\001\n\014ScoreRequest\022$"
+  "\n\013face_probes\030\001 \001(\0132\017.FaceRecordList\022%\n\014"
+  "face_gallery\030\002 \001(\0132\017.FaceRecordList\022&\n\017t"
+  "emplate_probes\030\003 \001(\0132\r.TemplateList\022\'\n\020t"
+  "emplate_gallery\030\004 \001(\0132\r.TemplateList\"h\n\024"
+  "DetectExtractRequest\022&\n\016detect_request\030\001"
+  " \001(\0132\016.DetectRequest\022(\n\017extract_request\030"
+  "\002 \001(\0132\017.ExtractRequest\"\226\001\n\032DetectExtract"
+  "EnrollRequest\022&\n\016detect_request\030\001 \001(\0132\016."
+  "DetectRequest\022(\n\017extract_request\030\002 \001(\0132\017"
+  ".ExtractRequest\022&\n\016enroll_request\030\003 \001(\0132"
+  "\016.EnrollRequest\"\226\001\n\032DetectExtractSearchR"
+  "equest\022&\n\016detect_request\030\001 \001(\0132\016.DetectR"
+  "equest\022(\n\017extract_request\030\002 \001(\0132\017.Extrac"
+  "tRequest\022&\n\016search_request\030\003 \001(\0132\016.Searc"
+  "hRequest\"\023\n\021FaceStatusRequest\"\245\002\n\017FaceSe"
+  "rviceInfo\022\036\n\006status\030\001 \001(\0162\016.ServiceStatu"
+  "s\022\024\n\014worker_count\030\002 \001(\005\022\031\n\021detection_sup"
+  "port\030\003 \001(\010\022\027\n\017extract_support\030\004 \001(\010\022\025\n\rs"
+  "core_support\030\005 \001(\010\022\031\n\021attribute_support\030"
+  "\006 \001(\010\022\036\n\nscore_type\030\007 \001(\0162\n.ScoreType\022\033\n"
+  "\023detection_threshold\030\010 \001(\002\022\027\n\017match_thre"
+  "shold\030\t \001(\002\022\021\n\talgorithm\030\n \001(\t\022\r\n\005notes\030"
+  "\013 \001(\t\"\024\n\022GalleryListRequest\",\n\024GalleryDe"
+  "leteRequest\022\024\n\014gallery_name\030\001 \001(\t\"-\n\025Enr"
+  "ollmentListRequest\022\024\n\014gallery_name\030\001 \001(\t"
+  "\"F\n\016EnrollmentInfo\022\022\n\nsubject_id\030\001 \001(\t\022\014"
+  "\n\004name\030\002 \001(\t\022\022\n\nface_count\030\003 \001(\005\"T\n\026Enro"
+  "llmentListResponse\022\024\n\014gallery_name\030\001 \001(\t"
+  "\022$\n\013enrollments\030\002 \003(\0132\017.EnrollmentInfo\"C"
+  "\n\027EnrollmentDeleteRequest\022\024\n\014gallery_nam"
+  "e\030\001 \001(\t\022\022\n\nsubject_id\030\002 \001(\t\"7\n\013GalleryIn"
+  "fo\022\024\n\014gallery_name\030\001 \001(\t\022\022\n\nface_count\030\002"
+  " \001(\003\".\n\013GalleryList\022\037\n\tgalleries\030\001 \003(\0132\014"
+  ".GalleryInfo\"\007\n\005Empty*<\n\rServiceStatus\022\013"
+  "\n\007UNKNOWN\020\000\022\t\n\005READY\020\001\022\t\n\005ERROR\020\002\022\010\n\004BUS"
+  "Y\020\003*k\n\010DataType\022\t\n\005EMPTY\020\000\022\n\n\006STRING\020\001\022\007"
+  "\n\003INT\020\002\022\t\n\005FLOAT\020\003\022\t\n\005BYTES\020\004\022\n\n\006VECTOR\020"
+  "\005\022\n\n\006PICKLE\020\006\022\007\n\003XML\020\007\022\010\n\004JSON\020\010*4\n\tScor"
+  "eType\022\n\n\006SERVER\020\000\022\006\n\002L1\020\001\022\006\n\002L2\020\002\022\013\n\007NEG"
+  "_DOT\020\0032\364\006\n\017FaceRecognition\0220\n\006status\022\022.F"
+  "aceStatusRequest\032\020.FaceServiceInfo\"\000\022+\n\006"
+  "detect\022\016.DetectRequest\032\017.FaceRecordList\""
+  "\000\022-\n\007extract\022\017.ExtractRequest\032\017.FaceReco"
+  "rdList\"\000\022!\n\005score\022\r.ScoreRequest\032\007.Matri"
+  "x\"\000\022+\n\006enroll\022\016.EnrollRequest\032\017.FaceReco"
+  "rdList\"\000\022+\n\006search\022\016.SearchRequest\032\017.Fac"
+  "eRecordList\"\000\0229\n\rdetectExtract\022\025.DetectE"
+  "xtractRequest\032\017.FaceRecordList\"\000\022E\n\023dete"
+  "ctExtractEnroll\022\033.DetectExtractEnrollReq"
+  "uest\032\017.FaceRecordList\"\000\022E\n\023detectExtract"
+  "Search\022\033.DetectExtractSearchRequest\032\017.Fa"
+  "ceRecordList\"\000\0222\n\013galleryList\022\023.GalleryL"
+  "istRequest\032\014.GalleryList\"\000\0220\n\rgalleryDel"
+  "ete\022\025.GalleryDeleteRequest\032\006.Empty\"\000\022;\n\016"
+  "enrollmentList\022\026.EnrollmentListRequest\032\017"
+  ".FaceRecordList\"\000\022\?\n\020enrollmentDelete\022\030."
+  "EnrollmentDeleteRequest\032\017.FaceRecordList"
+  "\"\000\022J\n\033enrollmentDeleteConditional\022\030.Enro"
+  "llmentDeleteRequest\032\017.FaceRecordList\"\000\022A"
+  "\n\022enrollmentTransfer\022\030.EnrollmentDeleteR"
+  "equest\032\017.FaceRecordList\"\000\022\032\n\004echo\022\007.Matr"
+  "ix\032\007.Matrix\"\000b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_faro_2fproto_2fface_5fservice_2eproto_deps[2] = {
   &::descriptor_table_faro_2fproto_2fgeometry_2eproto,
@@ -1362,7 +1371,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_far
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_faro_2fproto_2fface_5fservice_2eproto_once;
 static bool descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_faro_2fproto_2fface_5fservice_2eproto = {
-  &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto, "faro/proto/face_service.proto", 5390,
+  &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto, "faro/proto/face_service.proto", 5501,
   &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_once, descriptor_table_faro_2fproto_2fface_5fservice_2eproto_sccs, descriptor_table_faro_2fproto_2fface_5fservice_2eproto_deps, 37, 2,
   schemas, file_default_instances, TableStruct_faro_2fproto_2fface_5fservice_2eproto::offsets,
   file_level_metadata_faro_2fproto_2fface_5fservice_2eproto, 38, file_level_enum_descriptors_faro_2fproto_2fface_5fservice_2eproto, file_level_service_descriptors_faro_2fproto_2fface_5fservice_2eproto,
@@ -3630,6 +3639,8 @@ const int DetectionOptions::kScaleLevelsFieldNumber;
 const int DetectionOptions::kScanLevelsFieldNumber;
 const int DetectionOptions::kScanOverlapFieldNumber;
 const int DetectionOptions::kMinSizeFieldNumber;
+const int DetectionOptions::kSaveRequestFieldNumber;
+const int DetectionOptions::kDebugFieldNumber;
 const int DetectionOptions::kAttributesFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -3647,18 +3658,18 @@ DetectionOptions::DetectionOptions(const DetectionOptions& from)
   if (from.algorithm_id().size() > 0) {
     algorithm_id_.AssignWithDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from.algorithm_id_);
   }
-  ::memcpy(&best_, &from.best_,
-    static_cast<size_t>(reinterpret_cast<char*>(&min_size_) -
-    reinterpret_cast<char*>(&best_)) + sizeof(min_size_));
+  ::memcpy(&threshold_, &from.threshold_,
+    static_cast<size_t>(reinterpret_cast<char*>(&debug_) -
+    reinterpret_cast<char*>(&threshold_)) + sizeof(debug_));
   // @@protoc_insertion_point(copy_constructor:DetectionOptions)
 }
 
 void DetectionOptions::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_DetectionOptions_faro_2fproto_2fface_5fservice_2eproto.base);
   algorithm_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&best_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&min_size_) -
-      reinterpret_cast<char*>(&best_)) + sizeof(min_size_));
+  ::memset(&threshold_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&threshold_)) + sizeof(debug_));
 }
 
 DetectionOptions::~DetectionOptions() {
@@ -3687,9 +3698,9 @@ void DetectionOptions::Clear() {
 
   attributes_.Clear();
   algorithm_id_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&best_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&min_size_) -
-      reinterpret_cast<char*>(&best_)) + sizeof(min_size_));
+  ::memset(&threshold_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&threshold_)) + sizeof(debug_));
   _internal_metadata_.Clear();
 }
 
@@ -3760,6 +3771,20 @@ const char* DetectionOptions::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<::PROTOBUF_NAMESPACE_ID::uint8>(ptr) == 66);
+        } else goto handle_unusual;
+        continue;
+      // bool save_request = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+          save_request_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bool debug = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          debug_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+          CHK_(ptr);
         } else goto handle_unusual;
         continue;
       default: {
@@ -3896,6 +3921,32 @@ bool DetectionOptions::MergePartialFromCodedStream(
         break;
       }
 
+      // bool save_request = 9;
+      case 9: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (72 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &save_request_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // bool debug = 10;
+      case 10: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (80 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &debug_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -3972,6 +4023,16 @@ void DetectionOptions::SerializeWithCachedSizes(
       output);
   }
 
+  // bool save_request = 9;
+  if (this->save_request() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(9, this->save_request(), output);
+  }
+
+  // bool debug = 10;
+  if (this->debug() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(10, this->debug(), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -4034,6 +4095,16 @@ void DetectionOptions::SerializeWithCachedSizes(
         8, this->attributes(static_cast<int>(i)), target);
   }
 
+  // bool save_request = 9;
+  if (this->save_request() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->save_request(), target);
+  }
+
+  // bool debug = 10;
+  if (this->debug() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->debug(), target);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields(), target);
@@ -4073,11 +4144,6 @@ size_t DetectionOptions::ByteSizeLong() const {
         this->algorithm_id());
   }
 
-  // bool best = 2;
-  if (this->best() != 0) {
-    total_size += 1 + 1;
-  }
-
   // float threshold = 3;
   if (!(this->threshold() <= 0 && this->threshold() >= 0)) {
     total_size += 1 + 4;
@@ -4107,6 +4173,21 @@ size_t DetectionOptions::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->min_size());
+  }
+
+  // bool best = 2;
+  if (this->best() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool save_request = 9;
+  if (this->save_request() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool debug = 10;
+  if (this->debug() != 0) {
+    total_size += 1 + 1;
   }
 
   int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
@@ -4141,9 +4222,6 @@ void DetectionOptions::MergeFrom(const DetectionOptions& from) {
 
     algorithm_id_.AssignWithDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from.algorithm_id_);
   }
-  if (from.best() != 0) {
-    set_best(from.best());
-  }
   if (!(from.threshold() <= 0 && from.threshold() >= 0)) {
     set_threshold(from.threshold());
   }
@@ -4158,6 +4236,15 @@ void DetectionOptions::MergeFrom(const DetectionOptions& from) {
   }
   if (from.min_size() != 0) {
     set_min_size(from.min_size());
+  }
+  if (from.best() != 0) {
+    set_best(from.best());
+  }
+  if (from.save_request() != 0) {
+    set_save_request(from.save_request());
+  }
+  if (from.debug() != 0) {
+    set_debug(from.debug());
   }
 }
 
@@ -4189,12 +4276,14 @@ void DetectionOptions::InternalSwap(DetectionOptions* other) {
   CastToBase(&attributes_)->InternalSwap(CastToBase(&other->attributes_));
   algorithm_id_.Swap(&other->algorithm_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
-  swap(best_, other->best_);
   swap(threshold_, other->threshold_);
   swap(scale_levels_, other->scale_levels_);
   swap(scan_levels_, other->scan_levels_);
   swap(scan_overlap_, other->scan_overlap_);
   swap(min_size_, other->min_size_);
+  swap(best_, other->best_);
+  swap(save_request_, other->save_request_);
+  swap(debug_, other->debug_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DetectionOptions::GetMetadata() const {
@@ -4212,6 +4301,8 @@ class ExtractOptions::HasBitSetters {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int ExtractOptions::kAlgorithmIdFieldNumber;
+const int ExtractOptions::kSaveRequestFieldNumber;
+const int ExtractOptions::kDebugFieldNumber;
 const int ExtractOptions::kAttributesFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -4229,12 +4320,18 @@ ExtractOptions::ExtractOptions(const ExtractOptions& from)
   if (from.algorithm_id().size() > 0) {
     algorithm_id_.AssignWithDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from.algorithm_id_);
   }
+  ::memcpy(&save_request_, &from.save_request_,
+    static_cast<size_t>(reinterpret_cast<char*>(&debug_) -
+    reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
   // @@protoc_insertion_point(copy_constructor:ExtractOptions)
 }
 
 void ExtractOptions::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ExtractOptions_faro_2fproto_2fface_5fservice_2eproto.base);
   algorithm_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ::memset(&save_request_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
 }
 
 ExtractOptions::~ExtractOptions() {
@@ -4263,6 +4360,9 @@ void ExtractOptions::Clear() {
 
   attributes_.Clear();
   algorithm_id_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ::memset(&save_request_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
   _internal_metadata_.Clear();
 }
 
@@ -4278,6 +4378,20 @@ const char* ExtractOptions::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParserUTF8(mutable_algorithm_id(), ptr, ctx, "ExtractOptions.algorithm_id");
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bool save_request = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          save_request_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bool debug = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          debug_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -4338,6 +4452,32 @@ bool ExtractOptions::MergePartialFromCodedStream(
         break;
       }
 
+      // bool save_request = 2;
+      case 2: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (16 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &save_request_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // bool debug = 3;
+      case 3: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (24 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &debug_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       // repeated .Attribute attributes = 8;
       case 8: {
         if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (66 & 0xFF)) {
@@ -4386,6 +4526,16 @@ void ExtractOptions::SerializeWithCachedSizes(
       1, this->algorithm_id(), output);
   }
 
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(2, this->save_request(), output);
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(3, this->debug(), output);
+  }
+
   // repeated .Attribute attributes = 8;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->attributes_size()); i < n; i++) {
@@ -4417,6 +4567,16 @@ void ExtractOptions::SerializeWithCachedSizes(
     target =
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteStringToArray(
         1, this->algorithm_id(), target);
+  }
+
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->save_request(), target);
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->debug(), target);
   }
 
   // repeated .Attribute attributes = 8;
@@ -4466,6 +4626,16 @@ size_t ExtractOptions::ByteSizeLong() const {
         this->algorithm_id());
   }
 
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    total_size += 1 + 1;
+  }
+
   int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -4498,6 +4668,12 @@ void ExtractOptions::MergeFrom(const ExtractOptions& from) {
 
     algorithm_id_.AssignWithDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from.algorithm_id_);
   }
+  if (from.save_request() != 0) {
+    set_save_request(from.save_request());
+  }
+  if (from.debug() != 0) {
+    set_debug(from.debug());
+  }
 }
 
 void ExtractOptions::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -4528,6 +4704,8 @@ void ExtractOptions::InternalSwap(ExtractOptions* other) {
   CastToBase(&attributes_)->InternalSwap(CastToBase(&other->attributes_));
   algorithm_id_.Swap(&other->algorithm_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
+  swap(save_request_, other->save_request_);
+  swap(debug_, other->debug_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ExtractOptions::GetMetadata() const {
@@ -4544,6 +4722,8 @@ class EnrollOptions::HasBitSetters {
 };
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int EnrollOptions::kSaveRequestFieldNumber;
+const int EnrollOptions::kDebugFieldNumber;
 const int EnrollOptions::kAttributesFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -4557,11 +4737,17 @@ EnrollOptions::EnrollOptions(const EnrollOptions& from)
       _internal_metadata_(nullptr),
       attributes_(from.attributes_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
+  ::memcpy(&save_request_, &from.save_request_,
+    static_cast<size_t>(reinterpret_cast<char*>(&debug_) -
+    reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
   // @@protoc_insertion_point(copy_constructor:EnrollOptions)
 }
 
 void EnrollOptions::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_EnrollOptions_faro_2fproto_2fface_5fservice_2eproto.base);
+  ::memset(&save_request_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
 }
 
 EnrollOptions::~EnrollOptions() {
@@ -4588,6 +4774,9 @@ void EnrollOptions::Clear() {
   (void) cached_has_bits;
 
   attributes_.Clear();
+  ::memset(&save_request_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&debug_) -
+      reinterpret_cast<char*>(&save_request_)) + sizeof(debug_));
   _internal_metadata_.Clear();
 }
 
@@ -4599,6 +4788,20 @@ const char* EnrollOptions::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
+      // bool save_request = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          save_request_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bool debug = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          debug_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       // repeated .Attribute attributes = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
@@ -4641,6 +4844,32 @@ bool EnrollOptions::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // bool save_request = 2;
+      case 2: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (16 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &save_request_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // bool debug = 3;
+      case 3: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (24 & 0xFF)) {
+
+          DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &debug_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       // repeated .Attribute attributes = 8;
       case 8: {
         if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (66 & 0xFF)) {
@@ -4679,6 +4908,16 @@ void EnrollOptions::SerializeWithCachedSizes(
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(2, this->save_request(), output);
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBool(3, this->debug(), output);
+  }
+
   // repeated .Attribute attributes = 8;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->attributes_size()); i < n; i++) {
@@ -4700,6 +4939,16 @@ void EnrollOptions::SerializeWithCachedSizes(
   // @@protoc_insertion_point(serialize_to_array_start:EnrollOptions)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
+
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->save_request(), target);
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->debug(), target);
+  }
 
   // repeated .Attribute attributes = 8;
   for (unsigned int i = 0,
@@ -4741,6 +4990,16 @@ size_t EnrollOptions::ByteSizeLong() const {
     }
   }
 
+  // bool save_request = 2;
+  if (this->save_request() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool debug = 3;
+  if (this->debug() != 0) {
+    total_size += 1 + 1;
+  }
+
   int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -4769,6 +5028,12 @@ void EnrollOptions::MergeFrom(const EnrollOptions& from) {
   (void) cached_has_bits;
 
   attributes_.MergeFrom(from.attributes_);
+  if (from.save_request() != 0) {
+    set_save_request(from.save_request());
+  }
+  if (from.debug() != 0) {
+    set_debug(from.debug());
+  }
 }
 
 void EnrollOptions::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -4797,6 +5062,8 @@ void EnrollOptions::InternalSwap(EnrollOptions* other) {
   using std::swap;
   _internal_metadata_.Swap(&other->_internal_metadata_);
   CastToBase(&attributes_)->InternalSwap(CastToBase(&other->attributes_));
+  swap(save_request_, other->save_request_);
+  swap(debug_, other->debug_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata EnrollOptions::GetMetadata() const {

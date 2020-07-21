@@ -41,6 +41,9 @@ typedef GPB_ENUM(Image_DataType) {
   Image_DataType_Uint8 = 0,
   Image_DataType_Uint16 = 1,
   Image_DataType_Float32 = 2,
+  Image_DataType_URL = 3,
+  Image_DataType_Png = 4,
+  Image_DataType_Jpg = 5,
 };
 
 GPBEnumDescriptor *Image_DataType_EnumDescriptor(void);

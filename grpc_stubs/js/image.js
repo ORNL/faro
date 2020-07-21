@@ -357,7 +357,10 @@ proto.Image.serializeBinaryToWriter = function(message, writer) {
 proto.Image.DataType = {
   UINT8: 0,
   UINT16: 1,
-  FLOAT32: 2
+  FLOAT32: 2,
+  URL: 3,
+  PNG: 4,
+  JPG: 5
 };
 
 /**
