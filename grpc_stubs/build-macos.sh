@@ -12,6 +12,7 @@ mkdir cpp
 # build csharp
 mkdir csharp
 ./protoc -I ../proto --csharp_out=csharp --grpc_out=csharp --plugin=protoc-gen-grpc=./grpc_csharp_plugin faro/proto/face_service.proto faro/proto/geometry.proto faro/proto/image.proto
+#./protoc -I ../proto --csharp_out=csharp --grpc_out=csharp --csharp_opt=base_namespace=FaRO --plugin=protoc-gen-grpc=./grpc_csharp_plugin faro/proto/face_service.proto faro/proto/geometry.proto faro/proto/image.proto
 
 # build java
 #mkdir java

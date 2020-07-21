@@ -1323,7 +1323,7 @@ const char descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto[] =
   "llmentDeleteRequest\032\017.FaceRecordList\"\000\022A"
   "\n\022enrollmentTransfer\022\030.EnrollmentDeleteR"
   "equest\032\017.FaceRecordList\"\000\022\032\n\004echo\022\007.Matr"
-  "ix\032\007.Matrix\"\000b\006proto3"
+  "ix\032\007.Matrix\"\000B\r\252\002\nFaro.Protob\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_faro_2fproto_2fface_5fservice_2eproto_deps[2] = {
   &::descriptor_table_faro_2fproto_2fgeometry_2eproto,
@@ -1371,7 +1371,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_far
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_faro_2fproto_2fface_5fservice_2eproto_once;
 static bool descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_faro_2fproto_2fface_5fservice_2eproto = {
-  &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto, "faro/proto/face_service.proto", 5501,
+  &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fface_5fservice_2eproto, "faro/proto/face_service.proto", 5516,
   &descriptor_table_faro_2fproto_2fface_5fservice_2eproto_once, descriptor_table_faro_2fproto_2fface_5fservice_2eproto_sccs, descriptor_table_faro_2fproto_2fface_5fservice_2eproto_deps, 37, 2,
   schemas, file_default_instances, TableStruct_faro_2fproto_2fface_5fservice_2eproto::offsets,
   file_level_metadata_faro_2fproto_2fface_5fservice_2eproto, 38, file_level_enum_descriptors_faro_2fproto_2fface_5fservice_2eproto, file_level_service_descriptors_faro_2fproto_2fface_5fservice_2eproto,

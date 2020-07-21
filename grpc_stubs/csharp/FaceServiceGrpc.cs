@@ -31,735 +31,737 @@
 
 using grpc = global::Grpc.Core;
 
-public static partial class FaceRecognition
-{
-  static readonly string __ServiceName = "FaceRecognition";
-
-  static readonly grpc::Marshaller<global::FaceStatusRequest> __Marshaller_FaceStatusRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::FaceStatusRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::FaceServiceInfo> __Marshaller_FaceServiceInfo = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::FaceServiceInfo.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::DetectRequest> __Marshaller_DetectRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::DetectRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::FaceRecordList> __Marshaller_FaceRecordList = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::FaceRecordList.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::ExtractRequest> __Marshaller_ExtractRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::ExtractRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::ScoreRequest> __Marshaller_ScoreRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::ScoreRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::Matrix> __Marshaller_Matrix = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Matrix.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::EnrollRequest> __Marshaller_EnrollRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::EnrollRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::SearchRequest> __Marshaller_SearchRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SearchRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::DetectExtractRequest> __Marshaller_DetectExtractRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::DetectExtractRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::DetectExtractEnrollRequest> __Marshaller_DetectExtractEnrollRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::DetectExtractEnrollRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::DetectExtractSearchRequest> __Marshaller_DetectExtractSearchRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::DetectExtractSearchRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::GalleryListRequest> __Marshaller_GalleryListRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::GalleryListRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::GalleryList> __Marshaller_GalleryList = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::GalleryList.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::GalleryDeleteRequest> __Marshaller_GalleryDeleteRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::GalleryDeleteRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::Empty> __Marshaller_Empty = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Empty.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::EnrollmentListRequest> __Marshaller_EnrollmentListRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::EnrollmentListRequest.Parser.ParseFrom);
-  static readonly grpc::Marshaller<global::EnrollmentDeleteRequest> __Marshaller_EnrollmentDeleteRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::EnrollmentDeleteRequest.Parser.ParseFrom);
-
-  static readonly grpc::Method<global::FaceStatusRequest, global::FaceServiceInfo> __Method_status = new grpc::Method<global::FaceStatusRequest, global::FaceServiceInfo>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "status",
-      __Marshaller_FaceStatusRequest,
-      __Marshaller_FaceServiceInfo);
-
-  static readonly grpc::Method<global::DetectRequest, global::FaceRecordList> __Method_detect = new grpc::Method<global::DetectRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "detect",
-      __Marshaller_DetectRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::ExtractRequest, global::FaceRecordList> __Method_extract = new grpc::Method<global::ExtractRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "extract",
-      __Marshaller_ExtractRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::ScoreRequest, global::Matrix> __Method_score = new grpc::Method<global::ScoreRequest, global::Matrix>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "score",
-      __Marshaller_ScoreRequest,
-      __Marshaller_Matrix);
-
-  static readonly grpc::Method<global::EnrollRequest, global::FaceRecordList> __Method_enroll = new grpc::Method<global::EnrollRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "enroll",
-      __Marshaller_EnrollRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::SearchRequest, global::FaceRecordList> __Method_search = new grpc::Method<global::SearchRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "search",
-      __Marshaller_SearchRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::DetectExtractRequest, global::FaceRecordList> __Method_detectExtract = new grpc::Method<global::DetectExtractRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "detectExtract",
-      __Marshaller_DetectExtractRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::DetectExtractEnrollRequest, global::FaceRecordList> __Method_detectExtractEnroll = new grpc::Method<global::DetectExtractEnrollRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "detectExtractEnroll",
-      __Marshaller_DetectExtractEnrollRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::DetectExtractSearchRequest, global::FaceRecordList> __Method_detectExtractSearch = new grpc::Method<global::DetectExtractSearchRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "detectExtractSearch",
-      __Marshaller_DetectExtractSearchRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::GalleryListRequest, global::GalleryList> __Method_galleryList = new grpc::Method<global::GalleryListRequest, global::GalleryList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "galleryList",
-      __Marshaller_GalleryListRequest,
-      __Marshaller_GalleryList);
-
-  static readonly grpc::Method<global::GalleryDeleteRequest, global::Empty> __Method_galleryDelete = new grpc::Method<global::GalleryDeleteRequest, global::Empty>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "galleryDelete",
-      __Marshaller_GalleryDeleteRequest,
-      __Marshaller_Empty);
-
-  static readonly grpc::Method<global::EnrollmentListRequest, global::FaceRecordList> __Method_enrollmentList = new grpc::Method<global::EnrollmentListRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "enrollmentList",
-      __Marshaller_EnrollmentListRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList> __Method_enrollmentDelete = new grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "enrollmentDelete",
-      __Marshaller_EnrollmentDeleteRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList> __Method_enrollmentDeleteConditional = new grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "enrollmentDeleteConditional",
-      __Marshaller_EnrollmentDeleteRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList> __Method_enrollmentTransfer = new grpc::Method<global::EnrollmentDeleteRequest, global::FaceRecordList>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "enrollmentTransfer",
-      __Marshaller_EnrollmentDeleteRequest,
-      __Marshaller_FaceRecordList);
-
-  static readonly grpc::Method<global::Matrix, global::Matrix> __Method_echo = new grpc::Method<global::Matrix, global::Matrix>(
-      grpc::MethodType.Unary,
-      __ServiceName,
-      "echo",
-      __Marshaller_Matrix,
-      __Marshaller_Matrix);
-
-  /// <summary>Service descriptor</summary>
-  public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
+namespace Faro.Proto {
+  public static partial class FaceRecognition
   {
-    get { return global::FaceServiceReflection.Descriptor.Services[0]; }
+    static readonly string __ServiceName = "FaceRecognition";
+
+    static readonly grpc::Marshaller<global::Faro.Proto.FaceStatusRequest> __Marshaller_FaceStatusRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.FaceStatusRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.FaceServiceInfo> __Marshaller_FaceServiceInfo = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.FaceServiceInfo.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.DetectRequest> __Marshaller_DetectRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.DetectRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.FaceRecordList> __Marshaller_FaceRecordList = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.FaceRecordList.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.ExtractRequest> __Marshaller_ExtractRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.ExtractRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.ScoreRequest> __Marshaller_ScoreRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.ScoreRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.Matrix> __Marshaller_Matrix = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.Matrix.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.EnrollRequest> __Marshaller_EnrollRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.EnrollRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.SearchRequest> __Marshaller_SearchRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.SearchRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.DetectExtractRequest> __Marshaller_DetectExtractRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.DetectExtractRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.DetectExtractEnrollRequest> __Marshaller_DetectExtractEnrollRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.DetectExtractEnrollRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.DetectExtractSearchRequest> __Marshaller_DetectExtractSearchRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.DetectExtractSearchRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.GalleryListRequest> __Marshaller_GalleryListRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.GalleryListRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.GalleryList> __Marshaller_GalleryList = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.GalleryList.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.GalleryDeleteRequest> __Marshaller_GalleryDeleteRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.GalleryDeleteRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.Empty> __Marshaller_Empty = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.Empty.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.EnrollmentListRequest> __Marshaller_EnrollmentListRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.EnrollmentListRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Faro.Proto.EnrollmentDeleteRequest> __Marshaller_EnrollmentDeleteRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Faro.Proto.EnrollmentDeleteRequest.Parser.ParseFrom);
+
+    static readonly grpc::Method<global::Faro.Proto.FaceStatusRequest, global::Faro.Proto.FaceServiceInfo> __Method_status = new grpc::Method<global::Faro.Proto.FaceStatusRequest, global::Faro.Proto.FaceServiceInfo>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "status",
+        __Marshaller_FaceStatusRequest,
+        __Marshaller_FaceServiceInfo);
+
+    static readonly grpc::Method<global::Faro.Proto.DetectRequest, global::Faro.Proto.FaceRecordList> __Method_detect = new grpc::Method<global::Faro.Proto.DetectRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "detect",
+        __Marshaller_DetectRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.ExtractRequest, global::Faro.Proto.FaceRecordList> __Method_extract = new grpc::Method<global::Faro.Proto.ExtractRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "extract",
+        __Marshaller_ExtractRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.ScoreRequest, global::Faro.Proto.Matrix> __Method_score = new grpc::Method<global::Faro.Proto.ScoreRequest, global::Faro.Proto.Matrix>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "score",
+        __Marshaller_ScoreRequest,
+        __Marshaller_Matrix);
+
+    static readonly grpc::Method<global::Faro.Proto.EnrollRequest, global::Faro.Proto.FaceRecordList> __Method_enroll = new grpc::Method<global::Faro.Proto.EnrollRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "enroll",
+        __Marshaller_EnrollRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.SearchRequest, global::Faro.Proto.FaceRecordList> __Method_search = new grpc::Method<global::Faro.Proto.SearchRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "search",
+        __Marshaller_SearchRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.DetectExtractRequest, global::Faro.Proto.FaceRecordList> __Method_detectExtract = new grpc::Method<global::Faro.Proto.DetectExtractRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "detectExtract",
+        __Marshaller_DetectExtractRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.DetectExtractEnrollRequest, global::Faro.Proto.FaceRecordList> __Method_detectExtractEnroll = new grpc::Method<global::Faro.Proto.DetectExtractEnrollRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "detectExtractEnroll",
+        __Marshaller_DetectExtractEnrollRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.DetectExtractSearchRequest, global::Faro.Proto.FaceRecordList> __Method_detectExtractSearch = new grpc::Method<global::Faro.Proto.DetectExtractSearchRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "detectExtractSearch",
+        __Marshaller_DetectExtractSearchRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.GalleryListRequest, global::Faro.Proto.GalleryList> __Method_galleryList = new grpc::Method<global::Faro.Proto.GalleryListRequest, global::Faro.Proto.GalleryList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "galleryList",
+        __Marshaller_GalleryListRequest,
+        __Marshaller_GalleryList);
+
+    static readonly grpc::Method<global::Faro.Proto.GalleryDeleteRequest, global::Faro.Proto.Empty> __Method_galleryDelete = new grpc::Method<global::Faro.Proto.GalleryDeleteRequest, global::Faro.Proto.Empty>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "galleryDelete",
+        __Marshaller_GalleryDeleteRequest,
+        __Marshaller_Empty);
+
+    static readonly grpc::Method<global::Faro.Proto.EnrollmentListRequest, global::Faro.Proto.FaceRecordList> __Method_enrollmentList = new grpc::Method<global::Faro.Proto.EnrollmentListRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "enrollmentList",
+        __Marshaller_EnrollmentListRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList> __Method_enrollmentDelete = new grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "enrollmentDelete",
+        __Marshaller_EnrollmentDeleteRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList> __Method_enrollmentDeleteConditional = new grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "enrollmentDeleteConditional",
+        __Marshaller_EnrollmentDeleteRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList> __Method_enrollmentTransfer = new grpc::Method<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "enrollmentTransfer",
+        __Marshaller_EnrollmentDeleteRequest,
+        __Marshaller_FaceRecordList);
+
+    static readonly grpc::Method<global::Faro.Proto.Matrix, global::Faro.Proto.Matrix> __Method_echo = new grpc::Method<global::Faro.Proto.Matrix, global::Faro.Proto.Matrix>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "echo",
+        __Marshaller_Matrix,
+        __Marshaller_Matrix);
+
+    /// <summary>Service descriptor</summary>
+    public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
+    {
+      get { return global::Faro.Proto.FaceServiceReflection.Descriptor.Services[0]; }
+    }
+
+    /// <summary>Base class for server-side implementations of FaceRecognition</summary>
+    [grpc::BindServiceMethod(typeof(FaceRecognition), "BindService")]
+    public abstract partial class FaceRecognitionBase
+    {
+      /// <summary>
+      /// Service info and defaults
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceServiceInfo> status(global::Faro.Proto.FaceStatusRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Simple operations
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> detect(global::Faro.Proto.DetectRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> extract(global::Faro.Proto.ExtractRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.Matrix> score(global::Faro.Proto.ScoreRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> enroll(global::Faro.Proto.EnrollRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> search(global::Faro.Proto.SearchRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Combined opperations
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> detectExtract(global::Faro.Proto.DetectExtractRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> detectExtractEnroll(global::Faro.Proto.DetectExtractEnrollRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> detectExtractSearch(global::Faro.Proto.DetectExtractSearchRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Gallery Management
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.GalleryList> galleryList(global::Faro.Proto.GalleryListRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.Empty> galleryDelete(global::Faro.Proto.GalleryDeleteRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> enrollmentList(global::Faro.Proto.EnrollmentListRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> enrollmentDelete(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> enrollmentDeleteConditional(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.FaceRecordList> enrollmentTransfer(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Test
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      public virtual global::System.Threading.Tasks.Task<global::Faro.Proto.Matrix> echo(global::Faro.Proto.Matrix request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+    }
+
+    /// <summary>Client for FaceRecognition</summary>
+    public partial class FaceRecognitionClient : grpc::ClientBase<FaceRecognitionClient>
+    {
+      /// <summary>Creates a new client for FaceRecognition</summary>
+      /// <param name="channel">The channel to use to make remote calls.</param>
+      public FaceRecognitionClient(grpc::ChannelBase channel) : base(channel)
+      {
+      }
+      /// <summary>Creates a new client for FaceRecognition that uses a custom <c>CallInvoker</c>.</summary>
+      /// <param name="callInvoker">The callInvoker to use to make remote calls.</param>
+      public FaceRecognitionClient(grpc::CallInvoker callInvoker) : base(callInvoker)
+      {
+      }
+      /// <summary>Protected parameterless constructor to allow creation of test doubles.</summary>
+      protected FaceRecognitionClient() : base()
+      {
+      }
+      /// <summary>Protected constructor to allow creation of configured clients.</summary>
+      /// <param name="configuration">The client configuration.</param>
+      protected FaceRecognitionClient(ClientBaseConfiguration configuration) : base(configuration)
+      {
+      }
+
+      /// <summary>
+      /// Service info and defaults
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceServiceInfo status(global::Faro.Proto.FaceStatusRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return status(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Service info and defaults
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceServiceInfo status(global::Faro.Proto.FaceStatusRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_status, null, options, request);
+      }
+      /// <summary>
+      /// Service info and defaults
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceServiceInfo> statusAsync(global::Faro.Proto.FaceStatusRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return statusAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Service info and defaults
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceServiceInfo> statusAsync(global::Faro.Proto.FaceStatusRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_status, null, options, request);
+      }
+      /// <summary>
+      /// Simple operations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceRecordList detect(global::Faro.Proto.DetectRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detect(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Simple operations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceRecordList detect(global::Faro.Proto.DetectRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_detect, null, options, request);
+      }
+      /// <summary>
+      /// Simple operations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectAsync(global::Faro.Proto.DetectRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Simple operations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectAsync(global::Faro.Proto.DetectRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_detect, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList extract(global::Faro.Proto.ExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return extract(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList extract(global::Faro.Proto.ExtractRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_extract, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> extractAsync(global::Faro.Proto.ExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return extractAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> extractAsync(global::Faro.Proto.ExtractRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_extract, null, options, request);
+      }
+      public virtual global::Faro.Proto.Matrix score(global::Faro.Proto.ScoreRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return score(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.Matrix score(global::Faro.Proto.ScoreRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_score, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Matrix> scoreAsync(global::Faro.Proto.ScoreRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return scoreAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Matrix> scoreAsync(global::Faro.Proto.ScoreRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_score, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList enroll(global::Faro.Proto.EnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enroll(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList enroll(global::Faro.Proto.EnrollRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_enroll, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollAsync(global::Faro.Proto.EnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollAsync(global::Faro.Proto.EnrollRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_enroll, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList search(global::Faro.Proto.SearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return search(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList search(global::Faro.Proto.SearchRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_search, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> searchAsync(global::Faro.Proto.SearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return searchAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> searchAsync(global::Faro.Proto.SearchRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_search, null, options, request);
+      }
+      /// <summary>
+      /// Combined opperations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceRecordList detectExtract(global::Faro.Proto.DetectExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtract(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Combined opperations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.FaceRecordList detectExtract(global::Faro.Proto.DetectExtractRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_detectExtract, null, options, request);
+      }
+      /// <summary>
+      /// Combined opperations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractAsync(global::Faro.Proto.DetectExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtractAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Combined opperations
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractAsync(global::Faro.Proto.DetectExtractRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_detectExtract, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList detectExtractEnroll(global::Faro.Proto.DetectExtractEnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtractEnroll(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList detectExtractEnroll(global::Faro.Proto.DetectExtractEnrollRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_detectExtractEnroll, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractEnrollAsync(global::Faro.Proto.DetectExtractEnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtractEnrollAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractEnrollAsync(global::Faro.Proto.DetectExtractEnrollRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_detectExtractEnroll, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList detectExtractSearch(global::Faro.Proto.DetectExtractSearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtractSearch(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList detectExtractSearch(global::Faro.Proto.DetectExtractSearchRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_detectExtractSearch, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractSearchAsync(global::Faro.Proto.DetectExtractSearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return detectExtractSearchAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> detectExtractSearchAsync(global::Faro.Proto.DetectExtractSearchRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_detectExtractSearch, null, options, request);
+      }
+      /// <summary>
+      /// Gallery Management
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.GalleryList galleryList(global::Faro.Proto.GalleryListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return galleryList(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Gallery Management
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.GalleryList galleryList(global::Faro.Proto.GalleryListRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_galleryList, null, options, request);
+      }
+      /// <summary>
+      /// Gallery Management
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.GalleryList> galleryListAsync(global::Faro.Proto.GalleryListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return galleryListAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Gallery Management
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.GalleryList> galleryListAsync(global::Faro.Proto.GalleryListRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_galleryList, null, options, request);
+      }
+      public virtual global::Faro.Proto.Empty galleryDelete(global::Faro.Proto.GalleryDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return galleryDelete(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.Empty galleryDelete(global::Faro.Proto.GalleryDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_galleryDelete, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Empty> galleryDeleteAsync(global::Faro.Proto.GalleryDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return galleryDeleteAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Empty> galleryDeleteAsync(global::Faro.Proto.GalleryDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_galleryDelete, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentList(global::Faro.Proto.EnrollmentListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentList(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentList(global::Faro.Proto.EnrollmentListRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_enrollmentList, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentListAsync(global::Faro.Proto.EnrollmentListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentListAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentListAsync(global::Faro.Proto.EnrollmentListRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_enrollmentList, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentDelete(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentDelete(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentDelete(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_enrollmentDelete, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentDeleteAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentDeleteAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentDeleteAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_enrollmentDelete, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentDeleteConditional(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentDeleteConditional(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentDeleteConditional(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_enrollmentDeleteConditional, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentDeleteConditionalAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentDeleteConditionalAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentDeleteConditionalAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_enrollmentDeleteConditional, null, options, request);
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentTransfer(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentTransfer(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Faro.Proto.FaceRecordList enrollmentTransfer(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_enrollmentTransfer, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentTransferAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return enrollmentTransferAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.FaceRecordList> enrollmentTransferAsync(global::Faro.Proto.EnrollmentDeleteRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_enrollmentTransfer, null, options, request);
+      }
+      /// <summary>
+      /// Test
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.Matrix echo(global::Faro.Proto.Matrix request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return echo(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Test
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      public virtual global::Faro.Proto.Matrix echo(global::Faro.Proto.Matrix request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_echo, null, options, request);
+      }
+      /// <summary>
+      /// Test
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Matrix> echoAsync(global::Faro.Proto.Matrix request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return echoAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Test
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      public virtual grpc::AsyncUnaryCall<global::Faro.Proto.Matrix> echoAsync(global::Faro.Proto.Matrix request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_echo, null, options, request);
+      }
+      /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
+      protected override FaceRecognitionClient NewInstance(ClientBaseConfiguration configuration)
+      {
+        return new FaceRecognitionClient(configuration);
+      }
+    }
+
+    /// <summary>Creates service definition that can be registered with a server</summary>
+    /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+    public static grpc::ServerServiceDefinition BindService(FaceRecognitionBase serviceImpl)
+    {
+      return grpc::ServerServiceDefinition.CreateBuilder()
+          .AddMethod(__Method_status, serviceImpl.status)
+          .AddMethod(__Method_detect, serviceImpl.detect)
+          .AddMethod(__Method_extract, serviceImpl.extract)
+          .AddMethod(__Method_score, serviceImpl.score)
+          .AddMethod(__Method_enroll, serviceImpl.enroll)
+          .AddMethod(__Method_search, serviceImpl.search)
+          .AddMethod(__Method_detectExtract, serviceImpl.detectExtract)
+          .AddMethod(__Method_detectExtractEnroll, serviceImpl.detectExtractEnroll)
+          .AddMethod(__Method_detectExtractSearch, serviceImpl.detectExtractSearch)
+          .AddMethod(__Method_galleryList, serviceImpl.galleryList)
+          .AddMethod(__Method_galleryDelete, serviceImpl.galleryDelete)
+          .AddMethod(__Method_enrollmentList, serviceImpl.enrollmentList)
+          .AddMethod(__Method_enrollmentDelete, serviceImpl.enrollmentDelete)
+          .AddMethod(__Method_enrollmentDeleteConditional, serviceImpl.enrollmentDeleteConditional)
+          .AddMethod(__Method_enrollmentTransfer, serviceImpl.enrollmentTransfer)
+          .AddMethod(__Method_echo, serviceImpl.echo).Build();
+    }
+
+    /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
+    /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
+    /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
+    /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+    public static void BindService(grpc::ServiceBinderBase serviceBinder, FaceRecognitionBase serviceImpl)
+    {
+      serviceBinder.AddMethod(__Method_status, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.FaceStatusRequest, global::Faro.Proto.FaceServiceInfo>(serviceImpl.status));
+      serviceBinder.AddMethod(__Method_detect, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.DetectRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.detect));
+      serviceBinder.AddMethod(__Method_extract, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.ExtractRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.extract));
+      serviceBinder.AddMethod(__Method_score, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.ScoreRequest, global::Faro.Proto.Matrix>(serviceImpl.score));
+      serviceBinder.AddMethod(__Method_enroll, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.EnrollRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.enroll));
+      serviceBinder.AddMethod(__Method_search, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.SearchRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.search));
+      serviceBinder.AddMethod(__Method_detectExtract, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.DetectExtractRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.detectExtract));
+      serviceBinder.AddMethod(__Method_detectExtractEnroll, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.DetectExtractEnrollRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.detectExtractEnroll));
+      serviceBinder.AddMethod(__Method_detectExtractSearch, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.DetectExtractSearchRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.detectExtractSearch));
+      serviceBinder.AddMethod(__Method_galleryList, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.GalleryListRequest, global::Faro.Proto.GalleryList>(serviceImpl.galleryList));
+      serviceBinder.AddMethod(__Method_galleryDelete, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.GalleryDeleteRequest, global::Faro.Proto.Empty>(serviceImpl.galleryDelete));
+      serviceBinder.AddMethod(__Method_enrollmentList, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.EnrollmentListRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.enrollmentList));
+      serviceBinder.AddMethod(__Method_enrollmentDelete, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.enrollmentDelete));
+      serviceBinder.AddMethod(__Method_enrollmentDeleteConditional, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.enrollmentDeleteConditional));
+      serviceBinder.AddMethod(__Method_enrollmentTransfer, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.EnrollmentDeleteRequest, global::Faro.Proto.FaceRecordList>(serviceImpl.enrollmentTransfer));
+      serviceBinder.AddMethod(__Method_echo, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Faro.Proto.Matrix, global::Faro.Proto.Matrix>(serviceImpl.echo));
+    }
+
   }
-
-  /// <summary>Base class for server-side implementations of FaceRecognition</summary>
-  [grpc::BindServiceMethod(typeof(FaceRecognition), "BindService")]
-  public abstract partial class FaceRecognitionBase
-  {
-    /// <summary>
-    /// Service info and defaults
-    /// </summary>
-    /// <param name="request">The request received from the client.</param>
-    /// <param name="context">The context of the server-side call handler being invoked.</param>
-    /// <returns>The response to send back to the client (wrapped by a task).</returns>
-    public virtual global::System.Threading.Tasks.Task<global::FaceServiceInfo> status(global::FaceStatusRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    /// <summary>
-    /// Simple operations
-    /// </summary>
-    /// <param name="request">The request received from the client.</param>
-    /// <param name="context">The context of the server-side call handler being invoked.</param>
-    /// <returns>The response to send back to the client (wrapped by a task).</returns>
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> detect(global::DetectRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> extract(global::ExtractRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::Matrix> score(global::ScoreRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> enroll(global::EnrollRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> search(global::SearchRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    /// <summary>
-    /// Combined opperations
-    /// </summary>
-    /// <param name="request">The request received from the client.</param>
-    /// <param name="context">The context of the server-side call handler being invoked.</param>
-    /// <returns>The response to send back to the client (wrapped by a task).</returns>
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> detectExtract(global::DetectExtractRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> detectExtractEnroll(global::DetectExtractEnrollRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> detectExtractSearch(global::DetectExtractSearchRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    /// <summary>
-    /// Gallery Management
-    /// </summary>
-    /// <param name="request">The request received from the client.</param>
-    /// <param name="context">The context of the server-side call handler being invoked.</param>
-    /// <returns>The response to send back to the client (wrapped by a task).</returns>
-    public virtual global::System.Threading.Tasks.Task<global::GalleryList> galleryList(global::GalleryListRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::Empty> galleryDelete(global::GalleryDeleteRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> enrollmentList(global::EnrollmentListRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> enrollmentDelete(global::EnrollmentDeleteRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> enrollmentDeleteConditional(global::EnrollmentDeleteRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    public virtual global::System.Threading.Tasks.Task<global::FaceRecordList> enrollmentTransfer(global::EnrollmentDeleteRequest request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-    /// <summary>
-    /// Test
-    /// </summary>
-    /// <param name="request">The request received from the client.</param>
-    /// <param name="context">The context of the server-side call handler being invoked.</param>
-    /// <returns>The response to send back to the client (wrapped by a task).</returns>
-    public virtual global::System.Threading.Tasks.Task<global::Matrix> echo(global::Matrix request, grpc::ServerCallContext context)
-    {
-      throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-    }
-
-  }
-
-  /// <summary>Client for FaceRecognition</summary>
-  public partial class FaceRecognitionClient : grpc::ClientBase<FaceRecognitionClient>
-  {
-    /// <summary>Creates a new client for FaceRecognition</summary>
-    /// <param name="channel">The channel to use to make remote calls.</param>
-    public FaceRecognitionClient(grpc::ChannelBase channel) : base(channel)
-    {
-    }
-    /// <summary>Creates a new client for FaceRecognition that uses a custom <c>CallInvoker</c>.</summary>
-    /// <param name="callInvoker">The callInvoker to use to make remote calls.</param>
-    public FaceRecognitionClient(grpc::CallInvoker callInvoker) : base(callInvoker)
-    {
-    }
-    /// <summary>Protected parameterless constructor to allow creation of test doubles.</summary>
-    protected FaceRecognitionClient() : base()
-    {
-    }
-    /// <summary>Protected constructor to allow creation of configured clients.</summary>
-    /// <param name="configuration">The client configuration.</param>
-    protected FaceRecognitionClient(ClientBaseConfiguration configuration) : base(configuration)
-    {
-    }
-
-    /// <summary>
-    /// Service info and defaults
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceServiceInfo status(global::FaceStatusRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return status(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Service info and defaults
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceServiceInfo status(global::FaceStatusRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_status, null, options, request);
-    }
-    /// <summary>
-    /// Service info and defaults
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceServiceInfo> statusAsync(global::FaceStatusRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return statusAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Service info and defaults
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceServiceInfo> statusAsync(global::FaceStatusRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_status, null, options, request);
-    }
-    /// <summary>
-    /// Simple operations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceRecordList detect(global::DetectRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detect(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Simple operations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceRecordList detect(global::DetectRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_detect, null, options, request);
-    }
-    /// <summary>
-    /// Simple operations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectAsync(global::DetectRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Simple operations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectAsync(global::DetectRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_detect, null, options, request);
-    }
-    public virtual global::FaceRecordList extract(global::ExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return extract(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList extract(global::ExtractRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_extract, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> extractAsync(global::ExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return extractAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> extractAsync(global::ExtractRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_extract, null, options, request);
-    }
-    public virtual global::Matrix score(global::ScoreRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return score(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::Matrix score(global::ScoreRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_score, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::Matrix> scoreAsync(global::ScoreRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return scoreAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::Matrix> scoreAsync(global::ScoreRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_score, null, options, request);
-    }
-    public virtual global::FaceRecordList enroll(global::EnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enroll(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList enroll(global::EnrollRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_enroll, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollAsync(global::EnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollAsync(global::EnrollRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_enroll, null, options, request);
-    }
-    public virtual global::FaceRecordList search(global::SearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return search(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList search(global::SearchRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_search, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> searchAsync(global::SearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return searchAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> searchAsync(global::SearchRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_search, null, options, request);
-    }
-    /// <summary>
-    /// Combined opperations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceRecordList detectExtract(global::DetectExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtract(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Combined opperations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::FaceRecordList detectExtract(global::DetectExtractRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_detectExtract, null, options, request);
-    }
-    /// <summary>
-    /// Combined opperations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractAsync(global::DetectExtractRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtractAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Combined opperations
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractAsync(global::DetectExtractRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_detectExtract, null, options, request);
-    }
-    public virtual global::FaceRecordList detectExtractEnroll(global::DetectExtractEnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtractEnroll(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList detectExtractEnroll(global::DetectExtractEnrollRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_detectExtractEnroll, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractEnrollAsync(global::DetectExtractEnrollRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtractEnrollAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractEnrollAsync(global::DetectExtractEnrollRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_detectExtractEnroll, null, options, request);
-    }
-    public virtual global::FaceRecordList detectExtractSearch(global::DetectExtractSearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtractSearch(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList detectExtractSearch(global::DetectExtractSearchRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_detectExtractSearch, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractSearchAsync(global::DetectExtractSearchRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return detectExtractSearchAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> detectExtractSearchAsync(global::DetectExtractSearchRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_detectExtractSearch, null, options, request);
-    }
-    /// <summary>
-    /// Gallery Management
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::GalleryList galleryList(global::GalleryListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return galleryList(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Gallery Management
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::GalleryList galleryList(global::GalleryListRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_galleryList, null, options, request);
-    }
-    /// <summary>
-    /// Gallery Management
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::GalleryList> galleryListAsync(global::GalleryListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return galleryListAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Gallery Management
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::GalleryList> galleryListAsync(global::GalleryListRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_galleryList, null, options, request);
-    }
-    public virtual global::Empty galleryDelete(global::GalleryDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return galleryDelete(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::Empty galleryDelete(global::GalleryDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_galleryDelete, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::Empty> galleryDeleteAsync(global::GalleryDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return galleryDeleteAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::Empty> galleryDeleteAsync(global::GalleryDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_galleryDelete, null, options, request);
-    }
-    public virtual global::FaceRecordList enrollmentList(global::EnrollmentListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentList(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList enrollmentList(global::EnrollmentListRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_enrollmentList, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentListAsync(global::EnrollmentListRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentListAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentListAsync(global::EnrollmentListRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_enrollmentList, null, options, request);
-    }
-    public virtual global::FaceRecordList enrollmentDelete(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentDelete(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList enrollmentDelete(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_enrollmentDelete, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentDeleteAsync(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentDeleteAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentDeleteAsync(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_enrollmentDelete, null, options, request);
-    }
-    public virtual global::FaceRecordList enrollmentDeleteConditional(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentDeleteConditional(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList enrollmentDeleteConditional(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_enrollmentDeleteConditional, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentDeleteConditionalAsync(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentDeleteConditionalAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentDeleteConditionalAsync(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_enrollmentDeleteConditional, null, options, request);
-    }
-    public virtual global::FaceRecordList enrollmentTransfer(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentTransfer(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual global::FaceRecordList enrollmentTransfer(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_enrollmentTransfer, null, options, request);
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentTransferAsync(global::EnrollmentDeleteRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return enrollmentTransferAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    public virtual grpc::AsyncUnaryCall<global::FaceRecordList> enrollmentTransferAsync(global::EnrollmentDeleteRequest request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_enrollmentTransfer, null, options, request);
-    }
-    /// <summary>
-    /// Test
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::Matrix echo(global::Matrix request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return echo(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Test
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The response received from the server.</returns>
-    public virtual global::Matrix echo(global::Matrix request, grpc::CallOptions options)
-    {
-      return CallInvoker.BlockingUnaryCall(__Method_echo, null, options, request);
-    }
-    /// <summary>
-    /// Test
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-    /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-    /// <param name="cancellationToken">An optional token for canceling the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::Matrix> echoAsync(global::Matrix request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-    {
-      return echoAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-    }
-    /// <summary>
-    /// Test
-    /// </summary>
-    /// <param name="request">The request to send to the server.</param>
-    /// <param name="options">The options for the call.</param>
-    /// <returns>The call object.</returns>
-    public virtual grpc::AsyncUnaryCall<global::Matrix> echoAsync(global::Matrix request, grpc::CallOptions options)
-    {
-      return CallInvoker.AsyncUnaryCall(__Method_echo, null, options, request);
-    }
-    /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
-    protected override FaceRecognitionClient NewInstance(ClientBaseConfiguration configuration)
-    {
-      return new FaceRecognitionClient(configuration);
-    }
-  }
-
-  /// <summary>Creates service definition that can be registered with a server</summary>
-  /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
-  public static grpc::ServerServiceDefinition BindService(FaceRecognitionBase serviceImpl)
-  {
-    return grpc::ServerServiceDefinition.CreateBuilder()
-        .AddMethod(__Method_status, serviceImpl.status)
-        .AddMethod(__Method_detect, serviceImpl.detect)
-        .AddMethod(__Method_extract, serviceImpl.extract)
-        .AddMethod(__Method_score, serviceImpl.score)
-        .AddMethod(__Method_enroll, serviceImpl.enroll)
-        .AddMethod(__Method_search, serviceImpl.search)
-        .AddMethod(__Method_detectExtract, serviceImpl.detectExtract)
-        .AddMethod(__Method_detectExtractEnroll, serviceImpl.detectExtractEnroll)
-        .AddMethod(__Method_detectExtractSearch, serviceImpl.detectExtractSearch)
-        .AddMethod(__Method_galleryList, serviceImpl.galleryList)
-        .AddMethod(__Method_galleryDelete, serviceImpl.galleryDelete)
-        .AddMethod(__Method_enrollmentList, serviceImpl.enrollmentList)
-        .AddMethod(__Method_enrollmentDelete, serviceImpl.enrollmentDelete)
-        .AddMethod(__Method_enrollmentDeleteConditional, serviceImpl.enrollmentDeleteConditional)
-        .AddMethod(__Method_enrollmentTransfer, serviceImpl.enrollmentTransfer)
-        .AddMethod(__Method_echo, serviceImpl.echo).Build();
-  }
-
-  /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
-  /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
-  /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
-  /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
-  public static void BindService(grpc::ServiceBinderBase serviceBinder, FaceRecognitionBase serviceImpl)
-  {
-    serviceBinder.AddMethod(__Method_status, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::FaceStatusRequest, global::FaceServiceInfo>(serviceImpl.status));
-    serviceBinder.AddMethod(__Method_detect, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::DetectRequest, global::FaceRecordList>(serviceImpl.detect));
-    serviceBinder.AddMethod(__Method_extract, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::ExtractRequest, global::FaceRecordList>(serviceImpl.extract));
-    serviceBinder.AddMethod(__Method_score, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::ScoreRequest, global::Matrix>(serviceImpl.score));
-    serviceBinder.AddMethod(__Method_enroll, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::EnrollRequest, global::FaceRecordList>(serviceImpl.enroll));
-    serviceBinder.AddMethod(__Method_search, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SearchRequest, global::FaceRecordList>(serviceImpl.search));
-    serviceBinder.AddMethod(__Method_detectExtract, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::DetectExtractRequest, global::FaceRecordList>(serviceImpl.detectExtract));
-    serviceBinder.AddMethod(__Method_detectExtractEnroll, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::DetectExtractEnrollRequest, global::FaceRecordList>(serviceImpl.detectExtractEnroll));
-    serviceBinder.AddMethod(__Method_detectExtractSearch, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::DetectExtractSearchRequest, global::FaceRecordList>(serviceImpl.detectExtractSearch));
-    serviceBinder.AddMethod(__Method_galleryList, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::GalleryListRequest, global::GalleryList>(serviceImpl.galleryList));
-    serviceBinder.AddMethod(__Method_galleryDelete, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::GalleryDeleteRequest, global::Empty>(serviceImpl.galleryDelete));
-    serviceBinder.AddMethod(__Method_enrollmentList, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::EnrollmentListRequest, global::FaceRecordList>(serviceImpl.enrollmentList));
-    serviceBinder.AddMethod(__Method_enrollmentDelete, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::EnrollmentDeleteRequest, global::FaceRecordList>(serviceImpl.enrollmentDelete));
-    serviceBinder.AddMethod(__Method_enrollmentDeleteConditional, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::EnrollmentDeleteRequest, global::FaceRecordList>(serviceImpl.enrollmentDeleteConditional));
-    serviceBinder.AddMethod(__Method_enrollmentTransfer, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::EnrollmentDeleteRequest, global::FaceRecordList>(serviceImpl.enrollmentTransfer));
-    serviceBinder.AddMethod(__Method_echo, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Matrix, global::Matrix>(serviceImpl.echo));
-  }
-
 }
 #endregion

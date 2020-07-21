@@ -9,664 +9,668 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-/// <summary>Holder for reflection information generated from faro/proto/image.proto</summary>
-public static partial class ImageReflection {
+namespace Faro.Proto {
 
-  #region Descriptor
-  /// <summary>File descriptor for faro/proto/image.proto</summary>
-  public static pbr::FileDescriptor Descriptor {
-    get { return descriptor; }
+  /// <summary>Holder for reflection information generated from faro/proto/image.proto</summary>
+  public static partial class ImageReflection {
+
+    #region Descriptor
+    /// <summary>File descriptor for faro/proto/image.proto</summary>
+    public static pbr::FileDescriptor Descriptor {
+      get { return descriptor; }
+    }
+    private static pbr::FileDescriptor descriptor;
+
+    static ImageReflection() {
+      byte[] descriptorData = global::System.Convert.FromBase64String(
+          string.Concat(
+            "ChZmYXJvL3Byb3RvL2ltYWdlLnByb3RvIpYDCgVJbWFnZRINCgV3aWR0aBgB",
+            "IAEoBRIOCgZoZWlnaHQYAiABKAUSEAoIY2hhbm5lbHMYAyABKAUSHQoEdHlw",
+            "ZRgEIAEoDjIPLkltYWdlLkRhdGFUeXBlEhMKC2Rlc2NyaXB0aW9uGAUgASgJ",
+            "EgwKBGRhdGEYBiABKAwSDAoEZGF0ZRgIIAEoCRIMCgR0aW1lGAkgASgJEg4K",
+            "Bm1vZHVsZRgKIAEoBRIOCgZjYW1lcmEYCyABKAUSDQoFZXZlbnQYDCABKAUS",
+            "EQoJaW1hZ2VfbnVtGA0gASgFEhUKDWV4cG9zdXJlX3RpbWUYDiABKAISEAoI",
+            "Z2Fpbl9yYXcYDyABKAISDgoGZl9zdG9wGBAgASgCEhEKCW5kX2ZpbHRlchgR",
+            "IAEoAhIVCg1wb2xhcml6ZXJfYW5nGBIgASgCEg4KBnNvdXJjZRgTIAEoCSJJ",
+            "CghEYXRhVHlwZRIJCgVVSU5UOBAAEgoKBlVJTlQxNhABEgsKB0ZMT0FUMzIQ",
+            "AhIHCgNVUkwQAxIHCgNQTkcQBBIHCgNKUEcQBUINqgIKRmFyby5Qcm90b2IG",
+            "cHJvdG8z"));
+      descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
+          new pbr::FileDescriptor[] { },
+          new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Faro.Proto.Image), global::Faro.Proto.Image.Parser, new[]{ "Width", "Height", "Channels", "Type", "Description", "Data", "Date", "Time", "Module", "Camera", "Event", "ImageNum", "ExposureTime", "GainRaw", "FStop", "NdFilter", "PolarizerAng", "Source" }, null, new[]{ typeof(global::Faro.Proto.Image.Types.DataType) }, null)
+          }));
+    }
+    #endregion
+
   }
-  private static pbr::FileDescriptor descriptor;
+  #region Messages
+  public sealed partial class Image : pb::IMessage<Image> {
+    private static readonly pb::MessageParser<Image> _parser = new pb::MessageParser<Image>(() => new Image());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<Image> Parser { get { return _parser; } }
 
-  static ImageReflection() {
-    byte[] descriptorData = global::System.Convert.FromBase64String(
-        string.Concat(
-          "ChZmYXJvL3Byb3RvL2ltYWdlLnByb3RvIpYDCgVJbWFnZRINCgV3aWR0aBgB",
-          "IAEoBRIOCgZoZWlnaHQYAiABKAUSEAoIY2hhbm5lbHMYAyABKAUSHQoEdHlw",
-          "ZRgEIAEoDjIPLkltYWdlLkRhdGFUeXBlEhMKC2Rlc2NyaXB0aW9uGAUgASgJ",
-          "EgwKBGRhdGEYBiABKAwSDAoEZGF0ZRgIIAEoCRIMCgR0aW1lGAkgASgJEg4K",
-          "Bm1vZHVsZRgKIAEoBRIOCgZjYW1lcmEYCyABKAUSDQoFZXZlbnQYDCABKAUS",
-          "EQoJaW1hZ2VfbnVtGA0gASgFEhUKDWV4cG9zdXJlX3RpbWUYDiABKAISEAoI",
-          "Z2Fpbl9yYXcYDyABKAISDgoGZl9zdG9wGBAgASgCEhEKCW5kX2ZpbHRlchgR",
-          "IAEoAhIVCg1wb2xhcml6ZXJfYW5nGBIgASgCEg4KBnNvdXJjZRgTIAEoCSJJ",
-          "CghEYXRhVHlwZRIJCgVVSU5UOBAAEgoKBlVJTlQxNhABEgsKB0ZMT0FUMzIQ",
-          "AhIHCgNVUkwQAxIHCgNQTkcQBBIHCgNKUEcQBWIGcHJvdG8z"));
-    descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { },
-        new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::Image), global::Image.Parser, new[]{ "Width", "Height", "Channels", "Type", "Description", "Data", "Date", "Time", "Module", "Camera", "Event", "ImageNum", "ExposureTime", "GainRaw", "FStop", "NdFilter", "PolarizerAng", "Source" }, null, new[]{ typeof(global::Image.Types.DataType) }, null)
-        }));
-  }
-  #endregion
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Faro.Proto.ImageReflection.Descriptor.MessageTypes[0]; }
+    }
 
-}
-#region Messages
-public sealed partial class Image : pb::IMessage<Image> {
-  private static readonly pb::MessageParser<Image> _parser = new pb::MessageParser<Image>(() => new Image());
-  private pb::UnknownFieldSet _unknownFields;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public static pb::MessageParser<Image> Parser { get { return _parser; } }
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public static pbr::MessageDescriptor Descriptor {
-    get { return global::ImageReflection.Descriptor.MessageTypes[0]; }
-  }
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Image() {
+      OnConstruction();
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  pbr::MessageDescriptor pb::IMessage.Descriptor {
-    get { return Descriptor; }
-  }
+    partial void OnConstruction();
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public Image() {
-    OnConstruction();
-  }
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Image(Image other) : this() {
+      width_ = other.width_;
+      height_ = other.height_;
+      channels_ = other.channels_;
+      type_ = other.type_;
+      description_ = other.description_;
+      data_ = other.data_;
+      date_ = other.date_;
+      time_ = other.time_;
+      module_ = other.module_;
+      camera_ = other.camera_;
+      event_ = other.event_;
+      imageNum_ = other.imageNum_;
+      exposureTime_ = other.exposureTime_;
+      gainRaw_ = other.gainRaw_;
+      fStop_ = other.fStop_;
+      ndFilter_ = other.ndFilter_;
+      polarizerAng_ = other.polarizerAng_;
+      source_ = other.source_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
 
-  partial void OnConstruction();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Image Clone() {
+      return new Image(this);
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public Image(Image other) : this() {
-    width_ = other.width_;
-    height_ = other.height_;
-    channels_ = other.channels_;
-    type_ = other.type_;
-    description_ = other.description_;
-    data_ = other.data_;
-    date_ = other.date_;
-    time_ = other.time_;
-    module_ = other.module_;
-    camera_ = other.camera_;
-    event_ = other.event_;
-    imageNum_ = other.imageNum_;
-    exposureTime_ = other.exposureTime_;
-    gainRaw_ = other.gainRaw_;
-    fStop_ = other.fStop_;
-    ndFilter_ = other.ndFilter_;
-    polarizerAng_ = other.polarizerAng_;
-    source_ = other.source_;
-    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-  }
+    /// <summary>Field number for the "width" field.</summary>
+    public const int WidthFieldNumber = 1;
+    private int width_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Width {
+      get { return width_; }
+      set {
+        width_ = value;
+      }
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public Image Clone() {
-    return new Image(this);
-  }
+    /// <summary>Field number for the "height" field.</summary>
+    public const int HeightFieldNumber = 2;
+    private int height_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Height {
+      get { return height_; }
+      set {
+        height_ = value;
+      }
+    }
 
-  /// <summary>Field number for the "width" field.</summary>
-  public const int WidthFieldNumber = 1;
-  private int width_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Width {
-    get { return width_; }
-    set {
-      width_ = value;
+    /// <summary>Field number for the "channels" field.</summary>
+    public const int ChannelsFieldNumber = 3;
+    private int channels_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Channels {
+      get { return channels_; }
+      set {
+        channels_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "height" field.</summary>
-  public const int HeightFieldNumber = 2;
-  private int height_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Height {
-    get { return height_; }
-    set {
-      height_ = value;
+    /// <summary>Field number for the "type" field.</summary>
+    public const int TypeFieldNumber = 4;
+    private global::Faro.Proto.Image.Types.DataType type_ = 0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Faro.Proto.Image.Types.DataType Type {
+      get { return type_; }
+      set {
+        type_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "channels" field.</summary>
-  public const int ChannelsFieldNumber = 3;
-  private int channels_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Channels {
-    get { return channels_; }
-    set {
-      channels_ = value;
+    /// <summary>Field number for the "description" field.</summary>
+    public const int DescriptionFieldNumber = 5;
+    private string description_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Description {
+      get { return description_; }
+      set {
+        description_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
-  }
 
-  /// <summary>Field number for the "type" field.</summary>
-  public const int TypeFieldNumber = 4;
-  private global::Image.Types.DataType type_ = 0;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public global::Image.Types.DataType Type {
-    get { return type_; }
-    set {
-      type_ = value;
+    /// <summary>Field number for the "data" field.</summary>
+    public const int DataFieldNumber = 6;
+    private pb::ByteString data_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString Data {
+      get { return data_; }
+      set {
+        data_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
-  }
 
-  /// <summary>Field number for the "description" field.</summary>
-  public const int DescriptionFieldNumber = 5;
-  private string description_ = "";
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public string Description {
-    get { return description_; }
-    set {
-      description_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    /// <summary>Field number for the "date" field.</summary>
+    public const int DateFieldNumber = 8;
+    private string date_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Date {
+      get { return date_; }
+      set {
+        date_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
-  }
 
-  /// <summary>Field number for the "data" field.</summary>
-  public const int DataFieldNumber = 6;
-  private pb::ByteString data_ = pb::ByteString.Empty;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public pb::ByteString Data {
-    get { return data_; }
-    set {
-      data_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    /// <summary>Field number for the "time" field.</summary>
+    public const int TimeFieldNumber = 9;
+    private string time_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Time {
+      get { return time_; }
+      set {
+        time_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
-  }
 
-  /// <summary>Field number for the "date" field.</summary>
-  public const int DateFieldNumber = 8;
-  private string date_ = "";
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public string Date {
-    get { return date_; }
-    set {
-      date_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    /// <summary>Field number for the "module" field.</summary>
+    public const int ModuleFieldNumber = 10;
+    private int module_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Module {
+      get { return module_; }
+      set {
+        module_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "time" field.</summary>
-  public const int TimeFieldNumber = 9;
-  private string time_ = "";
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public string Time {
-    get { return time_; }
-    set {
-      time_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    /// <summary>Field number for the "camera" field.</summary>
+    public const int CameraFieldNumber = 11;
+    private int camera_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Camera {
+      get { return camera_; }
+      set {
+        camera_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "module" field.</summary>
-  public const int ModuleFieldNumber = 10;
-  private int module_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Module {
-    get { return module_; }
-    set {
-      module_ = value;
+    /// <summary>Field number for the "event" field.</summary>
+    public const int EventFieldNumber = 12;
+    private int event_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Event {
+      get { return event_; }
+      set {
+        event_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "camera" field.</summary>
-  public const int CameraFieldNumber = 11;
-  private int camera_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Camera {
-    get { return camera_; }
-    set {
-      camera_ = value;
+    /// <summary>Field number for the "image_num" field.</summary>
+    public const int ImageNumFieldNumber = 13;
+    private int imageNum_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int ImageNum {
+      get { return imageNum_; }
+      set {
+        imageNum_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "event" field.</summary>
-  public const int EventFieldNumber = 12;
-  private int event_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Event {
-    get { return event_; }
-    set {
-      event_ = value;
+    /// <summary>Field number for the "exposure_time" field.</summary>
+    public const int ExposureTimeFieldNumber = 14;
+    private float exposureTime_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float ExposureTime {
+      get { return exposureTime_; }
+      set {
+        exposureTime_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "image_num" field.</summary>
-  public const int ImageNumFieldNumber = 13;
-  private int imageNum_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int ImageNum {
-    get { return imageNum_; }
-    set {
-      imageNum_ = value;
+    /// <summary>Field number for the "gain_raw" field.</summary>
+    public const int GainRawFieldNumber = 15;
+    private float gainRaw_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float GainRaw {
+      get { return gainRaw_; }
+      set {
+        gainRaw_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "exposure_time" field.</summary>
-  public const int ExposureTimeFieldNumber = 14;
-  private float exposureTime_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public float ExposureTime {
-    get { return exposureTime_; }
-    set {
-      exposureTime_ = value;
+    /// <summary>Field number for the "f_stop" field.</summary>
+    public const int FStopFieldNumber = 16;
+    private float fStop_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float FStop {
+      get { return fStop_; }
+      set {
+        fStop_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "gain_raw" field.</summary>
-  public const int GainRawFieldNumber = 15;
-  private float gainRaw_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public float GainRaw {
-    get { return gainRaw_; }
-    set {
-      gainRaw_ = value;
+    /// <summary>Field number for the "nd_filter" field.</summary>
+    public const int NdFilterFieldNumber = 17;
+    private float ndFilter_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float NdFilter {
+      get { return ndFilter_; }
+      set {
+        ndFilter_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "f_stop" field.</summary>
-  public const int FStopFieldNumber = 16;
-  private float fStop_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public float FStop {
-    get { return fStop_; }
-    set {
-      fStop_ = value;
+    /// <summary>Field number for the "polarizer_ang" field.</summary>
+    public const int PolarizerAngFieldNumber = 18;
+    private float polarizerAng_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float PolarizerAng {
+      get { return polarizerAng_; }
+      set {
+        polarizerAng_ = value;
+      }
     }
-  }
 
-  /// <summary>Field number for the "nd_filter" field.</summary>
-  public const int NdFilterFieldNumber = 17;
-  private float ndFilter_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public float NdFilter {
-    get { return ndFilter_; }
-    set {
-      ndFilter_ = value;
+    /// <summary>Field number for the "source" field.</summary>
+    public const int SourceFieldNumber = 19;
+    private string source_ = "";
+    /// <summary>
+    /// Like a filename
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Source {
+      get { return source_; }
+      set {
+        source_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
-  }
 
-  /// <summary>Field number for the "polarizer_ang" field.</summary>
-  public const int PolarizerAngFieldNumber = 18;
-  private float polarizerAng_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public float PolarizerAng {
-    get { return polarizerAng_; }
-    set {
-      polarizerAng_ = value;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as Image);
     }
-  }
 
-  /// <summary>Field number for the "source" field.</summary>
-  public const int SourceFieldNumber = 19;
-  private string source_ = "";
-  /// <summary>
-  /// Like a filename
-  /// </summary>
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public string Source {
-    get { return source_; }
-    set {
-      source_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(Image other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Width != other.Width) return false;
+      if (Height != other.Height) return false;
+      if (Channels != other.Channels) return false;
+      if (Type != other.Type) return false;
+      if (Description != other.Description) return false;
+      if (Data != other.Data) return false;
+      if (Date != other.Date) return false;
+      if (Time != other.Time) return false;
+      if (Module != other.Module) return false;
+      if (Camera != other.Camera) return false;
+      if (Event != other.Event) return false;
+      if (ImageNum != other.ImageNum) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(ExposureTime, other.ExposureTime)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(GainRaw, other.GainRaw)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(FStop, other.FStop)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(NdFilter, other.NdFilter)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PolarizerAng, other.PolarizerAng)) return false;
+      if (Source != other.Source) return false;
+      return Equals(_unknownFields, other._unknownFields);
     }
-  }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public override bool Equals(object other) {
-    return Equals(other as Image);
-  }
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Width != 0) hash ^= Width.GetHashCode();
+      if (Height != 0) hash ^= Height.GetHashCode();
+      if (Channels != 0) hash ^= Channels.GetHashCode();
+      if (Type != 0) hash ^= Type.GetHashCode();
+      if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (Data.Length != 0) hash ^= Data.GetHashCode();
+      if (Date.Length != 0) hash ^= Date.GetHashCode();
+      if (Time.Length != 0) hash ^= Time.GetHashCode();
+      if (Module != 0) hash ^= Module.GetHashCode();
+      if (Camera != 0) hash ^= Camera.GetHashCode();
+      if (Event != 0) hash ^= Event.GetHashCode();
+      if (ImageNum != 0) hash ^= ImageNum.GetHashCode();
+      if (ExposureTime != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(ExposureTime);
+      if (GainRaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(GainRaw);
+      if (FStop != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(FStop);
+      if (NdFilter != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(NdFilter);
+      if (PolarizerAng != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PolarizerAng);
+      if (Source.Length != 0) hash ^= Source.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public bool Equals(Image other) {
-    if (ReferenceEquals(other, null)) {
-      return false;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
     }
-    if (ReferenceEquals(other, this)) {
-      return true;
-    }
-    if (Width != other.Width) return false;
-    if (Height != other.Height) return false;
-    if (Channels != other.Channels) return false;
-    if (Type != other.Type) return false;
-    if (Description != other.Description) return false;
-    if (Data != other.Data) return false;
-    if (Date != other.Date) return false;
-    if (Time != other.Time) return false;
-    if (Module != other.Module) return false;
-    if (Camera != other.Camera) return false;
-    if (Event != other.Event) return false;
-    if (ImageNum != other.ImageNum) return false;
-    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(ExposureTime, other.ExposureTime)) return false;
-    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(GainRaw, other.GainRaw)) return false;
-    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(FStop, other.FStop)) return false;
-    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(NdFilter, other.NdFilter)) return false;
-    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(PolarizerAng, other.PolarizerAng)) return false;
-    if (Source != other.Source) return false;
-    return Equals(_unknownFields, other._unknownFields);
-  }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public override int GetHashCode() {
-    int hash = 1;
-    if (Width != 0) hash ^= Width.GetHashCode();
-    if (Height != 0) hash ^= Height.GetHashCode();
-    if (Channels != 0) hash ^= Channels.GetHashCode();
-    if (Type != 0) hash ^= Type.GetHashCode();
-    if (Description.Length != 0) hash ^= Description.GetHashCode();
-    if (Data.Length != 0) hash ^= Data.GetHashCode();
-    if (Date.Length != 0) hash ^= Date.GetHashCode();
-    if (Time.Length != 0) hash ^= Time.GetHashCode();
-    if (Module != 0) hash ^= Module.GetHashCode();
-    if (Camera != 0) hash ^= Camera.GetHashCode();
-    if (Event != 0) hash ^= Event.GetHashCode();
-    if (ImageNum != 0) hash ^= ImageNum.GetHashCode();
-    if (ExposureTime != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(ExposureTime);
-    if (GainRaw != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(GainRaw);
-    if (FStop != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(FStop);
-    if (NdFilter != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(NdFilter);
-    if (PolarizerAng != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PolarizerAng);
-    if (Source.Length != 0) hash ^= Source.GetHashCode();
-    if (_unknownFields != null) {
-      hash ^= _unknownFields.GetHashCode();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Width != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Width);
+      }
+      if (Height != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Height);
+      }
+      if (Channels != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Channels);
+      }
+      if (Type != 0) {
+        output.WriteRawTag(32);
+        output.WriteEnum((int) Type);
+      }
+      if (Description.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Description);
+      }
+      if (Data.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteBytes(Data);
+      }
+      if (Date.Length != 0) {
+        output.WriteRawTag(66);
+        output.WriteString(Date);
+      }
+      if (Time.Length != 0) {
+        output.WriteRawTag(74);
+        output.WriteString(Time);
+      }
+      if (Module != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(Module);
+      }
+      if (Camera != 0) {
+        output.WriteRawTag(88);
+        output.WriteInt32(Camera);
+      }
+      if (Event != 0) {
+        output.WriteRawTag(96);
+        output.WriteInt32(Event);
+      }
+      if (ImageNum != 0) {
+        output.WriteRawTag(104);
+        output.WriteInt32(ImageNum);
+      }
+      if (ExposureTime != 0F) {
+        output.WriteRawTag(117);
+        output.WriteFloat(ExposureTime);
+      }
+      if (GainRaw != 0F) {
+        output.WriteRawTag(125);
+        output.WriteFloat(GainRaw);
+      }
+      if (FStop != 0F) {
+        output.WriteRawTag(133, 1);
+        output.WriteFloat(FStop);
+      }
+      if (NdFilter != 0F) {
+        output.WriteRawTag(141, 1);
+        output.WriteFloat(NdFilter);
+      }
+      if (PolarizerAng != 0F) {
+        output.WriteRawTag(149, 1);
+        output.WriteFloat(PolarizerAng);
+      }
+      if (Source.Length != 0) {
+        output.WriteRawTag(154, 1);
+        output.WriteString(Source);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
     }
-    return hash;
-  }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public override string ToString() {
-    return pb::JsonFormatter.ToDiagnosticString(this);
-  }
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Width != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Width);
+      }
+      if (Height != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Height);
+      }
+      if (Channels != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Channels);
+      }
+      if (Type != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+      }
+      if (Description.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (Data.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Data);
+      }
+      if (Date.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Date);
+      }
+      if (Time.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Time);
+      }
+      if (Module != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Module);
+      }
+      if (Camera != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Camera);
+      }
+      if (Event != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Event);
+      }
+      if (ImageNum != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ImageNum);
+      }
+      if (ExposureTime != 0F) {
+        size += 1 + 4;
+      }
+      if (GainRaw != 0F) {
+        size += 1 + 4;
+      }
+      if (FStop != 0F) {
+        size += 2 + 4;
+      }
+      if (NdFilter != 0F) {
+        size += 2 + 4;
+      }
+      if (PolarizerAng != 0F) {
+        size += 2 + 4;
+      }
+      if (Source.Length != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(Source);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public void WriteTo(pb::CodedOutputStream output) {
-    if (Width != 0) {
-      output.WriteRawTag(8);
-      output.WriteInt32(Width);
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(Image other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Width != 0) {
+        Width = other.Width;
+      }
+      if (other.Height != 0) {
+        Height = other.Height;
+      }
+      if (other.Channels != 0) {
+        Channels = other.Channels;
+      }
+      if (other.Type != 0) {
+        Type = other.Type;
+      }
+      if (other.Description.Length != 0) {
+        Description = other.Description;
+      }
+      if (other.Data.Length != 0) {
+        Data = other.Data;
+      }
+      if (other.Date.Length != 0) {
+        Date = other.Date;
+      }
+      if (other.Time.Length != 0) {
+        Time = other.Time;
+      }
+      if (other.Module != 0) {
+        Module = other.Module;
+      }
+      if (other.Camera != 0) {
+        Camera = other.Camera;
+      }
+      if (other.Event != 0) {
+        Event = other.Event;
+      }
+      if (other.ImageNum != 0) {
+        ImageNum = other.ImageNum;
+      }
+      if (other.ExposureTime != 0F) {
+        ExposureTime = other.ExposureTime;
+      }
+      if (other.GainRaw != 0F) {
+        GainRaw = other.GainRaw;
+      }
+      if (other.FStop != 0F) {
+        FStop = other.FStop;
+      }
+      if (other.NdFilter != 0F) {
+        NdFilter = other.NdFilter;
+      }
+      if (other.PolarizerAng != 0F) {
+        PolarizerAng = other.PolarizerAng;
+      }
+      if (other.Source.Length != 0) {
+        Source = other.Source;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
-    if (Height != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(Height);
-    }
-    if (Channels != 0) {
-      output.WriteRawTag(24);
-      output.WriteInt32(Channels);
-    }
-    if (Type != 0) {
-      output.WriteRawTag(32);
-      output.WriteEnum((int) Type);
-    }
-    if (Description.Length != 0) {
-      output.WriteRawTag(42);
-      output.WriteString(Description);
-    }
-    if (Data.Length != 0) {
-      output.WriteRawTag(50);
-      output.WriteBytes(Data);
-    }
-    if (Date.Length != 0) {
-      output.WriteRawTag(66);
-      output.WriteString(Date);
-    }
-    if (Time.Length != 0) {
-      output.WriteRawTag(74);
-      output.WriteString(Time);
-    }
-    if (Module != 0) {
-      output.WriteRawTag(80);
-      output.WriteInt32(Module);
-    }
-    if (Camera != 0) {
-      output.WriteRawTag(88);
-      output.WriteInt32(Camera);
-    }
-    if (Event != 0) {
-      output.WriteRawTag(96);
-      output.WriteInt32(Event);
-    }
-    if (ImageNum != 0) {
-      output.WriteRawTag(104);
-      output.WriteInt32(ImageNum);
-    }
-    if (ExposureTime != 0F) {
-      output.WriteRawTag(117);
-      output.WriteFloat(ExposureTime);
-    }
-    if (GainRaw != 0F) {
-      output.WriteRawTag(125);
-      output.WriteFloat(GainRaw);
-    }
-    if (FStop != 0F) {
-      output.WriteRawTag(133, 1);
-      output.WriteFloat(FStop);
-    }
-    if (NdFilter != 0F) {
-      output.WriteRawTag(141, 1);
-      output.WriteFloat(NdFilter);
-    }
-    if (PolarizerAng != 0F) {
-      output.WriteRawTag(149, 1);
-      output.WriteFloat(PolarizerAng);
-    }
-    if (Source.Length != 0) {
-      output.WriteRawTag(154, 1);
-      output.WriteString(Source);
-    }
-    if (_unknownFields != null) {
-      _unknownFields.WriteTo(output);
-    }
-  }
 
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int CalculateSize() {
-    int size = 0;
-    if (Width != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Width);
-    }
-    if (Height != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Height);
-    }
-    if (Channels != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Channels);
-    }
-    if (Type != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
-    }
-    if (Description.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
-    }
-    if (Data.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeBytesSize(Data);
-    }
-    if (Date.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(Date);
-    }
-    if (Time.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(Time);
-    }
-    if (Module != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Module);
-    }
-    if (Camera != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Camera);
-    }
-    if (Event != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Event);
-    }
-    if (ImageNum != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(ImageNum);
-    }
-    if (ExposureTime != 0F) {
-      size += 1 + 4;
-    }
-    if (GainRaw != 0F) {
-      size += 1 + 4;
-    }
-    if (FStop != 0F) {
-      size += 2 + 4;
-    }
-    if (NdFilter != 0F) {
-      size += 2 + 4;
-    }
-    if (PolarizerAng != 0F) {
-      size += 2 + 4;
-    }
-    if (Source.Length != 0) {
-      size += 2 + pb::CodedOutputStream.ComputeStringSize(Source);
-    }
-    if (_unknownFields != null) {
-      size += _unknownFields.CalculateSize();
-    }
-    return size;
-  }
-
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public void MergeFrom(Image other) {
-    if (other == null) {
-      return;
-    }
-    if (other.Width != 0) {
-      Width = other.Width;
-    }
-    if (other.Height != 0) {
-      Height = other.Height;
-    }
-    if (other.Channels != 0) {
-      Channels = other.Channels;
-    }
-    if (other.Type != 0) {
-      Type = other.Type;
-    }
-    if (other.Description.Length != 0) {
-      Description = other.Description;
-    }
-    if (other.Data.Length != 0) {
-      Data = other.Data;
-    }
-    if (other.Date.Length != 0) {
-      Date = other.Date;
-    }
-    if (other.Time.Length != 0) {
-      Time = other.Time;
-    }
-    if (other.Module != 0) {
-      Module = other.Module;
-    }
-    if (other.Camera != 0) {
-      Camera = other.Camera;
-    }
-    if (other.Event != 0) {
-      Event = other.Event;
-    }
-    if (other.ImageNum != 0) {
-      ImageNum = other.ImageNum;
-    }
-    if (other.ExposureTime != 0F) {
-      ExposureTime = other.ExposureTime;
-    }
-    if (other.GainRaw != 0F) {
-      GainRaw = other.GainRaw;
-    }
-    if (other.FStop != 0F) {
-      FStop = other.FStop;
-    }
-    if (other.NdFilter != 0F) {
-      NdFilter = other.NdFilter;
-    }
-    if (other.PolarizerAng != 0F) {
-      PolarizerAng = other.PolarizerAng;
-    }
-    if (other.Source.Length != 0) {
-      Source = other.Source;
-    }
-    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-  }
-
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public void MergeFrom(pb::CodedInputStream input) {
-    uint tag;
-    while ((tag = input.ReadTag()) != 0) {
-      switch(tag) {
-        default:
-          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-          break;
-        case 8: {
-          Width = input.ReadInt32();
-          break;
-        }
-        case 16: {
-          Height = input.ReadInt32();
-          break;
-        }
-        case 24: {
-          Channels = input.ReadInt32();
-          break;
-        }
-        case 32: {
-          Type = (global::Image.Types.DataType) input.ReadEnum();
-          break;
-        }
-        case 42: {
-          Description = input.ReadString();
-          break;
-        }
-        case 50: {
-          Data = input.ReadBytes();
-          break;
-        }
-        case 66: {
-          Date = input.ReadString();
-          break;
-        }
-        case 74: {
-          Time = input.ReadString();
-          break;
-        }
-        case 80: {
-          Module = input.ReadInt32();
-          break;
-        }
-        case 88: {
-          Camera = input.ReadInt32();
-          break;
-        }
-        case 96: {
-          Event = input.ReadInt32();
-          break;
-        }
-        case 104: {
-          ImageNum = input.ReadInt32();
-          break;
-        }
-        case 117: {
-          ExposureTime = input.ReadFloat();
-          break;
-        }
-        case 125: {
-          GainRaw = input.ReadFloat();
-          break;
-        }
-        case 133: {
-          FStop = input.ReadFloat();
-          break;
-        }
-        case 141: {
-          NdFilter = input.ReadFloat();
-          break;
-        }
-        case 149: {
-          PolarizerAng = input.ReadFloat();
-          break;
-        }
-        case 154: {
-          Source = input.ReadString();
-          break;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Width = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            Height = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Channels = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            Type = (global::Faro.Proto.Image.Types.DataType) input.ReadEnum();
+            break;
+          }
+          case 42: {
+            Description = input.ReadString();
+            break;
+          }
+          case 50: {
+            Data = input.ReadBytes();
+            break;
+          }
+          case 66: {
+            Date = input.ReadString();
+            break;
+          }
+          case 74: {
+            Time = input.ReadString();
+            break;
+          }
+          case 80: {
+            Module = input.ReadInt32();
+            break;
+          }
+          case 88: {
+            Camera = input.ReadInt32();
+            break;
+          }
+          case 96: {
+            Event = input.ReadInt32();
+            break;
+          }
+          case 104: {
+            ImageNum = input.ReadInt32();
+            break;
+          }
+          case 117: {
+            ExposureTime = input.ReadFloat();
+            break;
+          }
+          case 125: {
+            GainRaw = input.ReadFloat();
+            break;
+          }
+          case 133: {
+            FStop = input.ReadFloat();
+            break;
+          }
+          case 141: {
+            NdFilter = input.ReadFloat();
+            break;
+          }
+          case 149: {
+            PolarizerAng = input.ReadFloat();
+            break;
+          }
+          case 154: {
+            Source = input.ReadString();
+            break;
+          }
         }
       }
     }
-  }
 
-  #region Nested types
-  /// <summary>Container for nested types declared in the Image message type.</summary>
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public static partial class Types {
-    public enum DataType {
-      [pbr::OriginalName("UINT8")] Uint8 = 0,
-      [pbr::OriginalName("UINT16")] Uint16 = 1,
-      [pbr::OriginalName("FLOAT32")] Float32 = 2,
-      [pbr::OriginalName("URL")] Url = 3,
-      [pbr::OriginalName("PNG")] Png = 4,
-      [pbr::OriginalName("JPG")] Jpg = 5,
+    #region Nested types
+    /// <summary>Container for nested types declared in the Image message type.</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static partial class Types {
+      public enum DataType {
+        [pbr::OriginalName("UINT8")] Uint8 = 0,
+        [pbr::OriginalName("UINT16")] Uint16 = 1,
+        [pbr::OriginalName("FLOAT32")] Float32 = 2,
+        [pbr::OriginalName("URL")] Url = 3,
+        [pbr::OriginalName("PNG")] Png = 4,
+        [pbr::OriginalName("JPG")] Jpg = 5,
+      }
+
     }
+    #endregion
 
   }
+
   #endregion
 
 }
-
-#endregion
-
 
 #endregion Designer generated code

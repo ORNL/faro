@@ -142,7 +142,8 @@ const char descriptor_table_protodef_faro_2fproto_2fgeometry_2eproto[] =
   "\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\r\n\005width\030\003 \001(\002\022\016\n\006heig"
   "ht\030\004 \001(\002\"\037\n\007Point2D\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001("
   "\002\"\032\n\006Vector\022\020\n\004data\030\001 \003(\002B\002\020\001\"\037\n\006Matrix\022"
-  "\025\n\004rows\030\001 \003(\0132\007.Vectorb\006proto3"
+  "\025\n\004rows\030\001 \003(\0132\007.VectorB\r\252\002\nFaro.Protob\006p"
+  "roto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_faro_2fproto_2fgeometry_2eproto_deps[1] = {
 };
@@ -155,7 +156,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_far
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_faro_2fproto_2fgeometry_2eproto_once;
 static bool descriptor_table_faro_2fproto_2fgeometry_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_faro_2fproto_2fgeometry_2eproto = {
-  &descriptor_table_faro_2fproto_2fgeometry_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fgeometry_2eproto, "faro/proto/geometry.proto", 190,
+  &descriptor_table_faro_2fproto_2fgeometry_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fgeometry_2eproto, "faro/proto/geometry.proto", 205,
   &descriptor_table_faro_2fproto_2fgeometry_2eproto_once, descriptor_table_faro_2fproto_2fgeometry_2eproto_sccs, descriptor_table_faro_2fproto_2fgeometry_2eproto_deps, 4, 0,
   schemas, file_default_instances, TableStruct_faro_2fproto_2fgeometry_2eproto::offsets,
   file_level_metadata_faro_2fproto_2fgeometry_2eproto, 4, file_level_enum_descriptors_faro_2fproto_2fgeometry_2eproto, file_level_service_descriptors_faro_2fproto_2fgeometry_2eproto,

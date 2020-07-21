@@ -24,6 +24,8 @@
 
 syntax = "proto3";
 
+option csharp_namespace="Faro.Proto";
+
 
 /* This is basically a 3 dimensional array.  You should check that there is
  * enough data to fill the array in the data list.

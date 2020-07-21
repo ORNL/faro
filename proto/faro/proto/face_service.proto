@@ -28,6 +28,7 @@ syntax = "proto3";
 import "faro/proto/image.proto";
 import "faro/proto/geometry.proto";
 
+option csharp_namespace="Faro.Proto";
 
 
 

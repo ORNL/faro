@@ -81,8 +81,8 @@ const char descriptor_table_protodef_faro_2fproto_2fimage_2eproto[] =
   " \001(\002\022\016\n\006f_stop\030\020 \001(\002\022\021\n\tnd_filter\030\021 \001(\002\022"
   "\025\n\rpolarizer_ang\030\022 \001(\002\022\016\n\006source\030\023 \001(\t\"I"
   "\n\010DataType\022\t\n\005UINT8\020\000\022\n\n\006UINT16\020\001\022\013\n\007FLO"
-  "AT32\020\002\022\007\n\003URL\020\003\022\007\n\003PNG\020\004\022\007\n\003JPG\020\005b\006proto"
-  "3"
+  "AT32\020\002\022\007\n\003URL\020\003\022\007\n\003PNG\020\004\022\007\n\003JPG\020\005B\r\252\002\nFa"
+  "ro.Protob\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_faro_2fproto_2fimage_2eproto_deps[1] = {
 };
@@ -92,7 +92,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_far
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_faro_2fproto_2fimage_2eproto_once;
 static bool descriptor_table_faro_2fproto_2fimage_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_faro_2fproto_2fimage_2eproto = {
-  &descriptor_table_faro_2fproto_2fimage_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fimage_2eproto, "faro/proto/image.proto", 441,
+  &descriptor_table_faro_2fproto_2fimage_2eproto_initialized, descriptor_table_protodef_faro_2fproto_2fimage_2eproto, "faro/proto/image.proto", 456,
   &descriptor_table_faro_2fproto_2fimage_2eproto_once, descriptor_table_faro_2fproto_2fimage_2eproto_sccs, descriptor_table_faro_2fproto_2fimage_2eproto_deps, 1, 0,
   schemas, file_default_instances, TableStruct_faro_2fproto_2fimage_2eproto::offsets,
   file_level_metadata_faro_2fproto_2fimage_2eproto, 1, file_level_enum_descriptors_faro_2fproto_2fimage_2eproto, file_level_service_descriptors_faro_2fproto_2fimage_2eproto,
