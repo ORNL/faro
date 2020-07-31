@@ -144,7 +144,6 @@ class ArcfaceFaceWorker(faro.FaceWorker):
     
     def status(self):
         '''Return a simple status message.'''
-        print("Handeling status request.")
         status_message = fsd.FaceServiceInfo()
         status_message.status = fsd.READY
         status_message.detection_support = True

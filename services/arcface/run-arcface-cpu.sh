@@ -3,7 +3,7 @@
 #Author: Nisha Srinivas
 #@ORNL
 
-HOST=localhost
+HOST=0.0.0.0
 PORT=50030
 WORKER_COUNT=1
 USE_GPUS=''

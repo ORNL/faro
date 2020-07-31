@@ -14,6 +14,7 @@ import faro.proto.proto_types as pt
 import csv
 from faro.proto.face_service_pb2 import FaceRecordList,GalleryListRequest
 import time
+import traceback
 
 FACE_COUNT = 0
 
@@ -184,7 +185,7 @@ def preprocessImage(im, options):
             im = cv2.pyrDown(im)
             scale *= 0.5
         else:
-            w, h = im.shape[:2]
+            h, w = im.shape[:2]
             s = options.max_size / max(w, h)
             scale *= s
             w = int(s * w)
@@ -730,9 +731,15 @@ ATTRIBUTES_CSV = None
 
 
 def processDetections(each):
-    im, results, options = each
+    face_source, im, results, options = each
     if results.done():
-        recs = results.result().face_records
+        try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
+            recs = results.result().face_records  #possible error
+        except:
+            print("Error processing detections for:",face_source)
+            traceback.print_exc()
+            return
+
         i = 0
 
         dimg = None
@@ -876,7 +883,8 @@ def processDetections(each):
                     view.save(out_path)
                     print('Saving face:', out_path)
                 except:
-                    print("WARNING: Image not processed correctly:", face.source)
+                    print("WARNING: Image not processed correctly:", face_source)
+                    traceback.print_exc()
 
                 out_path = os.path.join(options.face_log, os.path.basename(base_name) + '_orig' + ext)
 
@@ -942,7 +950,7 @@ SEARCH_FILE = None
 
 
 def processSearchResults(each):
-    im, results, options = each
+    face_source, im, results, options = each
     im = pv.Image(im[:,:,::-1]) # RGB to BGR
 
     if results.done():
@@ -1016,8 +1024,13 @@ def processSearchResults(each):
             i += 1
 
         if options.search_log is not None:
-            out_name = os.path.join(options.search_log,os.path.basename(face_source))
-            im.asAnnotated().save(out_name)
+            try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
+                out_name = os.path.join(options.search_log,os.path.basename(face_source))
+                im.asAnnotated().save(out_name)
+            except:
+                print("Error processing:",face_source)
+                traceback.print_exc()
+                return False
 
         return False
     return True
@@ -1208,7 +1221,7 @@ def process_images(ilist, face_client, options):
         results = face_client.detect(im, best=options.best, threshold=options.detect_thresh, min_size=options.min_size,
                                      run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
         image_count += 1
         if options.max_images is not None and image_count >= options.max_images:
@@ -1266,7 +1279,7 @@ def detectExtract():
         results = face_client.detectExtract(im, best=options.best, threshold=options.detect_thresh,
                                             min_size=options.min_size, run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
 
         image_count += 1
@@ -1334,7 +1347,7 @@ def extractOnly():
 
         results = face_client.extract(im, detections, run_async=True)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
 
         image_count += 1
@@ -1383,7 +1396,7 @@ def enroll():
                                                   run_async=True, source=filename, frame=-1,
                                                   subject_name=options.subject_name, subject_id=options.subject_id)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
         enroll_queue.append([im, results, options])
 
         # Process results that are completed.
@@ -1453,7 +1466,7 @@ def enroll_csv():
                                                   run_async=True, source=filename, frame=-1,
                                                   subject_name=name, subject_id=subject_id)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
         enroll_queue.append([im, results, options])
 
         # Process results that are completed.
@@ -1545,6 +1558,9 @@ def search():
     for filename in image_list:
         print("Processing:", filename)
         im = cv2.imread(filename)
+        if im is None: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
+            print("Warning: could not process ",filename)
+            continue
         im = im[:, :, ::-1]  # BGR to RGB
 
         im = preprocessImage(im, options)
@@ -1553,8 +1569,8 @@ def search():
                                                   threshold=options.detect_thresh, min_size=options.min_size,
                                                   run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([im, results, options])
-        search_queue.append([im, results, options])
+        detect_queue.append([filename,im, results, options])
+        search_queue.append([filename,im, results, options])
 
         # Process results that are completed.
         detect_queue = list(filter(processDetections, detect_queue))
@@ -1609,7 +1625,7 @@ def test():
                                             threshold=options.detect_thresh, min_size=options.min_size, run_async=True,
                                             source=filename, frame=-1)
 
-        detect_queue.append([im, results, options])
+        detect_queue.append([filename, im, results, options])
 
         # Process results that are completed.
         detect_queue = list(filter(processDetections, detect_queue))

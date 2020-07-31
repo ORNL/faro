@@ -601,44 +601,45 @@ class FaceService(fs.FaceRecognitionServicer):
             probes = request.probes
             max_results = request.max_results
             threshold = request.threshold
-            
-            if search_gallery not in GALLERIES:
-                raise ValueError("Unknown gallery: "+search_gallery)
-            
-            gallery = fsd.FaceRecordList()
-            for key in GALLERIES[search_gallery]:
-                face = GALLERIES[search_gallery][key]
-                gallery.face_records.add().CopyFrom(face)
-                
-            score_request = fsd.ScoreRequest()
-            score_request.face_probes.CopyFrom(probes)
-            score_request.face_gallery.CopyFrom(gallery)
-            
-            # Compute the scores matrix
-            scores = self.score(score_request,context)
-            scores = pt.matrix_proto2np(scores)
-            
             matched = 0
-            for p in range(scores.shape[0]):
-                #probe = probes.face_records[p]
-                #out = result.probes.face_records[p].search_results
-                matches = []
-                for g in range(scores.shape[1]):
-                    score = scores[p,g]
-                    if score > threshold:
-                        continue
-                    matches.append( [ score, gallery.face_records[g] ] )
+
+            if len(probes.face_records) > 0: # if there are no probes then skip the search
+                if search_gallery not in GALLERIES:
+                    raise ValueError("Unknown gallery: "+search_gallery)
                 
-                matches.sort(key=lambda x: x[0])
-                
-                if max_results > 0:
-                    matches = matches[:max_results]
-                    matched += 1
-                
-                for score,face in matches:
-                    probes.face_records[p].search_results.face_records.add().CopyFrom(face)
-                    probes.face_records[p].search_results.face_records[-1].score=score
+                gallery = fsd.FaceRecordList()
+                for key in GALLERIES[search_gallery]:
+                    face = GALLERIES[search_gallery][key]
+                    gallery.face_records.add().CopyFrom(face)
                     
+                score_request = fsd.ScoreRequest()
+                score_request.face_probes.CopyFrom(probes)
+                score_request.face_gallery.CopyFrom(gallery)
+                
+                # Compute the scores matrix
+                scores = self.score(score_request,context)
+                scores = pt.matrix_proto2np(scores)
+                
+                for p in range(scores.shape[0]):
+                    #probe = probes.face_records[p]
+                    #out = result.probes.face_records[p].search_results
+                    matches = []
+                    for g in range(scores.shape[1]):
+                        score = scores[p,g]
+                        if score > threshold:
+                            continue
+                        matches.append( [ score, gallery.face_records[g] ] )
+                    
+                    matches.sort(key=lambda x: x[0])
+                    
+                    if max_results > 0:
+                        matches = matches[:max_results]
+                        matched += 1
+                    
+                    for score,face in matches:
+                        probes.face_records[p].search_results.face_records.add().CopyFrom(face)
+                        probes.face_records[p].search_results.face_records[-1].score=score
+          
             # Count the matches
             count = len(probes.face_records)
             notes = "Processed %d probes. %d matched."%(count,matched)

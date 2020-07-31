@@ -143,7 +143,6 @@ class FaceWorker(object):
     
     def status(self):
         '''Return a simple status message.'''
-        print("Handeling status request.")
         status_message = fsd.FaceServiceInfo()
         status_message.status = fsd.READY
         
