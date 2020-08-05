@@ -2,25 +2,25 @@
 
 ## Overview
 Face Recognition from Oak Ridge (FaRO) provides a well-defined server-client 
-interface to a some of the best open source face recognition projects on the 
+interface to some of the best open source face recognition projects on the 
 web.  The intention is to support an open platform for face recognition research 
-and provide a well-defined and modern baseline for face recognition accuracy.  
+and to provide a well-defined and modern baseline for face recognition accuracy.  
 While many universities and independent developers have released high quality 
 face recognition models, they often lack many useful features such as 
 configuration management, easy to use interfaces, deployment tools, backend 
 databases, and analysis tools that FaRO provides.
  
 In our research we have found that there are many high quality and open source 
-face analysis and recognition algorithms avalible for research however 
-end-to-end systems that can support larger systems or can be retrained for niche 
+face analysis and recognition algorithms available for research; however, 
+end-to-end systems that can support larger systems or that can be retrained for niche 
 applications are lacking. We hope FARO can fill some of those needs.
 
 The primary goals of this project are:
  1. Create an easy to use foundation that can support complex face recognition systems.
- 2. Provide well defined benchmark algorithms.
- 3. Allow for algorithm improvements via open source software and models and support improvements using techniques like transfer learning. 
+ 2. Provide well-defined benchmark algorithms.
+ 3. Allow for algorithm improvements via open source software and models and to support improvements using techniques like transfer learning. 
 
-FARO is designed as a client/server system to accomodate the need for high speed GPU 
+FaRO is designed as a client/server system to accomodate the need for high speed GPU 
 hardware to support deep learning face processing.  GRPC calls are used to communicate 
 with the server components which allows the clients to be written in many languages and 
 implemented on a varity of computationally limited platforms such as cellphones or biometric
@@ -41,7 +41,7 @@ If you use FARO for publications please cite as:
 
 ## System Requirements:
 Many FaRO services should run nicely on limited hardware resources.  As we 
-integrate more deep learning algorithms those may require GPUs and additional 
+integrate more deep learning algorithms, those may require GPUs and additional 
 hardware.
 
  * Software: python3, virtualenv, cmake, wget
@@ -52,7 +52,7 @@ hardware.
 
 ## Quick Start
 
-This is intended to get dlib algorithm up and running quickly.  This is a good 
+This is intended to get Dlib algorithm up and running quickly.  This is a good 
 place to start and will allow you to test the FaRO interface.  A few 
 dependencies may be needed on a fresh Ubuntu installation including: cmake, 
 python2, and python3.  The install scripts will download and install many other
@@ -84,10 +84,10 @@ $ ./build-proto.sh
 ```
 
 
-In one terminal run the DLIB service.  When you do this for the first time it 
+In one terminal run the Dlib service.  When you do this for the first time it 
 will create a "faro-storage" directory and will download and extract the machine
 learning models.  At the end it will print out messages for each started worker:
-"Worker N Started."  By default the services is started on port localhost:50030.
+"Worker N Started."  By default the service is started on port localhost:50030.
 
 If using virtualenv,
 ```
@@ -105,7 +105,7 @@ $ ./run_dlib.sh
 ```
 
 The VGG2Resnet model can also be run using similar commands, but only run one 
-service at a time unless you carefully configure the ports and check avalible 
+service at a time unless you carefully configure the ports and check available 
 memory, etc.
 
 If using virtualenv,
@@ -124,9 +124,9 @@ $ cd services/vggface2
 $ ./run_vgg2.sh
 ```
 
-Similarly, the InsightFace face analysis algorithms can be executed using similar commands.
+Similarly, InsightFace algorithms can be executed using similar commands.
 Face detection is performed using RetinaFace and features are extracted using ArcFace.
-Currenly, insightface works only with 1 gpu and worker.
+Currently, InsightFace works only with 1 GPU and worker.
 
 If using virtualenv,
 
@@ -144,7 +144,7 @@ $ cd services/arcface
 $ ./run_arcface.sh
 ```
   
-In a second terminal run client applications for this you can use either the 
+In a second terminal run client applications. For this you can use either the 
 "env_faro" or "env_faro_server" environments.  Test scripts are available in
 the test directory to test the workings of the different functionalities in FaRO.
 
@@ -156,7 +156,7 @@ $ source env_faro/bin/activate
 $ cd tests
 ```
 
-If usind conda,
+If using conda,
 
 ```
 $ source activate env_faro or conda activate env_faro
@@ -177,14 +177,14 @@ $./test_detect_videos.sh
 
 
 ## Install With PIP
-This is a simple way to add faro to the environment.  It should install everything needed to run client api calls, but it may not provide all the configurations or models needed to run services.
+This is a simple way to add FaRO to the environment.  It should install everything needed to run client api calls, but it may not provide all the configurations or models needed to run services.
 
 ```
 $ pip install git+https://github.com/ORNL/faro.git
 ```
 
 ## Run a Service Command Line
-Starting python services can be done with a simple command line.  This will start the service specifying the port, the number of workers and the algorithm.
+Starting python services can be done with a simple command line.  This will start the service specifying the port, the number of workers, and the algorithm.
 
 ```
 $ python -m faro.FaceService --port=localhost:50030 --worker-count=2 --algorithm=dlib
@@ -198,16 +198,7 @@ or
 
 FaRO_Client_Face_Detection_Video_and_Images.ipynb
 
-The client can access the services using the faro command line interface. The CLI includes the following functions/commands
-
-flist - List the faces in a gallery.
-detectExtract - Run face detection and template extraction.
-glist - List the galleries on the service.
-test - Process a probe and gallery directory and produce a distance matrix.
-extractOnly - Only run face extraction and attribute extraction.
-enroll - Extract faces and enroll faces in a gallery.
-search - Search images for faces in a gallery.
-detect - Only run face detection.
+The client can access the services using the FaRO command line interface. The CLI includes the following functions/commands
 
 ```
 #client environment has to be activated
@@ -260,7 +251,7 @@ Options:
     --min-size=MIN_SIZE
                         Faces with a height less that this will be ignored.
     --attribute-filter=ATTRIBUTE_FILTER
-                        A comma seperated list of filters example: 'Male>0.5'
+                        A comma separated list of filters example: 'Male>0.5'
 
   Connection Options:
     Control the connection to the FaRO service.
