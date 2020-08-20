@@ -1,5 +1,5 @@
 '''
-Created on Feb 16, 2019
+Created on August 18th 2020
 
 @author: Nisha Srinivas
 '''
@@ -17,6 +17,14 @@ from array import array
 
 
 roc = None
+
+def getOptionsGroup(parser):
+
+    rankone_options = parser.add_option_group("Options for RankOne")
+    rankone_options.add_option("--img-quality", type=float, dest="img_quality",default=None)
+    rankone_options.add_option("--num-faces", type=int, dest="num_faces", default=None)
+    rankone_options.add_option("--min-face-size", type=int, dest="min_face_size", default=None)
+
 
 class RankOneFaceWorker(faro.FaceWorker):
     '''
@@ -40,12 +48,40 @@ class RankOneFaceWorker(faro.FaceWorker):
             roc.roc_ensure(roc.roc_initialize(None,None))
         else:
             self.license_file = (roc.__file__).split('python')[0] + 'ROC.lic'
-            roc.roc_ensure(roc.roc_initialize(self.license_file,None))
+            roc.roc_ensure(roc.roc_initialize(self.license_file.encode('utf-8'),None))
 
         print("ROC SDK Initialized")
+        
+        self.img_quality = options.img_quality
+        self.num_faces = options.num_faces
+        self.min_face_size = options.min_face_size
+        
+        if self.img_quality is None:
+            self.img_quality = self.recommendedImgQuality()
+        
+        if self.num_faces is None:
+            self.num_faces = self.recommendedMaxFacesDetected()
+
+        if self.min_face_size is None:
+            self.min_face_size = self.recommendedMinFaceSize()
+
+        '''
+        ROC_Frontal : ROC frontal face detector (-30 to +30 degress yaw)
+        ROC_FR : Represent in-the-wild-faces for comparison
+        Note : Non-frontal faces detected by ROC_FULL and ROC_PARTIAL are not reliable for recognition.
+        Therefore we advise against using ROC_FULL or ROC_PARTIAL in conjunction with ROC_FR or ROC_ID.
+        ROC_FULL : ROC face detector (-100 to +100 degrees yaw)
+        ROC_DEMOGRAPHICS - Return age, gender, sex
+        ROC_PITCHYAW - Returns yaw and pitch
+        '''
+        self.algorithm_id = roc.ROC_FULL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS | roc.ROC_LANDMARKS | roc.ROC_PITCHYAW
+        roc.roc_ensure(roc.roc_preload(self.algorithm_id))
+        print("Algorithm-ID : ", self.algorithm_id)
+        print(self.img_quality, self.num_faces, self.min_face_size)
+        print(options)
 
     def _converttoRocImage(self,imgarray):
-        #convert to PIL image
+        #convert to PIL image (This has to be an RGB image)
         image_pillow = Image.fromarray(imgarray)
         #conver PIL to roc image
         image_roc = roc.roc_image()
@@ -56,8 +92,9 @@ class RankOneFaceWorker(faro.FaceWorker):
         bytes = 3 * image_pillow.width * image_pillow.height
         image_roc.data = roc.new_uint8_t_array(bytes + 1)
         roc.memmove(image_roc.data, image_pillow.tobytes())
+        #RankOne requires a BGR image
         roc.roc_ensure(roc.roc_swap_channels(image_roc))
-        
+        roc.roc_write_image(image_roc,'tmp.jpg'.encode('latin-1')) 
         return image_roc
         
         
@@ -116,46 +153,35 @@ class RankOneFaceWorker(faro.FaceWorker):
             im = self._converttoRocImage(im)
 
 
-        #RankOne inputs to roc_represent
-        '''
-        ROC_Frontal : ROC frontal face detector (-30 to +30 degress yaw)
-        ROC_FR : Represent in-the-wild-faces for comparison
-        Note : Non-frontal faces detected by ROC_FULL and ROC_PARTIAL are not reliable for recognition. 
-        Therefore we advise against using ROC_FULL or ROC_PARTIAL in conjunction with ROC_FR or ROC_ID.
-        '''
-        algorithm_id = roc.ROC_FRONTAL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS
+#        #RankOne inputs to roc_represent
+#        '''
+#        ROC_Frontal : ROC frontal face detector (-30 to +30 degress yaw)
+#        ROC_FR : Represent in-the-wild-faces for comparison
+#        Note : Non-frontal faces detected by ROC_FULL and ROC_PARTIAL are not reliable for recognition. 
+#        Therefore we advise against using ROC_FULL or ROC_PARTIAL in conjunction with ROC_FR or ROC_ID.
+#        ROC_FULL : ROC face detector (-100 to +100 degrees yaw)
+#        ROC_DEMOGRAPHICS - Return age, gender, sex
+#        ROC_PITCHYAW - Returns yaw and pitch
+#        '''
+#        algorithm_id = roc.ROC_FULL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS | roc.ROC_LANDMARKS | roc.ROC_PITCHYAW
+#
 
         '''
         indicates the smalled face to detect
         Face detection size is measured by the width of the face in pixels. 
         The default value is 36. It roughly correspinds to 18 pixels between the eyes.
         '''
-        min_size = self.recommendedDetectedFaceSize()
-
-        # TODO: enable detection threshold settings
-        #if opts.threshold:
-        #False detection rate
-        #   detection_threshold = opts.threshold
-        #else:
-        detection_threshold = self.recommendedDetectionThreshold()
-        #else:
-        #    detection_threshold = self.recommendedDetectionThreshold()
-
-        #print("Thresh:", detection_threshold)
-
-        # TODO: enable options to set the maximum number of faces
-        #max_number_faces -> The number of faces to return.
-        max_number_faces = self.recommendedMaxFacesDetected()
+        detection_threshold = opts.threshold
+        print("Thresh:", detection_threshold)
+        print(opts)
+        if opts.best:
+            self.num_faces = 1
 
         #create a template array
-        templates = roc.new_roc_template_array(max_number_faces)
-
-        #if opts.best:
-        #    max_number_faces = -1
-
+        templates = roc.new_roc_template_array(self.num_faces)
 
         #roc_represent performs both face detecion and template generation
-        roc.roc_represent(im, algorithm_id, min_size, max_number_faces, detection_threshold, templates)
+        roc.roc_represent(im, self.algorithm_id, self.min_face_size, self.num_faces, detection_threshold, self.img_quality, templates)
         
         # we don't need to check for best mode here. If a failed detection occurs then 
         #create a template by manually specifying the bounding box
@@ -163,14 +189,14 @@ class RankOneFaceWorker(faro.FaceWorker):
         curr_template = roc.roc_template_array_getitem(templates, 0)
         if (curr_template.algorithm_id == 0 or curr_template.algorithm_id & roc.ROC_INVALID):
             curr_template = roc.roc_template_array_getitem(templates, 0)
-            algorithm_id = roc.ROC_MANUAL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS
+            #algorithm_id = self.algorithm_id
             curr_template.x = 0
             curr_template.y = 0
             curr_template.width = w
             curr_template.height = h
             roc.roc_template_array_setitem(templates,0,curr_template)
 
-            roc.roc_represent(im, algorithm_id, min_size, 1, detection_threshold, templates)
+            roc.roc_represent(im, self.algorithm_id, self.min_face_size, 1, detection_threshold, self.img_quality, templates)
             curr_template = roc.roc_template_array_getitem(templates, 0)
 
         roc.roc_free_image(im)
@@ -198,15 +224,15 @@ class RankOneFaceWorker(faro.FaceWorker):
                 continue
             else:
                 face_record = face_records.face_records.add()
-                face_record.detection.score = curr_template.confidence
-                face_record.detection.location.CopyFrom(pt.rect_val2proto(curr_template.x, curr_template.y, curr_template.width, curr_template.height))
+                face_record.detection.score = curr_template.detection.confidence
+                face_record.detection.location.CopyFrom(pt.rect_val2proto(curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height))
                 face_record.detection.detection_id = i
                 face_record.detection.detection_class = "FACE"   
                 '''
                 default metadata fields : ChinX,ChinY, IOD (inter-occular distance), LeftEyeX, LeftEyeY, NoseRootX,
                 NoseRootY, Path, Pose, Quality, RightEyeX, RightEyeY, Roll
                 '''
-                metadata_info = json.loads(curr_template.md)
+                metadata_info = json.loads(curr_template.md.decode('utf-8'))
                 landmark = face_record.landmarks.add()
                 landmark.landmark_id = 'Nose' 
                 landmark.location.x = metadata_info['NoseRootX']
@@ -229,31 +255,29 @@ class RankOneFaceWorker(faro.FaceWorker):
                 
                 demographic = face_record.attributes.add()
                 demographic.key = 'Age'
-                demographic.ivalue = metadata_info['Age']
+                demographic.text = str(metadata_info['Age'])
                 
                 demographic = face_record.attributes.add()
                 demographic.key = 'Gender'
-                gender_dict = {k: metadata_info[k] for k in ('Male','Female')}
-                demographic.text = sorted(gender_dict.items(), key=lambda x: x[1], reverse = True)[0][0]
+                demographic.text = metadata_info['Gender']
 
                 demographic = face_record.attributes.add()
-                demographic.key = 'Race'
-                race_dict = {k: metadata_info[k] for k in ('Asian','Black','Hispanic','Other','White')}
-                demographic.text = sorted(race_dict.items(), key=lambda x: x[1], reverse = True)[0][0]
-                
-                face_record.template.buffer = self._rocFlatten(curr_template)       
-                
-                #save thumbnail
-                rect = pv.Rect()
-                x,y,w,h = curr_template.x, curr_template.y, curr_template.width, curr_template.height
-                cx,cy = x+0.5*w,y+0.5*h
-                tmp = 1.5*max(w,h)
-                cw,ch = tmp,tmp
-                crop = pv.AffineFromRect(pv.CenteredRect(cx,cy,cw,ch),(256,256))
-                pvim = pv.Image(img[:,:,::-1]) # convert rgb to bgr
-                pvim = crop(pvim)
-                view = pt.image_pv2proto(pvim)
-                face_record.view.CopyFrom(view)
+                demographic.key = 'GeographicOrigin'
+                demographic.text = metadata_info['GeographicOrigin']
+
+                demographic = face_record.attributes.add()
+                demographic.key = 'Emotion'
+                demographic.text = metadata_info['Emotion']
+
+                demographic = face_record.attributes.add()
+                demographic.key = 'Artwork'
+                demographic.text = metadata_info['Artwork']
+
+                demographic = face_record.attributes.add()
+                demographic.key = 'Yaw'
+                demographic.text = str(metadata_info['Yaw'])
+ 
+                face_record.template.buffer = self._rocFlatten(curr_template)                       
         
         #Free all the roc stuff
         for i in range(0,self.recommendedMaxFacesDetected()):
@@ -387,7 +411,10 @@ class RankOneFaceWorker(faro.FaceWorker):
         
         return status_message
         
-
+    def recommendedImgQuality(self):
+                
+        return roc.ROC_SUGGESTED_MIN_QUALITY
+ 
     def recommendedDetectionThreshold(self):
         '''
         The false_detection_rate parameter specifies the allowable 
@@ -408,7 +435,7 @@ class RankOneFaceWorker(faro.FaceWorker):
         
         return 10
 
-    def recommendedDetectedFaceSize(self):
+    def recommendedMinFaceSize(self):
         
         return 64
 
