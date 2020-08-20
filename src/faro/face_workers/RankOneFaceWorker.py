@@ -225,7 +225,10 @@ class RankOneFaceWorker(faro.FaceWorker):
             else:
                 face_record = face_records.face_records.add()
                 face_record.detection.score = curr_template.detection.confidence
-                face_record.detection.location.CopyFrom(pt.rect_val2proto(curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height))
+                xc, yc, w, h = curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height
+                x = int(xc/(w*0.5))
+                y = int(yc/(w*0.5))
+                face_record.detection.location.CopyFrom(pt.rect_val2proto(x, y, w, h))
                 face_record.detection.detection_id = i
                 face_record.detection.detection_class = "FACE"   
                 '''
