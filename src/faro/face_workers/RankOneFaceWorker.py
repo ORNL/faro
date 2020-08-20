@@ -74,11 +74,10 @@ class RankOneFaceWorker(faro.FaceWorker):
         ROC_DEMOGRAPHICS - Return age, gender, sex
         ROC_PITCHYAW - Returns yaw and pitch
         '''
-        self.algorithm_id = roc.ROC_FULL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS | roc.ROC_LANDMARKS | roc.ROC_PITCHYAW
-        roc.roc_ensure(roc.roc_preload(self.algorithm_id))
-        print("Algorithm-ID : ", self.algorithm_id)
-        print(self.img_quality, self.num_faces, self.min_face_size)
-        print(options)
+        self.algorithm_id_detect = roc.ROC_FULL
+        self.algorithm_id_extract = roc.ROC_MANUAL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS | roc.ROC_LANDMARKS | roc.ROC_PITCHYAW
+        roc.roc_ensure(roc.roc_preload(self.algorithm_id_detect))
+        roc.roc_ensure(roc.roc_preload(self.algorithm_id_extract))
 
     def _converttoRocImage(self,imgarray):
         #convert to PIL image (This has to be an RGB image)
@@ -152,37 +151,23 @@ class RankOneFaceWorker(faro.FaceWorker):
         if isinstance(im,np.ndarray):
             im = self._converttoRocImage(im)
 
-
-#        #RankOne inputs to roc_represent
-#        '''
-#        ROC_Frontal : ROC frontal face detector (-30 to +30 degress yaw)
-#        ROC_FR : Represent in-the-wild-faces for comparison
-#        Note : Non-frontal faces detected by ROC_FULL and ROC_PARTIAL are not reliable for recognition. 
-#        Therefore we advise against using ROC_FULL or ROC_PARTIAL in conjunction with ROC_FR or ROC_ID.
-#        ROC_FULL : ROC face detector (-100 to +100 degrees yaw)
-#        ROC_DEMOGRAPHICS - Return age, gender, sex
-#        ROC_PITCHYAW - Returns yaw and pitch
-#        '''
-#        algorithm_id = roc.ROC_FULL | roc.ROC_FR | roc.ROC_DEMOGRAPHICS | roc.ROC_LANDMARKS | roc.ROC_PITCHYAW
-#
-
         '''
         indicates the smalled face to detect
         Face detection size is measured by the width of the face in pixels. 
         The default value is 36. It roughly correspinds to 18 pixels between the eyes.
         '''
+        
         detection_threshold = opts.threshold
-        print("Thresh:", detection_threshold)
         print(opts)
         if opts.best:
             self.num_faces = 1
-
+        print(self.num_faces)
         #create a template array
         templates = roc.new_roc_template_array(self.num_faces)
 
         #roc_represent performs both face detecion and template generation
-        roc.roc_represent(im, self.algorithm_id, self.min_face_size, self.num_faces, detection_threshold, self.img_quality, templates)
-        
+        roc.roc_represent(im, self.algorithm_id_detect, self.min_face_size, self.num_faces, detection_threshold, self.img_quality, templates)
+        print(templates)
         # we don't need to check for best mode here. If a failed detection occurs then 
         #create a template by manually specifying the bounding box
         # fix the missing detection case
@@ -190,22 +175,44 @@ class RankOneFaceWorker(faro.FaceWorker):
         if (curr_template.algorithm_id == 0 or curr_template.algorithm_id & roc.ROC_INVALID):
             curr_template = roc.roc_template_array_getitem(templates, 0)
             #algorithm_id = self.algorithm_id
-            curr_template.x = 0
-            curr_template.y = 0
-            curr_template.width = w
-            curr_template.height = h
+            curr_template.detection.x = int(w * 0.5)
+            curr_template.detection.y = int(h * 0.5)
+            curr_template.detection.width = w
+            curr_template.detection.height = h
             roc.roc_template_array_setitem(templates,0,curr_template)
 
-            roc.roc_represent(im, self.algorithm_id, self.min_face_size, 1, detection_threshold, self.img_quality, templates)
-            curr_template = roc.roc_template_array_getitem(templates, 0)
 
         roc.roc_free_image(im)
 
         return templates
 
-
-    
     def detect(self,img,face_records,options):
+        detected_templates = self._detect(img,options) 
+
+        for i in range(0,self.num_faces):
+            print(i)
+            curr_template = roc.roc_template_array_getitem(detected_templates, i)
+            if curr_template.algorithm_id & roc.ROC_INVALID or curr_template.algorithm_id == 0:
+                '''
+                indicates if a template was created
+                '''
+                continue
+            else:
+                face_record = face_records.face_records.add()
+                face_record.detection.score = curr_template.detection.confidence
+                xc, yc, w, h = curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height
+                x = int(xc - (w*0.5))
+                y = int(yc - (w*0.5))
+                face_record.detection.location.CopyFrom(pt.rect_val2proto(x, y, w, h))
+                face_record.detection.detection_id = i
+                face_record.detection.detection_class = "FACE"
+                print(face_record)
+    
+        #Free all the roc stuff
+        for i in range(0,self.num_faces):
+            roc.roc_free_template(roc.roc_template_array_getitem(detected_templates,i))
+
+    def extract(self,img,face_records,options):
         '''
         In RankOne, face detection happends within the roc_represent function.
         There is no explicit face detection step like in dlib. 
@@ -226,8 +233,8 @@ class RankOneFaceWorker(faro.FaceWorker):
                 face_record = face_records.face_records.add()
                 face_record.detection.score = curr_template.detection.confidence
                 xc, yc, w, h = curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height
-                x = int(xc/(w*0.5))
-                y = int(yc/(w*0.5))
+                x = int(xc - (w*0.5))
+                y = int(yc - (w*0.5))
                 face_record.detection.location.CopyFrom(pt.rect_val2proto(x, y, w, h))
                 face_record.detection.detection_id = i
                 face_record.detection.detection_class = "FACE"   
@@ -286,11 +293,6 @@ class RankOneFaceWorker(faro.FaceWorker):
         for i in range(0,self.recommendedMaxFacesDetected()):
             roc.roc_free_template(roc.roc_template_array_getitem(detected_templates,i)) 
        
-        #if best option is true then keep the face detected with the highest confidence 
-        if options.best & len(face_records.face_records) > 0:
-            face_records.face_records.sort(key = lambda x: -x.detection.score)
-            while len(face_records.face_records) > 1:
-                del face_records.face_records[-1]
             
             
     def locate(self,img,face_records,options):
@@ -307,13 +309,6 @@ class RankOneFaceWorker(faro.FaceWorker):
         recognition.'''
         pass # Not needed for this algorithm.
             
-    def extract(self,img,face_records):
-        '''Extract a template that allows the face to be matched.'''
-       
-        '''
-        We don't need this as detection and feature extraction happens at one
-        go in RankOne. Use the detectandExtract funnctionality
-        ''' 
         
     def scoreType(self):
         '''Return the method used to create a score from the template.
