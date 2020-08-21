@@ -56,7 +56,9 @@ FACE_WORKER_LIST = {}
 
 
 WORKER_GPU_MAPPING = {}
+
 GALLERIES = {}
+FACE_LISTS = {}
 STORAGE = {}
 
 def filterDetectMinSize(face_records, min_size):
@@ -247,20 +249,14 @@ class FaceService(fs.FaceRecognitionServicer):
             gallery_name = each[:-3]
             path = os.path.join(self.gallery_storage,gallery_name+'.h5')
             STORAGE[gallery_name] = h5py.File(path,'a') # Open in read/write mode
-            GALLERIES[gallery_name] = {}
-            
-            #print(each,gallery_name,path)
-            #print(list(STORAGE[gallery_name]))
-            for each in STORAGE[gallery_name]:
-                data = STORAGE[gallery_name][each]
-                #print(data)
-                fr = fsd.FaceRecord()
-                #print(data)
-                #print(dir(data))
-                #print(list(data))
-                fr.ParseFromString(np.array(data).tobytes())
-                #print(each,fr)
-                GALLERIES[gallery_name][each] = fr
+            face_count = 0
+            for each in STORAGE[gallery_name]['faces']:
+                data = STORAGE[gallery_name]['faces'][each]
+                face = fsd.FaceRecord()
+                face.ParseFromString(np.array(data).tobytes())
+                self.addToInMemoryGallery(face.gallery_key,gallery_name,face)
+                face_count += 1
+            print("   * Loaded %s with %d faces."%(gallery_name,face_count))
         print('Done Loading Galleries.')
 
                 
@@ -357,6 +353,33 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
+    def addToInMemoryGallery(self, gallery_key, gallery_name, face):
+        global GALLERIES, FACE_LISTS, STORAGE
+
+        if gallery_name not in GALLERIES:
+            GALLERIES[gallery_name] = None
+
+        if gallery_name not in FACE_LISTS:
+            FACE_LISTS[gallery_name] = []
+
+        if gallery_key in FACE_LISTS[gallery_name]:
+            # we need to replace the template
+            idx = FACE_LISTS[gallery_name].index(gallery_key)
+            GALLERIES[gallery_name][idx,:] = pt.vector_proto2np( face.template.data ).flatten()
+
+        else:
+            # we need to add a new entry
+            FACE_LISTS[gallery_name].append(gallery_key)
+
+            if GALLERIES[gallery_name] is None:
+                GALLERIES[gallery_name] = pt.vector_proto2np( face.template.data ).reshape(1,-1)
+            else:
+                template = pt.vector_proto2np( face.template.data ).reshape(1,-1)
+                print(template.shape,GALLERIES[gallery_name].shape)
+                GALLERIES[gallery_name] = np.concatenate([GALLERIES[gallery_name],template],axis=0)
+
+        #print("gallery size:", GALLERIES[gallery_name].shape, len(FACE_LISTS[gallery_name]))
+
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
         try:
@@ -364,32 +387,60 @@ class FaceService(fs.FaceRecognitionServicer):
             
             gallery_name = request.enroll_gallery
             
-            global GALLERIES, STORAGE
+            global GALLERIES, FACE_LISTS, STORAGE
 
-            if gallery_name not in GALLERIES:
-                #print("Creating gallery",gallery_name)
-                GALLERIES[gallery_name] = {}
-                
+            replacements = 0
+
+            if gallery_name not in STORAGE:
                 path = os.path.join(self.gallery_storage,gallery_name+'.h5')
                 STORAGE[gallery_name] = h5py.File(path,'a')
+                STORAGE[gallery_name].create_group('faces')
+                STORAGE[gallery_name].create_group('sources')
+                STORAGE[gallery_name].create_group('detections')
+                STORAGE[gallery_name].create_group('tags')
+                STORAGE[gallery_name].create_group('logs')
 
             count = 0
             for face in request.records.face_records:
                 face_id = faro.generateFaceId(face)
                 face.gallery_key = face_id
-                #face_id = "-".join(face_id.split('/'))
-                #print('face_id:',face_id)
+
                 count += 1 
-                GALLERIES[gallery_name][face_id] = face
-                if face_id in STORAGE[gallery_name]:
-                    del STORAGE[gallery_name][face_id] # delete so it can be replaced.
-                STORAGE[gallery_name][face_id] = np.bytes_(face.SerializeToString())
+
+                if face_id in STORAGE[gallery_name]['faces']:
+                    del STORAGE[gallery_name]['faces'][face_id] # delete so it can be replaced.
+                    replacements += 1
+                STORAGE[gallery_name]['faces'][face_id] = np.bytes_(face.SerializeToString())
+
+                template = pt.vector_proto2np(face.template.data)
+                temp_length = template.shape[0]
+
+                if 'templates' not in STORAGE[gallery_name]:
+                    # Create an empty dataset
+                    f = STORAGE[gallery_name]
+                    dset = f.create_dataset('templates',data=np.zeros((0,temp_length)), maxshape=(None,temp_length),dtype=np.float32)
+
+                if 'facelist' not in STORAGE[gallery_name]:
+                    # Create an empty dataset
+                    f = STORAGE[gallery_name]
+                    dt = h5py.special_dtype(vlen=str)
+                    dset = f.create_dataset('facelist',(0,), maxshape=(None,),dtype=dt)
+
+                # Append to the end
+                dset = STORAGE[gallery_name]['templates']
+                size = dset.shape
+                dset.resize((size[0]+1,size[1]))
+                dset[-1,:] = template
+
+                dset = STORAGE[gallery_name]['facelist']
+                size = dset.shape
+                dset.resize((size[0]+1,))
+                dset[-1] = face_id
+
                 STORAGE[gallery_name].flush()
-                
-            #response = fsd.ErrorMessage()
 
             stop = time.time()
-            notes = "Enrolled %d faces into gallery '%s'.  Gallery size = %d."%(count,gallery_name,len(GALLERIES[gallery_name]))
+            notes = "Enrolled %d faces into gallery '%s' with %d replacements.  Gallery size = %d."%(count, gallery_name, replacements, len(STORAGE[gallery_name]['faces']))
             global LOG_FORMAT
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes,context.peer())))
 
@@ -430,20 +481,20 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
         
     def galleryList(self, request, context):
-        ''' List the galleries for this service. '''
+        ''' List the galleries hosted by this service. '''
         try:
             start = time.time()
             
             result = GalleryList()
             #gallery_name = request.enroll_gallery
             
-            global GALLERIES, STORAGE
+            global STORAGE
 
             count = 0
-            for gallery_name in GALLERIES:
+            for gallery_name in STORAGE:
                 item = result.galleries.add()
                 item.gallery_name=gallery_name
-                item.face_count=len(GALLERIES[gallery_name])
+                item.face_count=len(STORAGE[gallery_name]['faces'])
                 #print("Name:",gallery_name)
                 #print("Size:",len(GALLERIES[gallery_name]))
                 #print()
@@ -460,39 +511,74 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
 
 
+    def galleryDelete(self, request, context):
+        ''' Delete a gallery. '''
+        try:
+            start = time.time()
+            
+            result = GalleryList()
+            gallery_name = request.gallery_name
+            
+            global STORAGE
+
+            if gallery_name not in STORAGE:
+                raise ValueError("Gallery '" + gallery_name +"' not found.")
+
+            entry_count = len(STORAGE[gallery_name]['faces'])
+
+            # Close and remove the file
+            STORAGE[gallery_name].close()
+            del STORAGE[gallery_name]
+
+            # Delete the file from disk
+            path = os.path.join(self.gallery_storage,gallery_name+'.h5')
+            os.remove(path)
+
+            # Delete the memory cache
+            #del GALLERIES[gallery_name]
+                
+            stop = time.time()
+            notes = "%d faces removed."%(entry_count,)
+
+            global LOG_FORMAT
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryDelete()",notes,context.peer())))
+
+            return result
+        except:
+            traceback.print_exc()
+            raise
+
+
     def enrollmentList(self, request, context):
-        ''' List the galleries for this service. '''
+        ''' List the faces enrolled in this gallery. '''
         try:
             start = time.time()
             
             result = FaceRecordList()
             gallery_name = request.gallery_name
             
-            global GALLERIES, STORAGE
+            global STORAGE
 
             count = 0
-            for face_id in GALLERIES[gallery_name]:
-                face_record = GALLERIES[gallery_name][face_id]
+            for face_id in STORAGE[gallery_name]['faces']:
                 
+                data = STORAGE[gallery_name]['faces'][face_id]
+                face_record = fsd.FaceRecord()
+                face_record.ParseFromString(np.array(data).tobytes())
+
                 face = result.face_records.add()
                 face.gallery_key = face_id
-                face.name = GALLERIES[gallery_name][face_id].name
-                face.subject_id = GALLERIES[gallery_name][face_id].subject_id
-                face.source = GALLERIES[gallery_name][face_id].source
-                face.frame = GALLERIES[gallery_name][face_id].frame
+                face.name = face_record.name
+                face.subject_id = face_record.subject_id
+                face.source = face_record.source
+                face.frame = face_record.frame
                 
-                #item = result.galleries.add()
-                #item.gallery_name=gallery_name
-                #item.face_count=len(GALLERIES[gallery_name])
-                #print("Name:",gallery_name)
-                #print("Size:",len(GALLERIES[gallery_name]))
-                #print()
                 count += 1
                 
             stop = time.time()
             notes = "%d faces returned."%(count,)
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"galleryList()",notes,context.peer())))
+            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enrollmentList()",notes,context.peer())))
 
             return result
         except:
@@ -591,6 +677,9 @@ class FaceService(fs.FaceRecognitionServicer):
         
         returns: SearchResponse protobuf
         '''
+
+        global GALLERIES, FACE_LISTS, STORAGE
+
         try:
             start = time.time()
             #result = fsd.SearchResponse()
@@ -604,18 +693,20 @@ class FaceService(fs.FaceRecognitionServicer):
             matched = 0
 
             if len(probes.face_records) > 0: # if there are no probes then skip the search
-                if search_gallery not in GALLERIES:
+                if search_gallery not in STORAGE:
                     raise ValueError("Unknown gallery: "+search_gallery)
                 
                 gallery = fsd.FaceRecordList()
-                for key in GALLERIES[search_gallery]:
-                    face = GALLERIES[search_gallery][key]
+                for key in STORAGE[search_gallery]['faces']:
+                    tmp = STORAGE[search_gallery]['faces'][key]
+                    face = fsd.FaceRecord()
+                    face.ParseFromString(np.array(tmp).tobytes())
                     gallery.face_records.add().CopyFrom(face)
                     
                 score_request = fsd.ScoreRequest()
                 score_request.face_probes.CopyFrom(probes)
                 score_request.face_gallery.CopyFrom(gallery)
-                
+
                 # Compute the scores matrix
                 scores = self.score(score_request,context)
                 scores = pt.matrix_proto2np(scores)

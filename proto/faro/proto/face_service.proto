@@ -399,8 +399,11 @@ service FaceRecognition{
     rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
 	rpc enrollmentDelete(EnrollmentDeleteRequest) returns (FaceRecordList){};
 	
-	rpc enrollmentDeleteConditional(EnrollmentDeleteRequest) returns (FaceRecordList){};
-	rpc enrollmentTransfer(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	// Source Management
+	rpc retrieveSourceImage(SourceImageRequest) returns (Image){};
+
+	//rpc enrollmentDeleteConditional(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	//rpc enrollmentTransfer(EnrollmentDeleteRequest) returns (FaceRecordList){};
 
     // Test
 	rpc echo(Matrix) returns (Matrix){}; // test large messages

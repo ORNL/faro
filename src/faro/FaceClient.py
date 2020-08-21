@@ -54,6 +54,8 @@ def getDefaultClientOptions():
     options.max_async = 4
     options.port = 'localhost:50030'
     options.verbose = False
+    options.quality=95
+    options.compression='uint8'
     
     return options
 
@@ -64,6 +66,8 @@ class FaceClient(object):
     '''
     def __init__(self,options,max_message_length=-1):
         
+        self.options = options
+
         channel_options = [("grpc.max_send_message_length", max_message_length),
                            ("grpc.max_receive_message_length", max_message_length)]
 
@@ -103,9 +107,9 @@ class FaceClient(object):
     def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectRequest()
         try:
-            request.image.CopyFrom( pt.image_np2proto(im))
+            request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
         except:
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
             
         # Setup the source and subject information.
         request.source='UNKNOWN_SOURCE'
@@ -139,9 +143,9 @@ class FaceClient(object):
     def extract(self, im, face_records, run_async=False):
         request = fsd.ExtractRequest()
         try:
-            request.image.CopyFrom( pt.image_np2proto(im))
+            request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
         except:
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
             
         request.records.CopyFrom(face_records)
         
@@ -162,9 +166,9 @@ class FaceClient(object):
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
             
 
         # Setup the source and subject information.
@@ -207,9 +211,9 @@ class FaceClient(object):
         request.enroll_request.CopyFrom( fsd.EnrollRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
             
         request.enroll_request.enroll_gallery = enroll_gallery
 
@@ -254,9 +258,9 @@ class FaceClient(object):
         request.search_request.CopyFrom( fsd.SearchRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
             
         request.search_request.search_gallery = search_gallery
         request.search_request.max_results=max_results
@@ -337,6 +341,19 @@ class FaceClient(object):
         
         return result
     
+    
+    def galleryDelete(self, gallery_name):
+        '''Get a list of the galleries'''
+        
+        request = fsd.GalleryDeleteRequest()
+        
+        request.gallery_name = gallery_name
+
+        result = self.service_stub.galleryDelete(request)
+        
+        return result
+    
+
     def faceList(self,gallery_name):
         '''Get a list faces in a gallery'''
         
@@ -358,7 +375,7 @@ class FaceClient(object):
         return result
 
 
-    def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False,**kwargs):
+    def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False, **kwargs):
         request = fsd.SearchRequest()
         
         request.probes.CopyFrom(faces)

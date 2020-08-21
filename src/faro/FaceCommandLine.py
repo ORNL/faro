@@ -15,6 +15,8 @@ import csv
 from faro.proto.face_service_pb2 import FaceRecordList,GalleryListRequest
 import time
 import traceback
+from faro.command_line import addConnectionOptions, connectToFaroClient
+import faro.command_line as command_line
 
 FACE_COUNT = 0
 
@@ -29,6 +31,12 @@ def addConnectionOptions(parser):
 
     connection_group.add_option("--max-async", type="int", dest="max_async", default=faro.DEFAULT_MAX_ASYNC,
                                 help="The maximum number of asyncronous call to make at a time. Default=%d" % faro.DEFAULT_MAX_ASYNC)
+
+    connection_group.add_option( "--compression", type="choice", choices=['uint8','jpg','png'], dest="compression", default="uint8",
+                                help="Choose a compression format for data transmissions [uint8, jpg, png]. Default=uint8")
+
+    connection_group.add_option( "--quality", type="int", dest="quality", default=95,
+                                help="Compression quality level [0-100]. Default=95")
 
     connection_group.add_option("--max-message-size", type="int", dest="max_message_size",
                                 default=faro.DEFAULT_MAX_MESSAGE_SIZE,
@@ -131,10 +139,13 @@ def addSearchOptions(parser):
     search_group = optparse.OptionGroup(parser, "Search Options",
                                         "Configuration for gallery search.")
 
-    search_group.add_option("-s", "--search-csv", type="str", dest="search_csv", default='default',
+    search_group.add_option("-s", "--search-csv", type="str", dest="search_csv", default=None,
                             help="Save the search results.")
 
-    search_group.add_option("--search-log", type="str", dest="search_log", default='default',
+    search_group.add_option("--search-log", type="str", dest="search_log", default=None,
+                            help="Save the search results.")
+
+    search_group.add_option("--search-index", type="str", dest="search_index", default=None,
                             help="Save the search results.")
 
     search_group.add_option("--gallery", type="str", dest="search_gallery", default='default',
@@ -631,22 +642,6 @@ def testParseOptions():
     return options, args
 
 
-def connectToFaroClient(options):
-    if options.verbose:
-        print('Connecting to FaRO Service...')
-
-    face_client = faro.FaceClient(options)
-
-    is_ready, status = face_client.status(verbose=options.verbose)
-    if not is_ready:
-        print("ERROR: the FaRO service is not ready.")
-        print(status)
-        exit(-1)
-    else:
-        if options.verbose:
-            print('Connection to FaRO service established. [ algorithm: %s ]' % (status.algorithm))
-
-    return face_client
 
 
 def collect_files(args, options):
@@ -964,6 +959,12 @@ def processSearchResults(each):
             except:
                 pass
 
+        if options.search_index is not None:
+            try:
+                os.makedirs(options.search_index)
+            except:
+                pass
+
         for face in recs:
             # Filter faces based on min size
             size = min(face.detection.location.width, face.detection.location.height)
@@ -1022,6 +1023,31 @@ def processSearchResults(each):
                 SEARCH_FILE.flush()
 
             i += 1
+
+            if options.search_index is not None:
+
+                if len(face.search_results.face_records) > 0:
+                    gal = face.search_results.face_records[0]
+                    gal_name = gal.name
+                    gal_sub_id = gal.subject_id
+                    gal_source = gal.source
+                    gal_score = gal.score
+                    gal_key = gal.gallery_key
+
+                    dir_name = os.path.join(options.search_index,gal_sub_id+'-'+"_".join(gal_name.split()))
+                    link_name = os.path.join(dir_name,os.path.basename(face_source))
+
+                    try:
+                        os.makedirs(dir_name)
+                    except:
+                        pass
+
+                    try:
+                        os.remove(link_name)
+                    except:
+                        pass
+
+                    os.symlink(os.path.abspath(face_source), link_name)
 
         if options.search_log is not None:
             try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
@@ -1493,20 +1519,6 @@ def enroll_csv():
     finish = time.time()
     print("Processed %d files in %0.2fsec.  %0.2f images/sec"%(image_count,finish-start,image_count/(finish-start)))
 
-
-def glist():
-    options,args = galleryListOptions()
-    face_client = connectToFaroClient(options)
-
-    result = face_client.galleryList()
-    
-    print()
-    print("%-24s | %10s"%('GALLERY NAME','FACE_COUNT'))
-    print('-'*37)
-    for gallery in result.galleries:
-        print("%-24s | %10d"%(gallery.gallery_name,gallery.face_count))
-    print()
-    
 def elist():
     options,args = faceListOptions()
     face_client = connectToFaroClient(options)
@@ -1669,7 +1681,8 @@ COMMANDS = {
     'enrollCsv' : ['Extract faces and enroll faces in a gallery.',enroll_csv],
     'elist' : ['List the enrollments in a gallery.',elist],
     'edelete' : ['Delete enrollments in a gallery.',edelete],
-    'glist' : ['List the galleries on the service.',glist],
+    'glist' : ['List the galleries on the service.',command_line.glist],
+    'gdelete' : ['Delete a gallery.',command_line.gdelete],
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
             }
