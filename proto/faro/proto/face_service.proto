@@ -358,6 +358,11 @@ message EnrollmentListResponse {
 message EnrollmentDeleteRequest {
 	string gallery_name = 1;
 	string subject_id = 2;
+	string gallery_key = 3;
+}
+
+message EnrollmentDeleteResponse {
+	int64 delete_count = 1;
 }
 
 
@@ -397,10 +402,10 @@ service FaceRecognition{
     rpc galleryList(GalleryListRequest) returns (GalleryList){};
     rpc galleryDelete(GalleryDeleteRequest) returns (Empty){};
     rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
-	rpc enrollmentDelete(EnrollmentDeleteRequest) returns (FaceRecordList){};
+	rpc subjectDelete(EnrollmentDeleteRequest) returns (EnrollmentDeleteResponse){};
 	
 	// Source Management
-	rpc retrieveSourceImage(SourceImageRequest) returns (Image){};
+	//rpc retrieveSourceImage(SourceImageRequest) returns (Image){};
 
 	//rpc enrollmentDeleteConditional(EnrollmentDeleteRequest) returns (FaceRecordList){};
 	//rpc enrollmentTransfer(EnrollmentDeleteRequest) returns (FaceRecordList){};

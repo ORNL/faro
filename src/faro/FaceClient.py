@@ -341,7 +341,7 @@ class FaceClient(object):
         
         return result
     
-    
+
     def galleryDelete(self, gallery_name):
         '''Get a list of the galleries'''
         
@@ -364,13 +364,13 @@ class FaceClient(object):
         return result
 
 
-    def enrollmentDelete(self,gallery_name,subject_id):
+    def subjectDelete(self,gallery_name,subject_id):
         '''Get a list faces in a gallery'''
         
         request = fsd.EnrollmentDeleteRequest()
         request.gallery_name = gallery_name
         request.subject_id = subject_id
-        result = self.service_stub.enrollmentDelete(request)
+        result = self.service_stub.subjectDelete(request)
         
         return result
 

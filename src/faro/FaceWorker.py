@@ -31,7 +31,8 @@ import faro.proto.geometry_pb2 as geo
 import faro.proto.proto_types as pt
 import numpy as np
 import scipy as sp
-import scipy.spatial as spat                                                                
+import scipy.spatial as spat          
+from faro.FaceGallery import GalleryWorker                                                    
 
 # Standard scores can be computed by the client which may offer 
 # performance benefits.  In some cases scores can only be computed 
@@ -42,6 +43,9 @@ SCORE_DOT = "SCORE_DOT" # Simple dot product.
 SCORE_SERVER = "SCORE_SERVER" # A non-standard, custom, or proprietary score / Requires computation on the server.
 
 STATUS_READY = "STATUS_READY"
+
+def getGalleryWorker(options):
+    return GalleryWorker(options)
 
 
 class FaceWorker(object):
@@ -64,6 +68,7 @@ class FaceWorker(object):
         Constructor
         '''
         
+
     def detect(self):
         '''Run a face detector and return rectangles.'''
         raise NotImplementedError("Abstract Method Called.")

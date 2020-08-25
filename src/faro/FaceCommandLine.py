@@ -520,14 +520,14 @@ def faceListOptions():
         
     return options,args
 
-def enrollmentDeleteOptions():
+def subjectDeleteOptions():
     '''
     Parse command line arguments.
     '''
     args = ['gallery_name','subject_id'] # Add the names of arguments here.
     n_args = len(args)
     args = " ".join(args)
-    description = '''Delete enrollments in a gallery.'''
+    description = '''Delete subjects in a gallery.'''
     epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
     
     version = faro.__version__
@@ -964,6 +964,10 @@ def processSearchResults(each):
                 os.makedirs(options.search_index)
             except:
                 pass
+            
+            
+        if options.search_log is not None:
+            im.annotateLabel(pv.Point(10,10),"Detections: %d"%(len(recs),),font=16,color='yellow')
 
         for face in recs:
             # Filter faces based on min size
@@ -1018,7 +1022,7 @@ def processSearchResults(each):
                     im.annotateThickRect(face_detect_rect,width=3,color='yellow')
                     im.annotateLabel(pv.Point(face_detect_rect.x,face_detect_rect.y+face_detect_rect.h+5),"%s - %s"%(gal_sub_id,gal_name),font=16,color='yellow')
                 else:
-                    im.annotateRect(face_detect_rect,color='white')
+                    im.annotateThickRect(face_detect_rect,color='white',width=2)
 
                 SEARCH_FILE.flush()
 
@@ -1533,23 +1537,15 @@ def elist():
         print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
     print()
     
-def edelete():
-    options,args = enrollmentDeleteOptions()
+def sdelete():
+    options,args = subjectDeleteOptions()
     face_client = connectToFaroClient(options)
     
     gallery_name = args[1]
     subject_id = args[2]
-    result = face_client.enrollmentDelete(gallery_name,subject_id)
+    result = face_client.subjectDelete(gallery_name,subject_id)
     
-    print()
-    print("%-48s | %-16s | %-32s | %-40s | %10s"%('KEY','SUBJECT_ID','NAME','SOURCE','FRAME'))
-    print('-'*158)
-    #print( type(result) )
-    #print( dir(result) )
-    #print( result )
-    for face in result.face_records:
-        print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
-    print()
+    print("Deleted %d records."%(result.delete_count))
     
 def search():
     options, args = searchParseOptions()
@@ -1680,7 +1676,7 @@ COMMANDS = {
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
     'enrollCsv' : ['Extract faces and enroll faces in a gallery.',enroll_csv],
     'elist' : ['List the enrollments in a gallery.',elist],
-    'edelete' : ['Delete enrollments in a gallery.',edelete],
+    'sdelete' : ['Delete a subjects in a gallery.',sdelete],
     'glist' : ['List the galleries on the service.',command_line.glist],
     'gdelete' : ['Delete a gallery.',command_line.gdelete],
     'search' : ['Search images for faces in a gallery.',search],
