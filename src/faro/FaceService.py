@@ -44,6 +44,7 @@ import faro
 import os
 import h5py
 import skimage.io
+import cv2
 
 from faro.FaceGallery import GalleryWorker
 
@@ -304,9 +305,23 @@ class FaceService(fs.FaceRecognitionServicer):
             #skimage.io.imsave("test.png",mat)
             options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
+
+            # scale down for speed
+            print("DOWNSAMPLE",options.downsample)
+            for _ in range( options.downsample ):
+                mat = cv2.pyrDown(mat)
+            
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
             face_records_list = worker_result.get()
             
+            # scale up the results
+            for face in face_records_list.face_records:
+                for _ in range( options.downsample ):
+                    face.detection.location.x *= 2
+                    face.detection.location.y *= 2
+                    face.detection.location.width *= 2
+                    face.detection.location.height *= 2
+
             notes += ", Detections %s"%(len(face_records_list.face_records),)
                         
             for face in face_records_list.face_records:

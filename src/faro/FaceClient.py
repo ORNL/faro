@@ -104,7 +104,7 @@ class FaceClient(object):
                 time.sleep(self.async_sleep_time)
 
 
-    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None,downsample=0):
         request = fsd.DetectRequest()
         try:
             request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
@@ -123,6 +123,7 @@ class FaceClient(object):
 
         
         request.detect_options.best=best
+        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_options.threshold = self.info.detection_threshold
@@ -160,7 +161,7 @@ class FaceClient(object):
         
         return face_records
 
-    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None,downsample=0):
         request = fsd.DetectExtractRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
@@ -183,6 +184,7 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
+        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold
@@ -204,7 +206,8 @@ class FaceClient(object):
     
     
     
-    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,subject_name=None,frame=None):
+    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,
+                            subject_id=None,subject_name=None,frame=None,downsample=0):
         request = fsd.DetectExtractEnrollRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
@@ -231,6 +234,7 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
+        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold
@@ -251,7 +255,9 @@ class FaceClient(object):
         return face_records
     
     
-    def detectExtractSearch(self,im,search_gallery='default',max_results=3,search_threshold=None,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
+    def detectExtractSearch(self,im,search_gallery='default',max_results=3,search_threshold=None,best=False,
+                                threshold=None,min_size=None, run_async=False,source=None,subject_id=None,
+                                frame=None,downsample=0):
         request = fsd.DetectExtractSearchRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
@@ -283,6 +289,7 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
+        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold

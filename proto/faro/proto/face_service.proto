@@ -116,6 +116,7 @@ message DetectionOptions{
 	bool save_request = 9; // log the image on the server - Useful for debugging and record keeping
 	bool debug = 10; // Save or print more info on the server side
 
+	int32 downsample = 11; // downsample the images to improve speed during detection
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 

@@ -151,6 +151,12 @@ def addSearchOptions(parser):
     search_group.add_option("--gallery", type="str", dest="search_gallery", default='default',
                             help="Select the gallery to search.")
 
+    search_group.add_option("--search-threshold", type="float", dest="search_threshold", default=None,
+                            help="Set the maximum threshold for a match.")
+
+    search_group.add_option("--max-results", type="int", dest="max_results", default=3,
+                            help="Set the maximum number of search results returned for each face.")
+
     parser.add_option_group(search_group)
 
 
@@ -1575,7 +1581,8 @@ def search():
 
         results = face_client.detectExtractSearch(im, search_gallery=options.search_gallery, best=options.best,
                                                   threshold=options.detect_thresh, min_size=options.min_size,
-                                                  run_async=True, source=filename, frame=-1)
+                                                  run_async=True, source=filename, frame=-1,
+                                                  search_threshold=options.search_threshold, max_results=options.max_results)
 
         detect_queue.append([filename,im, results, options])
         search_queue.append([filename,im, results, options])
