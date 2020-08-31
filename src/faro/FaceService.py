@@ -307,7 +307,6 @@ class FaceService(fs.FaceRecognitionServicer):
             notes = "Image Size %s"%(mat.shape,)
 
             # scale down for speed
-            print("DOWNSAMPLE",options.downsample)
             for _ in range( options.downsample ):
                 mat = cv2.pyrDown(mat)
             
