@@ -822,7 +822,7 @@ def processDetections(each):
                 attributes.sort(key=lambda x: x.key)
                 for attribute in attributes:
                     key = attribute.key
-                    value = attribute.fvalue
+                    value = attribute.text
                     csv_eachline = [face.source,
                                     face.frame,
                                     i,

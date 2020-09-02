@@ -23,7 +23,7 @@ def getOptionsGroup(parser):
     rankone_options = parser.add_option_group("Options for RankOne")
     rankone_options.add_option("--img-quality", type=float, dest="img_quality",default=None)
     rankone_options.add_option("--num-faces", type=int, dest="num_faces", default=None)
-    rankone_options.add_option("--min-face-size", type=int, dest="min_face_size", default=None)
+    rankone_options.add_option("--min-face-size", dest="min_face_size", default='recommended')
 
 
 class RankOneFaceWorker(faro.FaceWorker):
@@ -54,16 +54,16 @@ class RankOneFaceWorker(faro.FaceWorker):
         
         self.img_quality = options.img_quality
         self.num_faces = options.num_faces
-        self.min_face_size = options.min_face_size
         
+        self.min_face_size = options.min_face_size
+
+        self.detection_threshold = self.recommendedDetectionThreshold()
+ 
         if self.img_quality is None:
             self.img_quality = self.recommendedImgQuality()
         
         if self.num_faces is None:
             self.num_faces = self.recommendedMaxFacesDetected()
-
-        if self.min_face_size is None:
-            self.min_face_size = self.recommendedMinFaceSize()
 
         '''
         ROC_Frontal : ROC frontal face detector (-30 to +30 degress yaw)
@@ -93,7 +93,7 @@ class RankOneFaceWorker(faro.FaceWorker):
         roc.memmove(image_roc.data, image_pillow.tobytes())
         #RankOne requires a BGR image
         roc.roc_ensure(roc.roc_swap_channels(image_roc))
-        roc.roc_write_image(image_roc,'tmp.jpg'.encode('latin-1')) 
+        
         return image_roc
         
         
@@ -116,12 +116,12 @@ class RankOneFaceWorker(faro.FaceWorker):
         
         return native_buffer
 
-    def _rocUnFlatten(self, buff,template_dst):
+    def _rocUnFlatten(self, buff):
         '''
         Converts serialized data back to roc template.
         '''
 
-        #template_dst = roc.roc_template()
+        template_dst = roc.roc_template()
         roc_buffer_dst = roc.new_uint8_t_array(len(buff) + 1)
         roc.memmove(roc_buffer_dst, buff)
         roc.roc_unflatten(roc_buffer_dst, template_dst)
@@ -157,30 +157,48 @@ class RankOneFaceWorker(faro.FaceWorker):
         The default value is 36. It roughly correspinds to 18 pixels between the eyes.
         '''
         
-        detection_threshold = opts.threshold
-        print(opts)
+        if self.min_face_size == 'recommended':
+            self.min_face_size = self.recommendedMinFaceSize()
+        elif self.min_face_size == 'adaptive_size':
+            '''
+            A method for determining the minimum face detection size as a fraction of the image size.
+
+            In the interest of efficiency, it is recommended to set a lower bound on the minimum face detection size as a fraction of the image size. Given a relative minimum size of 4% of the image dimensions, and an absolute minimum size of 36 pixels, the adaptive minimum size is: max(max(image.width, image.height) * 0.04, 36).
+
+            Example
+            roc_image image = ...;
+            size_t adaptive_minimum_size;
+            roc_adaptive_minimum_size(image, 0.04, 36, &adaptive_minimum_size);
+        '''
+            adaptive_minimum_size = new_size_t()
+            roc_ensure(roc_adaptive_minimum_size(im, 0.04, 36, adaptive_minimum_size))
+        else:
+            self.min_face_size = int(self.min_face_size)
+ 
+        self.detection_threshold = opts.threshold
         if opts.best:
             self.num_faces = 1
-        print(self.num_faces)
         #create a template array
         templates = roc.new_roc_template_array(self.num_faces)
+        if self.min_face_size != 'adaptive_size':
+            #roc_represent performs both face detecion and template generation
+            roc.roc_represent(im, self.algorithm_id_detect, self.min_face_size, self.num_faces, self.detection_threshold, self.img_quality, templates)
+        else:
+            roc.roc_represent(im, self.algorithm_id_detect, size_t_value(adaptive_minimum_size), self.num_faces, detection_threshold, self.img_quality, templates) 
+            roc.delete_size_t(adaptive_minimum_size)
 
-        #roc_represent performs both face detecion and template generation
-        roc.roc_represent(im, self.algorithm_id_detect, self.min_face_size, self.num_faces, detection_threshold, self.img_quality, templates)
-        print(templates)
         # we don't need to check for best mode here. If a failed detection occurs then 
         #create a template by manually specifying the bounding box
         # fix the missing detection case
         curr_template = roc.roc_template_array_getitem(templates, 0)
         if (curr_template.algorithm_id == 0 or curr_template.algorithm_id & roc.ROC_INVALID):
             curr_template = roc.roc_template_array_getitem(templates, 0)
-            #algorithm_id = self.algorithm_id
             curr_template.detection.x = int(w * 0.5)
             curr_template.detection.y = int(h * 0.5)
             curr_template.detection.width = w
             curr_template.detection.height = h
             roc.roc_template_array_setitem(templates,0,curr_template)
-
+            roc.roc_represent(im, roc.ROC_MANUAL, self.min_face_size, 1, self.detection_threshold, self.img_quality, templates)
 
         roc.roc_free_image(im)
 
@@ -188,14 +206,10 @@ class RankOneFaceWorker(faro.FaceWorker):
 
     def detect(self,img,face_records,options):
         detected_templates = self._detect(img,options) 
-
+    
         for i in range(0,self.num_faces):
-            print(i)
             curr_template = roc.roc_template_array_getitem(detected_templates, i)
             if curr_template.algorithm_id & roc.ROC_INVALID or curr_template.algorithm_id == 0:
-                '''
-                indicates if a template was created
-                '''
                 continue
             else:
                 face_record = face_records.face_records.add()
@@ -206,43 +220,38 @@ class RankOneFaceWorker(faro.FaceWorker):
                 face_record.detection.location.CopyFrom(pt.rect_val2proto(x, y, w, h))
                 face_record.detection.detection_id = i
                 face_record.detection.detection_class = "FACE"
-                print(face_record)
-    
+                face_record.template.buffer = self._rocFlatten(curr_template) 
+        
         #Free all the roc stuff
         for i in range(0,self.num_faces):
             roc.roc_free_template(roc.roc_template_array_getitem(detected_templates,i))
 
-    def extract(self,img,face_records,options):
-        '''
-        In RankOne, face detection happends within the roc_represent function.
-        There is no explicit face detection step like in dlib. 
-        But we will output the bounding box. So we provide a stand alone detection method for RankOne.   
-        '''
-        detected_templates = self._detect(img,options)
-
-        #check the number of faces detected 
-
-        for i in range(0,self.recommendedMaxFacesDetected()):
-            curr_template = roc.roc_template_array_getitem(detected_templates, i)
-            if curr_template.algorithm_id & roc.ROC_INVALID or curr_template.algorithm_id == 0:
-                '''
-                indicates if a template was created
-                '''
+    def extract(self, img, face_records):
+        
+        if isinstance(img,np.ndarray):
+            im = self._converttoRocImage(img)
+        
+        for face_record in face_records.face_records:
+            template_dst = self._rocUnFlatten(face_record.template.buffer)
+            roc.roc_represent(im, self.algorithm_id_extract, self.recommendedMinFaceSize(), 1, self.recommendedDetectionThreshold(), self.recommendedImgQuality(), template_dst) 
+             
+            if template_dst.algorithm_id & roc.ROC_INVALID or template_dst.algorithm_id == 0:
                 continue
             else:
-                face_record = face_records.face_records.add()
-                face_record.detection.score = curr_template.detection.confidence
-                xc, yc, w, h = curr_template.detection.x, curr_template.detection.y, curr_template.detection.width, curr_template.detection.height
+                
+                xc, yc, w, h = template_dst.detection.x, template_dst.detection.y, template_dst.detection.width, template_dst.detection.height
                 x = int(xc - (w*0.5))
                 y = int(yc - (w*0.5))
-                face_record.detection.location.CopyFrom(pt.rect_val2proto(x, y, w, h))
-                face_record.detection.detection_id = i
-                face_record.detection.detection_class = "FACE"   
+            
+                assert (face_record.detection.location.x == x), "They have to be equal cause"
+                assert (face_record.detection.location.y == y), "They have to be equal cause"
+                assert (face_record.detection.location.width == w), "They have to be equal cause"
+                assert (face_record.detection.location.height == h), "They have to be equal cause" 
                 '''
                 default metadata fields : ChinX,ChinY, IOD (inter-occular distance), LeftEyeX, LeftEyeY, NoseRootX,
                 NoseRootY, Path, Pose, Quality, RightEyeX, RightEyeY, Roll
                 '''
-                metadata_info = json.loads(curr_template.md.decode('utf-8'))
+                metadata_info = json.loads(template_dst.md.decode('utf-8'))
                 landmark = face_record.landmarks.add()
                 landmark.landmark_id = 'Nose' 
                 landmark.location.x = metadata_info['NoseRootX']
@@ -287,12 +296,7 @@ class RankOneFaceWorker(faro.FaceWorker):
                 demographic.key = 'Yaw'
                 demographic.text = str(metadata_info['Yaw'])
  
-                face_record.template.buffer = self._rocFlatten(curr_template)                       
-        
-        #Free all the roc stuff
-        for i in range(0,self.recommendedMaxFacesDetected()):
-            roc.roc_free_template(roc.roc_template_array_getitem(detected_templates,i)) 
-       
+            roc.roc_ensure(roc.roc_free_template(template_dst)) 
             
             
     def locate(self,img,face_records,options):
@@ -402,11 +406,9 @@ class RankOneFaceWorker(faro.FaceWorker):
         status_message.extract_support = True
         status_message.score_support = False
         status_message.score_type = self.scoreType()
-        status_message.detection_threshold = self.recommendedDetectionThreshold();
-        status_message.match_threshold = self.recommendedScoreThreshold();
         status_message.algorithm = "RankOne_%s"%(roc.__file__);
-
-        
+        status_message.detection_threshold = self.recommendedDetectionThreshold()
+        status_message.match_threshold = self.recommendedScoreThreshold() 
         return status_message
         
     def recommendedImgQuality(self):
@@ -435,7 +437,7 @@ class RankOneFaceWorker(faro.FaceWorker):
 
     def recommendedMinFaceSize(self):
         
-        return 64
+        return 32
 
     def recommendedScoreThreshold(self,far=-1):
         '''Return the method used to create a score from the template.
