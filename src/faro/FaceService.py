@@ -593,40 +593,52 @@ class FaceService(fs.FaceRecognitionServicer):
 
             if len(probes.face_records) > 0: # if there are no probes then skip the search
                 
-                gallery = self.gallery_worker.getAllFaceRecords(search_gallery)
-                    
-                score_request = fsd.ScoreRequest()
-                score_request.face_probes.CopyFrom(probes)
-                score_request.face_gallery.CopyFrom(gallery)
+                if self.gallery_worker.isSearchable():
+                    self.gallery_worker.generateIndex(search_gallery)
+                    probes = self.gallery_worker.search(search_gallery,probes,max_results,threshold)
 
-                # Compute the scores matrix
-                scores = self.score(score_request,context)
-                scores = pt.matrix_proto2np(scores)
-                
-                for p in range(scores.shape[0]):
-                    #probe = probes.face_records[p]
-                    #out = result.probes.face_records[p].search_results
-                    matches = []
-                    for g in range(scores.shape[1]):
-                        score = scores[p,g]
-                        if score > threshold:
-                            continue
-                        matches.append( [ score, gallery.face_records[g] ] )
+                else:
+                    gallery = self.gallery_worker.getAllFaceRecords(search_gallery)
+                        
+                    score_request = fsd.ScoreRequest()
+                    score_request.face_probes.CopyFrom(probes)
+                    score_request.face_gallery.CopyFrom(gallery)
+
+                    # Compute the scores matrix
+                    scores = self.score(score_request,context)
+                    scores = pt.matrix_proto2np(scores)
                     
-                    matches.sort(key=lambda x: x[0])
-                    
-                    if max_results > 0:
-                        matches = matches[:max_results]
-                        matched += 1
-                    
-                    for score,face in matches:
-                        probes.face_records[p].search_results.face_records.add().CopyFrom(face)
-                        probes.face_records[p].search_results.face_records[-1].score=score
+                    for p in range(scores.shape[0]):
+                        #probe = probes.face_records[p]
+                        #out = result.probes.face_records[p].search_results
+                        matches = []
+                        for g in range(scores.shape[1]):
+                            score = scores[p,g]
+                            if score > threshold:
+                                continue
+                            matches.append( [ score, gallery.face_records[g] ] )
+                        
+                        matches.sort(key=lambda x: x[0])
+                        
+                        if max_results > 0:
+                            matches = matches[:max_results]
+                            matched += 1
+                        
+                        for score,face in matches:
+                            probes.face_records[p].search_results.face_records.add().CopyFrom(face)
+                            probes.face_records[p].search_results.face_records[-1].score=score
           
             # Count the matches
             count = len(probes.face_records)
-            notes = "Processed %d probes. %d matched."%(count,matched)
+
+            # Compute speed
             stop = time.time()
+            
+            gcount = self.gallery_worker.size(search_gallery)
+            total_faces = count*gcount
+            speed = total_faces/(stop-start)
+            notes = "Processed %d probes. Searched %0.1f faces per second."%(count,speed)
+
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"search()",notes,context.peer())))
             return probes
         except:

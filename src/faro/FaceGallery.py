@@ -32,6 +32,10 @@ import numpy as np
 import faro
 import h5py
 import os
+import time
+import faro.proto.face_service_pb2 as fsd
+import scipy.spatial as spat          
+
 
 import faro.proto.proto_types as pt
 from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,Empty,FaceRecord
@@ -81,15 +85,13 @@ class GalleryWorker(object):
 
 
 
-    def isSearchable(self):
-        ''' Return true of the gallery implements fast search. '''
-        return False
-
 
 
     def addFaceToGallery(self, gallery_name, gallery_key, face):
         ''' Enrolls the faces in the gallery. '''
         global STORAGE
+
+        self.clearIndex(gallery_name)
 
         replaced = 0
 
@@ -187,6 +189,8 @@ class GalleryWorker(object):
 
     def subjectDelete(self, gallery_name, subject_id):
         ''' List the galleries for this service. '''
+        self.clearIndex(gallery_name)
+
         if gallery_name not in STORAGE:
             raise ValueError("No gallery named '%s'"%(gallery_name,))
 
@@ -208,8 +212,12 @@ class GalleryWorker(object):
         
         return delete_count
 
+    def isSearchable(self):
+        ''' Return true of the gallery implements fast search. '''
+        return False
 
-    def clearIndex(self):
+
+    def clearIndex(self, gallery_name):
         ''' Remove the index to free space and allow it to be regenerated when needed. '''
         pass
 
@@ -232,6 +240,188 @@ class GalleryWorker(object):
             gallery.face_records.add().CopyFrom(face)
 
         return gallery
+
+    def getFaceRecord(self, gallery_name, face_id):
+        ''' Get all the face records in the gallery. '''
+        if gallery_name not in STORAGE:
+            raise ValueError("Unknown gallery: "+gallery_name)
+
+        tmp = STORAGE[gallery_name]['faces'][face_id]
+        face = FaceRecord()
+        face.ParseFromString(np.array(tmp).tobytes())
+
+        return face
+
+
+
+class SearchableGalleryWorker(GalleryWorker):
+    ''' Implements a fast gallery to speed up searches. Requires templates to be simple vectors.'''
+
+    def __init__(self,options,score_type):
+        GalleryWorker.__init__(self,options)
+
+        self.score_type = score_type
+        self.indexes = {}
+        self.face_ids = {}
+
+
+    def isSearchable(self):
+        ''' Return true of the gallery implements fast search. '''
+        return True
+
+
+    def clearIndex(self, gallery_name):
+        ''' Remove the index to free space and allow it to be regenerated when needed. '''
+
+        if gallery_name not in STORAGE:
+            raise ValueError("Unknown gallery: "+gallery_name)
+
+        try:
+            del STORAGE[gallery_name]['index']
+        except:
+            pass
+
+        try:
+            del STORAGE[gallery_name]['face_ids']
+        except:
+            pass
+
+        try:
+            del self.indexes[gallery_name]
+        except:
+            pass
+
+        try:
+            del self.face_ids[gallery_name]
+        except:
+            pass
+
+
+
+    def generateIndex(self, gallery_name):
+        ''' Process the gallery to generate a fast index. '''
+
+        #try:
+        #    print("Gallery Names:",list(STORAGE[gallery_name]))
+        #    self.clearIndex(gallery_name)
+        #except:
+        #    print("Problem clearing index.")
+
+        if gallery_name not in STORAGE:
+            raise ValueError("Unknown gallery: "+gallery_name)
+
+        if gallery_name in self.indexes:
+            # This seems to exist and be loaded into memory so just continue
+            return 
+
+        if 'index' in STORAGE[gallery_name]:
+            # Use the existing index
+            self.indexes[gallery_name] = np.array(STORAGE[gallery_name]['index'],dtype=np.float32)
+            self.face_ids[gallery_name] = list(STORAGE[gallery_name]['face_ids']) 
+            return
+
+        else:
+            # Generate the index
+            start = time.time()
+
+            gsize = self.size(gallery_name)
+            
+            dset = None
+
+            print("Building Gallery Index...")
+            i = 0
+            for key in STORAGE[gallery_name]['faces']:
+                i += 1
+                if i % 1000 == 0: print("Scanning ",i," of ",gsize)
+                tmp = STORAGE[gallery_name]['faces'][key]
+                face = FaceRecord()
+                face.ParseFromString(np.array(tmp).tobytes())
+                vec = pt.vector_proto2np(face.template.data)
+                
+                # Figure out the size of the vectors
+                assert len(vec.shape) == 1
+                cols = vec.shape[0]
+
+                # Store into an h5 datasets to keep memory requirements low
+                if dset is None:
+                    try:
+                        del STORAGE[gallery_name]['index']
+                    except:
+                        pass
+                    dset = STORAGE[gallery_name].create_dataset("index", (0,cols), maxshape=(None, cols),dtype='f4')
+                    dt = None
+                    try:
+                        dt = h5py.string_dtype() # h5py > 2.10.0
+                    except:
+                        dt = h5py.special_dtype(vlen=str) # h5py==2.9.0
+                    try:
+                        del STORAGE[gallery_name]['face_ids']
+                    except:
+                        pass
+                    fset = STORAGE[gallery_name].create_dataset("face_ids", (0,), maxshape=(None,),dtype=dt)
+
+                r,c = dset.shape
+                dset.resize((r+1,cols))
+                dset[r,:] = vec
+                fset.resize((r+1,))
+                fset[r] = key
+
+            stop = time.time()
+
+            # save the index in memory
+            self.indexes[gallery_name] = np.array(STORAGE[gallery_name]['index'],dtype=np.float32)
+            self.face_ids[gallery_name] = list(STORAGE[gallery_name]['face_ids']) 
+            print("   Index Complete: %d faces in %0.3fs  Total Size: %s"%(self.size(gallery_name),stop-start, STORAGE[gallery_name]['index'].shape))
+
+
+    def search(self, gallery_name, probes, max_results, threshold):
+        ''' search the gallery using the index. '''
+
+        score_type = self.score_type
+
+        probe_mat = [pt.vector_proto2np(face_rec.template.data) for face_rec in probes.face_records]
+        probe_mat = np.array(probe_mat,dtype=np.float32)
+
+        gal_mat = self.indexes[gallery_name]
+                
+        # Compute the distance
+        if score_type == fsd.L1:
+            scores = spat.distance_matrix(probe_mat,gal_mat,1)
+        elif score_type == fsd.L2:
+            scores = spat.distance_matrix(probe_mat,gal_mat,2)
+        elif score_type == fsd.NEG_DOT:
+            scores = -np.dot(probe_mat,gal_mat.T)
+        else:
+            NotImplementedError("ScoreType %s is not implemented."%(score_type,))
+
+        
+        face_ids = self.face_ids[gallery_name]
+
+        for p in range(scores.shape[0]):
+            #probe = probes.face_records[p]
+            #out = result.probes.face_records[p].search_results
+            matches = []
+            for g in range(scores.shape[1]):
+                score = scores[p,g]
+                if score > threshold:
+                    continue
+                face = self.getFaceRecord(gallery_name,face_ids[g])
+                matches.append( [ score, face ] )
+            
+            matches.sort(key=lambda x: x[0])
+            
+            if max_results > 0:
+                matches = matches[:max_results]
+            
+            for score,face in matches:
+                probes.face_records[p].search_results.face_records.add().CopyFrom(face)
+                probes.face_records[p].search_results.face_records[-1].score=score
+
+
+        return probes
+
+
+
 
 
 

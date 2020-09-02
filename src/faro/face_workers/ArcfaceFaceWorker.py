@@ -33,7 +33,11 @@ import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
 import numpy as np
 import pyvision as pv
+from faro.FaceGallery import SearchableGalleryWorker
  
+def getGalleryWorker(options):
+    print("Arcface: Creating indexed gallery worker...")
+    return SearchableGalleryWorker(options,fsd.NEG_DOT)
 
 class ArcfaceFaceWorker(faro.FaceWorker):
     '''
