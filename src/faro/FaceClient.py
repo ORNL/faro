@@ -123,7 +123,7 @@ class FaceClient(object):
 
         
         request.detect_options.best=best
-        request.detect_request.detect_options.downsample=downsample
+        request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_options.threshold = self.info.detection_threshold
