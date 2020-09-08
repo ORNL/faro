@@ -77,7 +77,10 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         # Now process each face we found and add a face to the records list.
         for idx in range(0,dets.shape[0]):
             face_record = face_records.face_records.add()
-            face_record.detection.score = dets[idx,-1:]
+            try: # todo: this seems to be different depending on mxnet version
+                face_record.detection.score = dets[idx,-1:]
+            except:
+                face_record.detection.score = dets[idx,-1:][0]
             ulx, uly, lrx, lry = dets[idx,:-1]        
             #create_square_bbox = np.amax(abs(lrx-ulx) , abs(lry-uly))
             face_record.detection.location.CopyFrom(pt.rect_val2proto(ulx, uly, abs(lrx-ulx) , abs(lry-uly)))

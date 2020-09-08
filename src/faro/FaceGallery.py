@@ -30,11 +30,10 @@ import numpy as np
 import multiprocessing as mp
 import numpy as np
 import faro
-import h5py
-import os
 import time
 import faro.proto.face_service_pb2 as fsd
-import scipy.spatial as spat          
+import scipy.spatial as spat 
+import os         
 
 
 import faro.proto.proto_types as pt
@@ -55,6 +54,7 @@ class GalleryWorker(object):
 
     def loadGalleries(self):
         '''Load gallery information into memory on startup.'''
+        import h5py
         global STORAGE
         
         galleries = os.listdir(self.gallery_storage)
@@ -89,9 +89,10 @@ class GalleryWorker(object):
 
     def addFaceToGallery(self, gallery_name, gallery_key, face):
         ''' Enrolls the faces in the gallery. '''
+        import h5py
+
         global STORAGE
 
-        self.clearIndex(gallery_name)
 
         replaced = 0
 
@@ -142,6 +143,9 @@ class GalleryWorker(object):
         dset[-1] = face_id
 
         STORAGE[gallery_name].flush()
+        
+        self.clearIndex(gallery_name)
+
 
         return enrolled, replaced
 
@@ -300,6 +304,8 @@ class SearchableGalleryWorker(GalleryWorker):
 
     def generateIndex(self, gallery_name):
         ''' Process the gallery to generate a fast index. '''
+        import h5py
+
 
         #try:
         #    print("Gallery Names:",list(STORAGE[gallery_name]))
