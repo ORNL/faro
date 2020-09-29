@@ -1636,7 +1636,7 @@ def test():
 
         im = preprocessImage(im, options)
 
-        results = face_client.detectExtract(im, search_gallery=options.search_gallery, best=options.best,
+        results = face_client.detectExtract(im, best=options.best,
                                             threshold=options.detect_thresh, min_size=options.min_size, run_async=True,
                                             source=filename, frame=-1)
 
