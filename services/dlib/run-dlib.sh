@@ -1,7 +1,7 @@
 #!/bin/bash
 
-HOST=0.0.0.0
-PORT=50030
+HOST=localhost
+PORT=50034
 WORKER_COUNT=8
 if lsof -i:$PORT
 then
@@ -23,7 +23,7 @@ LANDMARK_MODEL=$FARO_STORAGE/models/shape_predictor_5_face_landmarks.dat
 mkdir -p ${FARO_STORAGE}/models
 mkdir -p ${FARO_STORAGE}/galleries
 
-if [[ ! -f "$RESNET_MODEL" ]]; then
+if [[ !  -f "$RESNET_MODEL" ]]; then
 	echo "Downloading dlib resnet model..."
 	wget http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2
 	bunzip2 dlib_face_recognition_resnet_model_v1.dat.bz2

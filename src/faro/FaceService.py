@@ -34,7 +34,7 @@ from concurrent import futures
 import traceback
 import time
 import faro.proto.proto_types as pt
-from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,Empty
+from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,ScoreRequest,Empty
 import csv
 import multiprocessing as mp
 import optparse
@@ -45,6 +45,7 @@ import os
 import h5py
 import skimage.io
 import cv2
+import inspect
 
 from faro.FaceGallery import GalleryWorker
 
@@ -75,7 +76,7 @@ def filterDetectMinSize(face_records, min_size):
 def filterDetectBest(face_records, im, best):
     # TODO: This is a temporary fix.
     if best and len(face_records.face_records) > 1:
-        print( "WARNING: detector service does not seem to support best mode.  To many faces returned." )
+        print( "WARNING: detector service does not seem to support best mode.  Too many faces returned." )
         face_records.face_records.sort(key=lambda x: -x.detection.score)
         #print(detections.detections)
         while len(face_records.face_records) > 1:
@@ -127,15 +128,29 @@ def worker_init(options):
     else:
         options.gpuid = -1    
     global FACE_ALG 
+    is_loaded_for_exit = True
     try: 
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)
+        try:
+            functions = [func for func in dir(FACE_ALG) if callable(getattr(FACE_ALG, func)) and not func.startswith("__")]
+            for f in functions: options.functiondict[f] = 0 
+            is_loaded_for_exit = False
+        except:
+            print('Warning: could not find any functionalities within faceworker ',options.algorithm)
+            is_loaded_for_exit = True
+            pass 
+        
+        
     except:
         print ("ERROR: Worker %d could not be started."%WORKER_INDEX)
         traceback.print_exc() 
+        if not is_loaded_for_exit:
+            options.queue_semaphore.value -= 1
         raise   
-
+    
     print( "Worker %d Ready."%(WORKER_INDEX) )
-
+    if not is_loaded_for_exit:
+        options.queue_semaphore.value -= 1
 
 def worker_status():
     global FACE_ALG
@@ -204,7 +219,7 @@ def worker_score(request):
         dist_mat = FACE_ALG.score(request)
         return dist_mat
     except:
-        print("ERROR in worker executing extract method.")
+        print("ERROR in worker executing score method.")
         traceback.print_exc()
         raise
 
@@ -221,7 +236,7 @@ def worker_cleanexit():
     try:
         FACE_ALG.cleanexit()
     except:
-        print("ERROR in worker executing extract method.")
+        print("ERROR in worker executing exit method.")
         traceback.print_exc()
         raise
 
@@ -229,12 +244,29 @@ class FaceService(fs.FaceRecognitionServicer):
     
     def __init__(self,options):
         #self.alg = FaceAlgorithms.FaceAlgorithms()
+        self.manager = mp.Manager()
+        self.worker_functionality_dict = self.manager.dict()
         self.galleries = {}
+        self.worker_init_semaphore = self.manager.Value('c',options.worker_count)
+        options.functiondict = self.worker_functionality_dict
+        options.queue_semaphore = self.worker_init_semaphore
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
+        try:
+            while(self.worker_init_semaphore.value > 0):
+                time.sleep(.1)
+        except:
+            pass
+        print("Found functions in worker: ",options.functiondict.keys())
         
         # TODO: Change this to gallery worker
 
         print(FACE_WORKER_LIST[options.algorithm][2])
+        self.gallery_passthrough = False
+        if "fusion" in options.algorithm.lower():
+            print("GALLERY WORKER: Using gallery passhtrough if available")
+            self.gallery_passthrough = True
+            self.gallery_worker_passthrough = FACE_WORKER_LIST[options.algorithm][0](options)
+            print('started worker for enrollment purposes')
         if FACE_WORKER_LIST[options.algorithm][2] is not None:
             print( "GALLERY WORKER: Using custom gallery worker.")
             self.gallery_worker = FACE_WORKER_LIST[options.algorithm][2](options)
@@ -380,36 +412,56 @@ class FaceService(fs.FaceRecognitionServicer):
 
     def enroll(self,request,context):
         ''' Enrolls the faces in the gallery. '''
+        result = self.passthrough(inspect.currentframe().f_code.co_name,request)
+        if result:
+            return request.records
+        else:
+            try:
+                start = time.time()
+                
+                gallery_name = request.enroll_gallery
+            
+
+                replacements = 0
+                count = 0
+
+                for face in request.records.face_records:
+                    face_id = faro.generateFaceId(face)
+                    face.gallery_key = face_id
+
+                    enrolled,replaced = self.gallery_worker.addFaceToGallery(gallery_name, face_id, face)
+
+                    count += enrolled
+                    replacements += replaced
+
+                stop = time.time()
+                notes = "Enrolled %d faces into gallery '%s' with %d replacements.  Gallery size = %d." % (count, gallery_name, replacements, self.gallery_worker.size(gallery_name))
+                global LOG_FORMAT
+                print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes,context.peer())))
+
+                return request.records
+            except:
+                traceback.print_exc()
+                raise
+
+
+    def generateMatchDistribution(self,request,context):
+        ''' Create a NxN square match matrix of a given gallery'''
         try:
             start = time.time()
-            
-            gallery_name = request.enroll_gallery
-            
-
-            replacements = 0
-            count = 0
-
-            for face in request.records.face_records:
-                face_id = faro.generateFaceId(face)
-                face.gallery_key = face_id
-
-                enrolled,replaced = self.gallery_worker.addFaceToGallery(gallery_name, face_id, face)
-
-                count += enrolled
-                replacements += replaced
-
-            stop = time.time()
-            notes = "Enrolled %d faces into gallery '%s' with %d replacements.  Gallery size = %d." % (count, gallery_name, replacements, self.gallery_worker.size(gallery_name))
-            global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"enroll()",notes,context.peer())))
-
-            return request.records
+            gallery_name = request.gallery_name
+            gallery_records = self.gallery_worker.getAllTemplates(gallery_name)
+            score_request = ScoreRequest()
+            score_request.template_probes.CopyFrom(gallery_records)
+            score_request.template_gallery.CopyFrom(gallery_records)
+            worker_result = self.workers.apply_async(worker_score,[score_request])
+            score_mat = worker_result.get()
+        
+            return score_mat
         except:
             traceback.print_exc()
             raise
-
-
-    
+        
     def score(self,request,context):
         try:
             start = time.time()
@@ -438,9 +490,14 @@ class FaceService(fs.FaceRecognitionServicer):
         except:
             traceback.print_exc()
             raise
-        
+
+            
     def galleryList(self, request, context):
         ''' List the galleries hosted by this service. '''
+        result = self.passthrough(inspect.currentframe().f_code.co_name,request)
+        if result:
+            return result
+            
         try:
             start = time.time()
             
@@ -471,6 +528,9 @@ class FaceService(fs.FaceRecognitionServicer):
 
     def galleryDelete(self, request, context):
         ''' Delete a gallery. '''
+        result = self.passthrough(inspect.currentframe().f_code.co_name,request)
+        if result:
+            return Empty()
         try:
             start = time.time()
             
@@ -506,7 +566,9 @@ class FaceService(fs.FaceRecognitionServicer):
            
         return result
  
-
+    def trainFromGallery(self, request, context):
+        result = self.passthrough(inspect.currentframe().f_code.co_name,request)
+        return Empty()
  
 
 
@@ -536,7 +598,17 @@ class FaceService(fs.FaceRecognitionServicer):
             traceback.print_exc()
             raise
 
-
+    def passthrough(self,functionName,request):
+        if self.gallery_passthrough and  functionName in self.worker_functionality_dict:
+            if True:
+           
+                print('performing passthrough for', functionName)
+                method = getattr(self.gallery_worker_passthrough, functionName)
+                result = method(request)
+                return result
+            # except Exception as e:
+#                 print('could not perform passthrough on ', functionName, ': ', e)
+        return None
     
 
     def echo(self,request,context):
@@ -860,9 +932,7 @@ def serve():
     sys.path.append(os.path.join(import_dir,'face_workers'))
     scripts = list(scripts)
     scripts.sort()
-    
-    print('scripts1',scripts)
-    
+        
     # Scan for other workers
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
@@ -879,21 +949,21 @@ def serve():
             sys.path.append(worker_dir)
             scripts += list(worker_scripts)
             scripts.sort()
-            
-    print('scripts2',scripts)
-    
+                
     for each in scripts:
-        module = importlib.import_module(each[:-3])
-        class_obj = getattr(module,each[:-3])
         name = each[:-13].lower()
-        print("    Loaded: ",name,'-',class_obj)
+        try:
+            module = importlib.import_module(each[:-3])
+            class_obj = getattr(module,each[:-3])
+            print("    Loaded: ",name,'-',class_obj)
        
-        FACE_WORKER_LIST[name] = [class_obj,None,None]
-        if 'getOptionsGroup' in dir(module):
-            FACE_WORKER_LIST[name][1] = module.getOptionsGroup
-        if 'getGalleryWorker' in dir(module):
-            FACE_WORKER_LIST[name][2] = module.getGalleryWorker
-    
+            FACE_WORKER_LIST[name] = [class_obj,None,None]
+            if 'getOptionsGroup' in dir(module):
+                FACE_WORKER_LIST[name][1] = module.getOptionsGroup
+            if 'getGalleryWorker' in dir(module):
+                FACE_WORKER_LIST[name][2] = module.getGalleryWorker
+        except Exception as e:
+            print("Could not load worker ", name, ": ", e)
     options,_ = parseOptions(FACE_WORKER_LIST)
     
     

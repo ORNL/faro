@@ -175,6 +175,7 @@ message FaceTemplate{
     // Typically just populate one of these fields.
 	Vector data = 1;    // A standard floating point feature vector.
 	bytes buffer = 2;   // General storage.  Can be used for raw data templates from commercial systems.
+	string algorithm = 3;
 }
 
 
@@ -197,6 +198,7 @@ message FaceRecord{
 	string name = 5;
 	string source = 4;
 	int64 frame = 14;
+	string algorithm = 20;
 	string notes = 6;
 	string gallery_key = 15;
 	float collection_date = 16;
@@ -403,8 +405,9 @@ service FaceRecognition{
     rpc galleryList(GalleryListRequest) returns (GalleryList){};
     rpc galleryDelete(GalleryDeleteRequest) returns (Empty){};
     rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
+    rpc trainFromGallery(EnrollmentListRequest) returns (Empty){};
 	rpc subjectDelete(EnrollmentDeleteRequest) returns (EnrollmentDeleteResponse){};
-	
+	rpc generateMatchDistribution(EnrollmentListRequest) returns (Matrix){};
 	// Source Management
 	//rpc retrieveSourceImage(SourceImageRequest) returns (Image){};
 

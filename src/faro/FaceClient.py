@@ -312,15 +312,10 @@ class FaceClient(object):
     
     def enroll(self,faces, enroll_gallery, subject_id=None, subject_name=None, run_async=False,**kwargs):
         request = fsd.EnrollRequest()
-        
-        #print( "enrolling:",gallery_name,subject_id,subject_name)
-        
-        request.enroll_gallery = enroll_gallery
-        
+        request.enroll_gallery = enroll_gallery  
         if subject_id is not None:
             for face in faces.face_records:
                 face.subject_id = subject_id
-        
         if subject_name is not None:
             for face in faces.face_records:
                 face.name = subject_name
@@ -419,7 +414,12 @@ class FaceClient(object):
         dist_mat = self.service_stub.score(request,None)
         return pt.matrix_proto2np(dist_mat)
 
-
+    def generateMatchDistribution(self,gallery_name):
+        request = fsd.EnrollmentListRequest()
+        request.gallery_name = gallery_name
+        dist_mat = self.service_stub.generateMatchDistribution(request)
+        return pt.matrix_proto2np(dist_mat)
+        
     def echo(self,mat):
         '''
         '''
@@ -443,7 +443,11 @@ class FaceClient(object):
             
         return status_message.status == fsd.READY, status_message
     
-    
+    def trainFromGallery(self,gallery_name):
+        request = fsd.EnrollmentListRequest()
+        request.gallery_name = gallery_name
+        result = self.service_stub.trainFromGallery(request)
+        return result
     
     
     

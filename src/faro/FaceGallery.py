@@ -37,7 +37,7 @@ import os
 
 
 import faro.proto.proto_types as pt
-from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,Empty,FaceRecord
+from faro.proto.face_service_pb2 import DetectRequest,DetectExtractRequest,ExtractRequest,FaceRecordList,GalleryList,GalleryInfo,TemplateList,Empty,FaceRecord
 
 # TODO: Remove this and make it a local variable
 STORAGE = {}
@@ -95,9 +95,11 @@ class GalleryWorker(object):
 
 
         replaced = 0
-
+        print('Gallery name:' , gallery_name)
+        print(list(STORAGE.keys()))
         if gallery_name not in STORAGE:
             path = os.path.join(self.gallery_storage,gallery_name+'.h5')
+            print('adding new gallery at ', path)
             STORAGE[gallery_name] = h5py.File(path,'a')
             STORAGE[gallery_name].create_group('faces')
             STORAGE[gallery_name].create_group('sources')
@@ -119,7 +121,7 @@ class GalleryWorker(object):
 
         template = pt.vector_proto2np(face.template.data)
         temp_length = template.shape[0]
-
+        print('template shape: ', template.shape)
         if 'templates' not in STORAGE[gallery_name]:
             # Create an empty dataset
             f = STORAGE[gallery_name]
@@ -134,6 +136,7 @@ class GalleryWorker(object):
         # Append to the end
         dset = STORAGE[gallery_name]['templates']
         size = dset.shape
+        print('dataset size 2:', size)
         dset.resize((size[0]+1,size[1]))
         dset[-1,:] = template
 
@@ -242,7 +245,21 @@ class GalleryWorker(object):
             face = FaceRecord()
             face.ParseFromString(np.array(tmp).tobytes())
             gallery.face_records.add().CopyFrom(face)
+            
+        return gallery
+    
+    def getAllTemplates(self, gallery_name):
+        ''' Get all the face records in the gallery. '''
+        if gallery_name not in STORAGE:
+            raise ValueError("Unknown gallery: "+gallery_name)
 
+        gallery = TemplateList()
+        for key in STORAGE[gallery_name]['faces']:
+            tmp = STORAGE[gallery_name]['faces'][key]
+            face = FaceRecord()
+            face.ParseFromString(np.array(tmp).tobytes())
+            gallery.templates.add().CopyFrom(face.template)
+            
         return gallery
 
     def getFaceRecord(self, gallery_name, face_id):
