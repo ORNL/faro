@@ -195,7 +195,6 @@ class FaceClient(object):
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
-                                
         return face_records
     
     

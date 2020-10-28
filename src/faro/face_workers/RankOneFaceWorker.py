@@ -116,12 +116,12 @@ class RankOneFaceWorker(faro.FaceWorker):
         
         return native_buffer
 
-    def _rocUnFlatten(self, buff):
+    def _rocUnFlatten(self, buff, template_dst):
         '''
         Converts serialized data back to roc template.
         '''
 
-        template_dst = roc.roc_template()
+        #template_dst = roc.roc_template()
         roc_buffer_dst = roc.new_uint8_t_array(len(buff) + 1)
         roc.memmove(roc_buffer_dst, buff)
         roc.roc_unflatten(roc_buffer_dst, template_dst)
@@ -181,7 +181,6 @@ class RankOneFaceWorker(faro.FaceWorker):
         #create a template array
         templates = roc.new_roc_template_array(self.num_faces)
         if self.min_face_size != 'adaptive_size':
-            #roc_represent performs both face detecion and template generation
             roc.roc_represent(im, self.algorithm_id_detect, self.min_face_size, self.num_faces, self.detection_threshold, self.img_quality, templates)
         else:
             roc.roc_represent(im, self.algorithm_id_detect, size_t_value(adaptive_minimum_size), self.num_faces, detection_threshold, self.img_quality, templates) 
@@ -232,7 +231,8 @@ class RankOneFaceWorker(faro.FaceWorker):
             im = self._converttoRocImage(img)
         
         for face_record in face_records.face_records:
-            template_dst = self._rocUnFlatten(face_record.template.buffer)
+            template_dst = roc.roc_template()
+            self._rocUnFlatten(face_record.template.buffer, template_dst)
             roc.roc_represent(im, self.algorithm_id_extract, self.recommendedMinFaceSize(), 1, self.recommendedDetectionThreshold(), self.recommendedImgQuality(), template_dst) 
              
             if template_dst.algorithm_id & roc.ROC_INVALID or template_dst.algorithm_id == 0:
@@ -295,7 +295,8 @@ class RankOneFaceWorker(faro.FaceWorker):
                 demographic = face_record.attributes.add()
                 demographic.key = 'Yaw'
                 demographic.text = str(metadata_info['Yaw'])
- 
+                
+                face_record.template.buffer = self._rocFlatten(template_dst) 
             roc.roc_ensure(roc.roc_free_template(template_dst)) 
             
             
@@ -365,25 +366,30 @@ class RankOneFaceWorker(faro.FaceWorker):
             sim_mat = np.zeros((len(score_request.template_probes.templates),len(score_request.template_gallery.templates)),dtype=np.float32)
            
             roc_probe_template = roc.roc_template() 
-            roc_gallery_template_array = roc.new_roc_template_array(len(score_request.template_gallery.templates))
+            roc_gallery_template = roc.roc_template()
+            #roc_gallery_template_array = roc.new_roc_template_array(len(score_request.template_gallery.templates))
             sm_metric = roc.new_roc_similarity()
             for p in range(0,len(score_request.template_probes.templates)):
                 self._rocUnFlatten(score_request.template_probes.templates[p].buffer,roc_probe_template)
                 #print roc_probe_template
                 for g in range(0,len(score_request.template_gallery.templates)):
                     #print(p,g)
-                    if p == 0:
-                        roc_gallery_template = roc.roc_template()
-                        self._rocUnFlatten(score_request.template_gallery.templates[g].buffer,roc_gallery_template)
-                        roc.roc_template_array_setitem(roc_gallery_template_array,g,roc_gallery_template)
-                        
-                    roc.roc_compare_templates(roc_probe_template, roc.roc_template_array_getitem(roc_gallery_template_array,g), sm_metric)
+                    #if p == 0:
+                    #    roc_gallery_template = roc.roc_template()
+                    #    self._rocUnFlatten(score_request.template_gallery.templates[g].buffer,roc_gallery_template)
+                    #    roc.roc_template_array_setitem(roc_gallery_template_array,g,roc_gallery_template)
+                    #roc_gallery_template = roc.roc_template()
+                    self._rocUnFlatten(score_request.template_gallery.templates[g].buffer,roc_gallery_template)   
+                    #roc.roc_compare_templates(roc_probe_template, roc.roc_template_array_getitem(roc_gallery_template_array,g), sm_metric)
+                    roc.roc_compare_templates(roc_probe_template, roc_gallery_template, sm_metric)
                     sim_mat[p,g] = roc.roc_similarity_value(sm_metric)
+                    #roc.roc_free_template(roc_gallery_template)
             roc.delete_roc_similarity(sm_metric)        
             roc.roc_free_template(roc_probe_template)
-            for i in range(len(score_request.template_gallery.templates)):
+            roc.roc_free_template(roc_gallery_template)
+            #for i in range(len(score_request.template_gallery.templates)):
                 #print(i)
-                roc.roc_ensure(roc.roc_free_template(roc.roc_template_array_getitem(roc_gallery_template_array, i)))
+            #    roc.roc_ensure(roc.roc_free_template(roc.roc_template_array_getitem(roc_gallery_template_array, i)))
     
         else:
             NotImplementedError("ScoreType %s is not implemented."%(score_type,))

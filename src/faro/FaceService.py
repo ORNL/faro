@@ -669,7 +669,6 @@ class FaceService(fs.FaceRecognitionServicer):
             extract_request = request.extract_request
             extract_request.image.CopyFrom( request.detect_request.image )
             extract_request.records.CopyFrom(face_records_list)
-            
             face_records_list = self.extract(extract_request, context)
             
             return face_records_list

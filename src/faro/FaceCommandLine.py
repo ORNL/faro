@@ -614,6 +614,7 @@ def testParseOptions():
                       help="If too large, images will be scaled to have this maximum size. Default=%d" % (
                           faro.DEFAULT_MAX_SIZE))
 
+
     addTestOptions(parser)
     addDetectorOptions(parser)
     addConnectionOptions(parser)
@@ -655,7 +656,6 @@ def collect_files(args, options):
 
     image_list = []
     video_list = []
-
     for each in args:
         if os.path.isdir(each):
             for path, dirs, files in os.walk(each):
@@ -1594,56 +1594,82 @@ def search():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
 
+def process_image_dir(img_dir, dir_type, fc, options):
+    if options.verbose:
+        print("Scanning {} directory for images and videos".format(dir_type))
+    
+    image_list, video_list = collect_files([img_dir], options)
+    if options.verbose:
+        print("Processing Images")
+
+    image_count = 0
+    detect_queue = []
+    for filename in image_list:
+        im = cv2.imread(filename)
+        im = im[:, :, ::-1]
+        im = preprocessImage(im, options)
+        results = fc.detectExtract(im, best=options.best, threshold=options.detect_thresh,
+                                            min_size=options.min_size, run_async=True, source=filename, frame=-1)
+        
+        detect_queue.append([filename, results])     
+        
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+    
+    templates = []
+    while len(detect_queue):
+        fname, res = detect_queue[0]
+        if res.done():
+            recs = res.result().face_records
+            for each_record in recs:
+                templates.append(each_record)
+            detect_queue.pop(0)
+        time.sleep(0.05)
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,)) 
+    
+    return templates
+
 def test():
     """
     Run a recognition test and compute a distance matrix and optionally other results.
     """
     options, args = testParseOptions()
-
     face_client = connectToFaroClient(options)
-
-    if options.verbose:
-        print("Scanning directories for images and videos.")
-
-    image_list, video_list = collect_files(args[1:], options)
-
-    if options.verbose:
-        print("Processing images.")
-
-    image_count = 0
-    detect_queue = []
-    search_queue = []
-
-    for filename in image_list:
-        print("Processing:", filename)
-        im = cv2.imread(filename)
-        im = im[:, :, ::-1]  # BGR to RGB
-
-        im = preprocessImage(im, options)
-
-        results = face_client.detectExtract(im, search_gallery=options.search_gallery, best=options.best,
-                                            threshold=options.detect_thresh, min_size=options.min_size, run_async=True,
-                                            source=filename, frame=-1)
-
-        detect_queue.append([filename, im, results, options])
-
-        # Process results that are completed.
-        detect_queue = list(filter(processDetections, detect_queue))
-
-        image_count += 1
-        if options.max_images is not None and image_count >= options.max_images:
-            break
-
-    import time
-
-    # Finish processing.
-    while len(detect_queue):
-        detect_queue = list(filter(processDetections, detect_queue))
-        time.sleep(0.05)
-
-    if len(video_list) > 0:
-        print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
-
+    g_templates = None
+    p_templates = None
+    smat = None
+    if len(args[1:]) == 1:
+        gallery_dir = args[1]
+        g_templates = process_image_dir(gallery_dir, "gallery", face_client, options)
+        p_templates = g_templates.copy()
+        smat = face_client.score(g_templates, p_templates)
+    elif len(args[1:]) == 2:
+        gallery_dir = args[1]
+        g_templates = process_image_dir(gallery_dir, "gallery", face_client, options)
+        probe_dir = args[2]
+        p_templates = process_image_dir(probe_dir, "probe", face_client, options)
+        smat = face_client.score(g_templates, p_templates)
+    else:
+        print("Something is wrong")
+    
+    if options.distance_matrix is not None:
+        scores_csv_file = open(options.distance_matrix,'w')
+        scores_csv = csv.writer(scores_csv_file)
+        scores_csv.writerow(['face_id1','filename1','face_id2','filename2','score'])
+        scores_csv_file.flush()
+        
+        r,c = smat.shape
+        for i in range(0,r):
+            for j in range(0,c):
+                filename1 = g_templates[i].source
+                filename2 = p_templates[j].source
+                if scores_csv is not None:
+                    scores_csv.writerow([i,filename1,j,filename2,smat[i,j]])
+                    scores_csv_file.flush()
+        scores_csv_file.close()
+    
 def status():
     """
     Conects to the server and gets status information.
