@@ -192,7 +192,17 @@ def addTestOptions(parser):
                             help="A directory containing matching face images.")
 
     parser.add_option_group(search_group)
-
+    
+def addFuseOptions(parser):
+    fuse_group = optparse.OptionGroup(parser, "Fusion Options",
+                                        "Configuration for fusing scored results")
+    fuse_group.add_option('-m', "--distance-matrix", type="str", dest="distance_matrix", default=None,
+                            help="Save the fused distance matrix to this file.")     
+    fuse_group.add_option("--fusion-method", type="str", dest="method", default="minmax",
+                            help="method to use for fusion. Options are minmax, Options are minmax, weighted, gmm, llr, mlp")  
+    fuse_group.add_option("--training-data", type="str", dest="training", default=None,
+                            help="Comma separated list of .csv files used for training, each file pertaining to a unique method's scores")                                
+    parser.add_option_group(fuse_group)
 
 def preprocessImage(im, options):
     # Reduce the size if the image is too large
@@ -648,15 +658,44 @@ def testParseOptions():
 
     return options, args
 
+def fuseParseOptions():
+    """
+    Parse command line arguments.
+    """
+    args = ['score_file_dir']  # Add the names of arguments here
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Fuse scored results from different algorithms'''
+    epilog = '''Created by Joel Brogan - broganjr@ornl.gov'''
+    version = faro.__version__
 
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
+                                   version=version, description=description, epilog=epilog)
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    addFuseOptions(parser)
 
+    (options, args) = parser.parse_args()
+    if len(args) < 2:
+        parser.print_help()
+        print()
+        print(("Error: Please supply at least one directory or two csv score files for fusion"))
+        print()
+        exit(-1)
 
-def collect_files(args, options):
+    return options, args
+    
+def collect_files(args, options,extension=None):
+    
     if options.verbose:
-        print('Scanning for videos and images...')
-
+        if extension is None:
+            print('Scanning for videos and images...')
+        else:
+            print('Scanning for ', extension,' files')
     image_list = []
     video_list = []
+    csv_list = []
     for each in args:
         if os.path.isdir(each):
             for path, dirs, files in os.walk(each):
@@ -665,22 +704,32 @@ def collect_files(args, options):
                         image_list.append(os.path.join(path, filename))
                     elif pv.isVideo(filename):
                         video_list.append(os.path.join(path, filename))
+                    elif extension is not None and filename.endswith(extension):
+                        csv_list.append(os.path.join(path,filename))
 
         elif os.path.isfile(each):
             if pv.isImage(each):
                 image_list.append(each)
             elif pv.isVideo(each):
                 video_list.append(each)
+            elif extension is not None and each.endswith(extension):
+                csv_list.append(each)
             else:
                 raise ValueError("The file <%s> is not in a supported image or video type." % (each))
         else:
             raise ValueError("The path <%s> is not found." % (each))
 
     if options.verbose:
-        print("    Found %d images." % (len(image_list)))
-        print("    Found %d videos." % (len(video_list)))
+        if extension is None:
+            print("    Found %d images." % (len(image_list)))
+            print("    Found %d videos." % (len(video_list)))
+        else:
+            print("    Found %d files." % (len(csv_list)))
 
-    return image_list, video_list
+    if extension is None:
+        return image_list, video_list
+    else:
+        return csv_list
 
 
 def processAttributeFilter(face, options):
@@ -1684,6 +1733,94 @@ def test():
                     scores_csv.writerow([i,filename1,j,filename2,smat[i,j]])
                     scores_csv_file.flush()
         scores_csv_file.close()
+
+def progress_passthrough(v):
+    return v
+def fuse():
+    """
+    Run a recognition test and compute a distance matrix and optionally other results.
+    """
+    from collections import defaultdict
+    import numpy as np
+    try:
+        from tqdm import tqdm
+    except:
+        tqdm = progress_passthrough
+    options, args = fuseParseOptions()
+    method = options.method
+    print("got args:", list(args))
+    score_file_dir = args[1]
+    csv_files = collect_files(args[1:], options,extension='.csv')
+    line_len = -1
+    filenames = [os.path.basename(f) for f in csv_files]
+    
+    #     sorting the file names will ensure score matrices are built in the correct order
+    filenames.sort()
+    
+    score_dict = defaultdict(dict)
+    if options.verbose:
+        print('collecting scores')
+    for f in tqdm(csv_files):
+        fname = os.path.basename(f)
+        with open(f,'r') as fp:
+            lines = fp.readlines()
+            if line_len < 0: line_len = len(lines)
+            if not len(lines) == line_len:
+                assert("Error: file ", f, " is of length ", len(lines), " while the previous file was of length ", line_len)
+            else:
+                line_len = len(lines)
+            for l in lines[1:]:
+                parts = l.split(',')
+                if len(parts) >= 5:
+                    p1 = parts[1].strip().rstrip()
+                    p2 = parts[3].strip().rstrip()
+                    score = parts[4]
+                    pair = (p1,p2)
+                    score_dict[pair][fname] = float(score)
+    fusion_matrix = []
+    allpairs = list(score_dict.keys())
+    allpairs.sort()
+    if options.verbose:
+        print('stacking matrices...')
+    for pair in tqdm(allpairs):
+        alg_scores = score_dict[pair]
+        scores = []
+        for alg in filenames:
+            
+            if alg in alg_scores:
+                scores.append(alg_scores[alg])
+        if len(fusion_matrix) > 1: #check to make sure each match pair has the same amount of scores associated with it
+            if len(scores) == len(fusion_matrix[-1]):
+                pass
+            else:
+                assert('algorithm length mismatch for ', list(pair), ' only has ', len(scores), 'score results, and should have ', len(fusion_matrix[-1]))
+        fusion_matrix.append(scores)
+    # the fusion matrix in the format of one algorithm per column, with a shape NxM, where N is the number of match pairs and M is the number of algorithms
+    fusion_matrix = np.vstack(fusion_matrix)
+    if options.verbose:
+        print('performing fusion...')
+    if method == "minmax":
+        #first, normalize all values to between 0 and 1 on a per-algorithm basis
+        minvals = fusion_matrix.min(axis=0)
+        maxvals = fusion_matrix.max(axis=0)
+        fusion_matrix = (fusion_matrix - minvals)/(maxvals-minvals)
+           
+        #next, average the results across the algorithm axis
+        fusion_matrix = fusion_matrix.mean(axis=1).flatten()
+    else:
+        print('fusion method ', method, ' not implemented')
+    csv_output = []
+    scores_csv_file = open(options.distance_matrix,'w')
+    scores_csv = csv.writer(scores_csv_file)
+    for pair,score in zip(allpairs,fusion_matrix):
+            l = ['0',str(pair[0]),'2',str(pair[1]),str(score)]
+            if scores_csv is not None:
+                scores_csv.writerow(l)
+                scores_csv_file.flush()
+    scores_csv_file.close()
+    if options.verbose:
+        print('done!')
+    
     
 def status():
     """
@@ -1714,6 +1851,7 @@ COMMANDS = {
     'gdelete' : ['Delete a gallery.',command_line.gdelete],
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
+    'fuse' : ['Fuse scored results from different algorithms',fuse],
             }
 
 def face_command_line():
