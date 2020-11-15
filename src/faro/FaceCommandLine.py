@@ -1187,7 +1187,7 @@ def process_single_videos(each_video, face_client, options):
             save_video_csvfile_dir = os.path.dirname(options.detections_csv)
             if len(save_video_csvfile_dir) == 0:
                 save_video_csvfile_dir = os.getcwd()
-        else:
+        else
             save_video_csvfile_dir = options.detections_csv
         if not os.path.isdir(save_video_csvfile_dir):
             os.makedirs(save_video_csvfile_dir)    
@@ -1635,6 +1635,7 @@ def process_image_dir(img_dir, dir_type, fc, options):
     templates = []
     while len(detect_queue):
         fname, res = detect_queue[0]
+        print(fname)
         if res.done():
             recs = res.result().face_records
             for each_record in recs:

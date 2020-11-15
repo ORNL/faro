@@ -252,49 +252,85 @@ class RankOneFaceWorker(faro.FaceWorker):
                 NoseRootY, Path, Pose, Quality, RightEyeX, RightEyeY, Roll
                 '''
                 metadata_info = json.loads(template_dst.md.decode('utf-8'))
+                mkeys = metadata_info.keys()
                 landmark = face_record.landmarks.add()
                 landmark.landmark_id = 'Nose' 
-                landmark.location.x = metadata_info['NoseRootX']
-                landmark.location.y = metadata_info['NoseRootY']
+                if all(key in mkeys for key in ('NoseRootX', 'NoseRootY')): 
+                    landmark.location.x = metadata_info['NoseRootX']
+                    landmark.location.y = metadata_info['NoseRootY']
+                else:
+                    landmark.location.x = -0.0
+                    landmark.location.y = -0.0
                 
                 landmark = face_record.landmarks.add()
                 landmark.landmark_id = 'LeftEye' 
-                landmark.location.x = metadata_info['LeftEyeX']
-                landmark.location.y = metadata_info['LeftEyeY']
+                if all(key in mkeys for key in ('LeftEyeX', 'LeftEyeY')):
+                    landmark.location.x = metadata_info['LeftEyeX']
+                    landmark.location.y = metadata_info['LeftEyeY']
+                else:
+                    landmark.location.x = -0.0
+                    landmark.location.y = -0.0
 
                 landmark = face_record.landmarks.add()
                 landmark.landmark_id = 'RightEye'
-                landmark.location.x = metadata_info['RightEyeX']
-                landmark.location.y = metadata_info['RightEyeY']
+                if all(key in mkeys for key in ('RightEyeX', 'RightEyeY')):
+                    landmark.location.x = metadata_info['RightEyeX']
+                    landmark.location.y = metadata_info['RightEyeY']
+                else:
+                    landmark.location.x = -0.0
+                    landmark.location.y = -0.0
 
                 landmark = face_record.landmarks.add()
-                landmark.landmark_id = 'ChinX'
-                landmark.location.x = metadata_info['ChinX']
-                landmark.location.y = metadata_info['ChinY']
+                landmark.landmark_id = 'Chin'
+                if all(key in mkeys for key in ('ChinX', 'ChinY')):
+                    landmark.location.x = metadata_info['ChinX']
+                    landmark.location.y = metadata_info['ChinY']
+                else:
+                    landmark.location.x = -0.0
+                    landmark.location.y = -0.0      
                 
                 demographic = face_record.attributes.add()
                 demographic.key = 'Age'
-                demographic.text = str(metadata_info['Age'])
+                if all(key in mkeys for key in ('Age')):
+                    demographic.text = str(metadata_info['Age'])
+                else:
+                    demographic.text = ''
+                
                 
                 demographic = face_record.attributes.add()
                 demographic.key = 'Gender'
-                demographic.text = metadata_info['Gender']
+                if all(key in mkeys for key in ('Gender')):
+                    demographic.text = metadata_info['Gender']
+                else:
+                    demographic.text = ''
 
                 demographic = face_record.attributes.add()
                 demographic.key = 'GeographicOrigin'
-                demographic.text = metadata_info['GeographicOrigin']
+                if all(key in mkeys for key in ('GeographicOrigin')):
+                    demographic.text = metadata_info['GeographicOrigin']
+                else:
+                    demographic.text = ''
 
                 demographic = face_record.attributes.add()
                 demographic.key = 'Emotion'
-                demographic.text = metadata_info['Emotion']
-
+                if all(key in mkeys for key in ('Emotion')):
+                    demographic.text = metadata_info['Emotion']
+                else:
+                    demographic.text = ''
+    
                 demographic = face_record.attributes.add()
                 demographic.key = 'Artwork'
-                demographic.text = metadata_info['Artwork']
-
+                if all(key in mkeys for key in ('Artwork')):
+                    demographic.text = metadata_info['Artwork']
+                else:
+                    demographic.text = ''
+                
                 demographic = face_record.attributes.add()
                 demographic.key = 'Yaw'
-                demographic.text = str(metadata_info['Yaw'])
+                if all(key in mkeys for key in ('Yaw')):
+                    demographic.text = str(metadata_info['Yaw'])
+                else:
+                    demographic.text = ''
                 
                 face_record.template.buffer = self._rocFlatten(template_dst) 
             roc.roc_ensure(roc.roc_free_template(template_dst)) 

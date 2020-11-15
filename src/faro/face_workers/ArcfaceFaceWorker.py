@@ -136,16 +136,16 @@ class ArcfaceFaceWorker(faro.FaceWorker):
                 #print(normed_embedding.shape)
 
                 # Extract view
-                x,y,w,h = pt.rect_proto2pv(face_record.detection.location).asTuple()
-                cx,cy = x+0.5*w,y+0.5*h
-                tmp = 1.5*max(w,h)
-                cw,ch = tmp,tmp
-                crop = pv.AffineFromRect(pv.CenteredRect(cx,cy,cw,ch),(256,256))
-                #print (x,y,w,h,cx,cy,cw,ch,crop)
-                pvim = pv.Image(img[:,:,::-1]) # convert rgb to bgr
-                pvim = crop(pvim)
-                view = pt.image_pv2proto(pvim)
-                face_record.view.CopyFrom(view)
+                #x,y,w,h = pt.rect_proto2pv(face_record.detection.location).asTuple()
+                #cx,cy = x+0.5*w,y+0.5*h
+                #tmp = 1.5*max(w,h)
+                #cw,ch = tmp,tmp
+                #crop = pv.AffineFromRect(pv.CenteredRect(cx,cy,cw,ch),(256,256))
+                ##print (x,y,w,h,cx,cy,cw,ch,crop)
+                #pvim = pv.Image(img[:,:,::-1]) # convert rgb to bgr
+                #pvim = crop(pvim)
+                #view = pt.image_pv2proto(pvim)
+                #face_record.view.CopyFrom(view)
 
             else:
                 normed_embedding = np.zeros(512,dtype=float)
