@@ -24,8 +24,6 @@
 
 syntax = "proto3";
 
-option csharp_namespace="Faro.Proto";
-
 /*
  * Define a rectangle.
  */

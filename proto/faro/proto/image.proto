@@ -24,8 +24,6 @@
 
 syntax = "proto3";
 
-option csharp_namespace="Faro.Proto";
-
 
 /* This is basically a 3 dimensional array.  You should check that there is
  * enough data to fill the array in the data list.
@@ -39,9 +37,6 @@ message Image {
 		UINT8 = 0;
 		UINT16 = 1;
 		FLOAT32 = 2;
-        URL = 3;
-        PNG = 4;
-        JPG = 5;
 	}
 	DataType type = 4;
 	string description = 5;

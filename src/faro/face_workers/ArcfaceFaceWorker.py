@@ -33,11 +33,8 @@ import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
 import numpy as np
 import pyvision as pv
-from faro.FaceGallery import SearchableGalleryWorker
  
-def getGalleryWorker(options):
-    print("Arcface: Creating indexed gallery worker...")
-    return SearchableGalleryWorker(options,fsd.NEG_DOT)
+from PIL import Image
 
 class ArcfaceFaceWorker(faro.FaceWorker):
     '''
@@ -49,38 +46,56 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         Constructor
         '''
         import insightface
+        import torch
+        import torch.nn as nn
+        from torch.utils.data import DataLoader
+        from torchvision import transforms
+        import torch.backends.cudnn as cudnn
+        import torchvision
+        import hopenet
+
         os.environ['MXNET_CUDNN_AUTOTUNE_DEFAULT'] = '0'
         kwargs = {'root':os.path.join(options.storage_dir,'models')}
         #load Retina face model
         self.detector = insightface.model_zoo.get_model('retinaface_r50_v1',**kwargs)
         if options.gpuid == -1:
-            ctx_id = -1
+            self.ctx_id = -1
         else:
-            ctx_id = int(options.gpuid)
-        #self.detector.rac = 'net5'
+            self.ctx_id = int(options.gpuid)
         #set ctx_id to a gpu a predefined gpu value
-        self.detector.prepare(ctx_id, nms=0.4)
+        self.detector.prepare(self.ctx_id, nms=0.4)
         # load arcface FR model
         self.fr_model = insightface.model_zoo.get_model('arcface_r100_v1',**kwargs)
         
-        self.fr_model.prepare(ctx_id) 
+        self.fr_model.prepare(self.ctx_id) 
         self.preprocess = insightface.utils.face_align
         print("ArcFace Models Loaded.")
-
         
+
+        self.deep_pose_model = hopenet.Hopenet(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 66)
+        cudnn.enabled = True
+        saved_state_dict = torch.load(os.path.join(options.storage_dir, 'models', 'deep_head_pose', 'hopenet_robust_alpha1.pkl'))
+        self.deep_pose_model.load_state_dict(saved_state_dict)
+        self.deep_pose_model.cuda(self.ctx_id)
+        self.transformations = transforms.Compose([transforms.Scale(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+        self.deep_pose_model.eval() 
+        self.idx_tensor = [idx for idx in range(66)]
+        self.idx_tensor = torch.FloatTensor(self.idx_tensor).cuda(self.ctx_id)
+        print('Deep pose head models Ready')
+
     def detect(self,img,face_records,options):
+        from torch.autograd import Variable
+        import torch.nn.functional as F
+        import torch
         '''Run a face detector and return rectangles.'''
-        #print('Running Face Detector For ArchFace')
-        img = img[:,:,::-1] #convert from rgb to bgr . There is a reordering from bgr to RGB internally in the detector code.
-        dets, lpts = self.detector.detect(img, threshold=options.threshold, scale=1)
+        print('Running Face Detector For ArchFace')
+        img_bgr = img[:,:,::-1] #convert from rgb to bgr . There is a reordering from bgr to RGB internally in the detector code.
+        dets, lpts = self.detector.detect(img_bgr, threshold=options.threshold, scale=1)
         #print('Number of detections ', dets.shape[0])
         # Now process each face we found and add a face to the records list.
         for idx in range(0,dets.shape[0]):
             face_record = face_records.face_records.add()
-            try: # todo: this seems to be different depending on mxnet version
-                face_record.detection.score = dets[idx,-1:]
-            except:
-                face_record.detection.score = dets[idx,-1:][0]
+            face_record.detection.score = dets[idx,-1:]
             ulx, uly, lrx, lry = dets[idx,:-1]        
             #create_square_bbox = np.amax(abs(lrx-ulx) , abs(lry-uly))
             face_record.detection.location.CopyFrom(pt.rect_val2proto(ulx, uly, abs(lrx-ulx) , abs(lry-uly)))
@@ -93,20 +108,58 @@ class ArcfaceFaceWorker(faro.FaceWorker):
                 lmark.landmark_id = "point_%02d"%ldx
                 lmark.location.x = lmarkloc[ldx][0]
                 lmark.location.y = lmarkloc[ldx][1]
+            
+            x_min, y_min, x_max, y_max = int(ulx), int(uly), int(lrx), int(lry)
+            bbox_width = abs(x_max - x_min)
+            bbox_height = abs(y_max - y_min)
+            x_min -= 50
+            x_max += 50
+            y_min -= 50
+            y_max += 30
+            x_min = max(x_min, 0)
+            y_min = max(y_min, 0)
+            x_max = min(img.shape[1], x_max)
+            y_max = min(img.shape[0], y_max)
 
+            img_mod = img[y_min:y_max,x_min:x_max]
+            img_mod = Image.fromarray(img_mod)
+            img_mod = self.transformations(img_mod) 
+            img_shape = img_mod.size()
+            img_mod = img_mod.view(1, img_shape[0], img_shape[1], img_shape[2])
+            img_mod = Variable(img_mod).cuda(self.ctx_id)
+            #try:
+            yaw, pitch, roll = self.deep_pose_model(img_mod)
+            yaw_predicted = F.softmax(yaw)
+            pitch_predicted = F.softmax(pitch)
+            roll_predicted = F.softmax(roll)
+            yaw_predicted = torch.sum(yaw_predicted.data[0] * self.idx_tensor) * 3 - 99
+            pitch_predicted = torch.sum(pitch_predicted.data[0] * self.idx_tensor) * 3 - 99
+            roll_predicted = torch.sum(roll_predicted.data[0] * self.idx_tensor) * 3 - 99
+            
+            demographic = face_record.attributes.add()
+            demographic.key = 'Yaw'
+            demographic.text = str(yaw_predicted.cpu().numpy())
+
+            demographic = face_record.attributes.add()
+            demographic.key = 'Pitch'
+            demographic.text = str(pitch_predicted.cpu().numpy()) 
+
+            demographic = face_record.attributes.add()
+            demographic.key = 'Roll'
+            demographic.text = str(roll_predicted.cpu().numpy())
+        
         if options.best:
             face_records.face_records.sort(key = lambda x: -x.detection.score)
             
             while len(face_records.face_records) > 1:
                 del face_records.face_records[-1]
             
-        #print('Done Running Face Detector For ArchFace')
+        print('Done Running Face Detector For ArcFace')
     
     def locate(self,img,face_records,options):
         '''Locate facial features.'''
-        pass #the 5 landmarks points that retina face detects are stored during detection
-        
-        
+        pass 
+
     def align(self,image,face_records):
         '''Align the images to a standard size and orientation to allow 
         recognition.'''
@@ -134,19 +187,6 @@ class ArcfaceFaceWorker(faro.FaceWorker):
                 embedding_norm = np.linalg.norm(embedding)
                 normed_embedding = embedding / embedding_norm
                 #print(normed_embedding.shape)
-
-                # Extract view
-                x,y,w,h = pt.rect_proto2pv(face_record.detection.location).asTuple()
-                cx,cy = x+0.5*w,y+0.5*h
-                tmp = 1.5*max(w,h)
-                cw,ch = tmp,tmp
-                crop = pv.AffineFromRect(pv.CenteredRect(cx,cy,cw,ch),(256,256))
-                #print (x,y,w,h,cx,cy,cw,ch,crop)
-                pvim = pv.Image(img[:,:,::-1]) # convert rgb to bgr
-                pvim = crop(pvim)
-                view = pt.image_pv2proto(pvim)
-                face_record.view.CopyFrom(view)
-
             else:
                 normed_embedding = np.zeros(512,dtype=float)
             
@@ -164,6 +204,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
     
     def status(self):
         '''Return a simple status message.'''
+        print("Handeling status request.")
         status_message = fsd.FaceServiceInfo()
         status_message.status = fsd.READY
         status_message.detection_support = True

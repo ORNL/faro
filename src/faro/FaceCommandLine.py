@@ -14,9 +14,6 @@ import faro.proto.proto_types as pt
 import csv
 from faro.proto.face_service_pb2 import FaceRecordList,GalleryListRequest
 import time
-import traceback
-from faro.command_line import addConnectionOptions, connectToFaroClient
-import faro.command_line as command_line
 
 FACE_COUNT = 0
 
@@ -32,18 +29,18 @@ def addConnectionOptions(parser):
     connection_group.add_option("--max-async", type="int", dest="max_async", default=faro.DEFAULT_MAX_ASYNC,
                                 help="The maximum number of asyncronous call to make at a time. Default=%d" % faro.DEFAULT_MAX_ASYNC)
 
-    connection_group.add_option( "--compression", type="choice", choices=['uint8','jpg','png'], dest="compression", default="uint8",
-                                help="Choose a compression format for data transmissions [uint8, jpg, png]. Default=uint8")
-
-    connection_group.add_option( "--quality", type="int", dest="quality", default=95,
-                                help="Compression quality level [0-100]. Default=95")
-
     connection_group.add_option("--max-message-size", type="int", dest="max_message_size",
                                 default=faro.DEFAULT_MAX_MESSAGE_SIZE,
                                 help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d" % (
                                     faro.DEFAULT_MAX_MESSAGE_SIZE))
 
-    connection_group.add_option("-p", "--port", type="str", dest="port", default="localhost:50030",
+    connection_group.add_option("-p", "--port", type="str", dest="detect_port", default="localhost:50030",
+                                help="The port used for the recognition service.")
+
+    connection_group.add_option("--detect-port", type="str", dest="detect_port", default="localhost:50030",
+                                help="The port used for the recognition service.")
+
+    connection_group.add_option("--recognition-port", type="str", dest="rec_port", default="localhost:50030",
                                 help="The port used for the recognition service.")
 
     parser.add_option_group(connection_group)
@@ -108,29 +105,6 @@ def addEnrollOptions(parser):
     parser.add_option_group(enroll_group)
 
 
-def addFaceDeleteOptions(parser):
-    """
-    Add options for deleting faces.
-    """
-
-    enroll_group = optparse.OptionGroup(parser, "Enrollment Options",
-                                        "Configuration for enrollment.")
-
-    enroll_group.add_option("-e", "--enroll-csv", type="str", dest="enroll_csv", default=None,
-                            help="Save a log of the enrollments.")
-
-    enroll_group.add_option("--gallery", type="str", dest="enroll_gallery", default='default',
-                            help="Select the gallery to enroll into.")
-
-    enroll_group.add_option("--name", type="str", dest="subject_name", default='UNKNOWN',
-                            help="Enroll detected faces into a gallery.")
-
-    enroll_group.add_option("--subject-id", type="str", dest="subject_id", default='unknown',
-                            help="Enroll detected faces into a gallery.")
-
-    parser.add_option_group(enroll_group)
-
-
 def addSearchOptions(parser):
     """
     Add options for search of a gallery.
@@ -139,23 +113,14 @@ def addSearchOptions(parser):
     search_group = optparse.OptionGroup(parser, "Search Options",
                                         "Configuration for gallery search.")
 
-    search_group.add_option("-s", "--search-csv", type="str", dest="search_csv", default=None,
+    search_group.add_option("-s", "--search-csv", type="str", dest="search_csv", default='default',
                             help="Save the search results.")
 
-    search_group.add_option("--search-log", type="str", dest="search_log", default=None,
-                            help="Save the search results.")
-
-    search_group.add_option("--search-index", type="str", dest="search_index", default=None,
+    search_group.add_option("--search-log", type="str", dest="search_log", default='default',
                             help="Save the search results.")
 
     search_group.add_option("--gallery", type="str", dest="search_gallery", default='default',
                             help="Select the gallery to search.")
-
-    search_group.add_option("--search-threshold", type="float", dest="search_threshold", default=None,
-                            help="Set the maximum threshold for a match.")
-
-    search_group.add_option("--max-results", type="int", dest="max_results", default=3,
-                            help="Set the maximum number of search results returned for each face.")
 
     parser.add_option_group(search_group)
 
@@ -202,7 +167,7 @@ def preprocessImage(im, options):
             im = cv2.pyrDown(im)
             scale *= 0.5
         else:
-            h, w = im.shape[:2]
+            w, h = im.shape[:2]
             s = options.max_size / max(w, h)
             scale *= s
             w = int(s * w)
@@ -294,81 +259,6 @@ def detectParseOptions():
 
     return options, args
 
-def statusParseOptions():
-    """
-    Parse command line arguments.
-    """
-    args = ['']  # Add the names of arguments here.
-    n_args = len(args)
-    args = " ".join(args)
-    description = '''Check the server status and display algorithm and version information.'''
-    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
-
-    version = faro.__version__
-
-    # Setup the parser
-    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
-                                   version=version, description=description, epilog=epilog)
-
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-                      help="Print out more program information.")
-
-    addConnectionOptions(parser)
-    # Here are some templates for standard option formats.
-    # parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-    #                 help="Decrease the verbosity of the program")
-
-    # parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
-    #                  help="don't print status messages to stdout")
-
-    # parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
-    #                  help="Choose an option.")
-
-    # parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
-    #                  help="A floating point value.")
-
-    # parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
-    #                  help="An integer value.")
-
-    # parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
-    #                  help="A string value.")
-
-    # parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--search", type="str", dest="search_gallery", default=None,
-    #                  help="Search images for faces from a gallery.")
-
-    # parser.add_option( "--name", type="str", dest="subject_name", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--subject-id", type="str", dest="subject_id", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--search-log", type="str", dest="search_log", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "-m","--match-log", type="str", dest="match_log", default=None,
-    #                  help="A directory to store matching faces.")
-
-    # parser.add_option( "--same-person", type="str", dest="same_person", default=None,
-    #                  help="Specifies a python function that returns true if the filenames indicate a match.  Example: lambda x,y: x[:5] == y[:5]")
-
-    # parser.add_option( "-s","--scores-csv", type="str", dest="scores_csv", default=None,
-    #                  help="Save similarity scores to this file.")
-
-    # Parse the arguments and return the results.
-    (options, args) = parser.parse_args()
-
-    if len(args) != 1:
-        parser.print_help()
-        print()
-        print(("Please supply exactly %d arguments." % 0))
-        print()
-        exit(-1)
-
-    return options, args
-
 
 def enrollParseOptions():
     """
@@ -407,49 +297,6 @@ def enrollParseOptions():
         parser.print_help()
         print()
         print(("Error: Please supply at least one directory, image, or video."))
-        print()
-        exit(-1)
-
-    return options, args
-
-
-def enrollCsvParseOptions():
-    """
-    Parse command line arguments.
-    """
-    args = ['enroll_list.csv']  # Add the names of arguments here.
-    n_args = len(args)
-    args = " ".join(args)
-    description = '''Run detection on a collection of images.'''
-    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
-
-    version = faro.__version__
-
-    # Setup the parser
-    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
-                                   version=version, description=description, epilog=epilog)
-
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-                      help="Print out more program information.")
-
-    parser.add_option("-n", "--max-images", type="int", dest="max_images", default=None,
-                      help="Process at N images and then stop.")
-
-    parser.add_option("--maximum-size", type="int", dest="max_size", default=faro.DEFAULT_MAX_SIZE,
-                      help="If too large, images will be scaled to have this maximum size. Default=%d" % (
-                          faro.DEFAULT_MAX_SIZE))
-
-    addDetectorOptions(parser)
-    addEnrollOptions(parser)
-    addConnectionOptions(parser)
-
-    # Parse the arguments and return the results.
-    (options, args) = parser.parse_args()
-
-    if len(args) < 2:
-        parser.print_help()
-        print()
-        print(("Error: Please supply a csv file with fields subject_id,name,filename."))
         print()
         exit(-1)
 
@@ -517,41 +364,6 @@ def faceListOptions():
     (options, args) = parser.parse_args()
     
     if len(args) < 1:
-        parser.print_help()
-        print()
-        print(( "Error: No position arguments required."))
-        print()
-        exit(-1)
-        
-        
-    return options,args
-
-def subjectDeleteOptions():
-    '''
-    Parse command line arguments.
-    '''
-    args = ['gallery_name','subject_id'] # Add the names of arguments here.
-    n_args = len(args)
-    args = " ".join(args)
-    description = '''Delete subjects in a gallery.'''
-    epilog = '''Created by David Bolme - bolmeds@ornl.gov'''
-    
-    version = faro.__version__
-    
-    
-    
-    # Setup the parser
-    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
-
-    parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
-                      help="Print out more program information.")
-    
-    addConnectionOptions(parser)
-
-    # Parse the arguments and return the results.
-    (options, args) = parser.parse_args()
-    
-    if len(args) < n_args:
         parser.print_help()
         print()
         print(( "Error: No position arguments required."))
@@ -631,7 +443,6 @@ def testParseOptions():
                       help="If too large, images will be scaled to have this maximum size. Default=%d" % (
                           faro.DEFAULT_MAX_SIZE))
 
-
     addTestOptions(parser)
     addDetectorOptions(parser)
     addConnectionOptions(parser)
@@ -649,6 +460,22 @@ def testParseOptions():
     return options, args
 
 
+def connectToFaroClient(options):
+    if options.verbose:
+        print('Connecting to FaRO Service...')
+
+    face_client = faro.FaceClient(options)
+
+    is_ready, status = face_client.status(verbose=options.verbose)
+    if not is_ready:
+        print("ERROR: the FaRO service is not ready.")
+        print(status)
+        exit(-1)
+    else:
+        if options.verbose:
+            print('Connection to FaRO service established. [ algorithm: %s ]' % (status.algorithm))
+
+    return face_client
 
 
 def collect_files(args, options):
@@ -657,9 +484,11 @@ def collect_files(args, options):
 
     image_list = []
     video_list = []
+
     for each in args:
         if os.path.isdir(each):
             for path, dirs, files in os.walk(each):
+                
                 for filename in files:
                     if pv.isImage(filename):
                         image_list.append(os.path.join(path, filename))
@@ -732,19 +561,18 @@ ATTRIBUTES_CSV = None
 
 
 def processDetections(each):
-    face_source, im, results, options = each
+    im, results, options = each
     if results.done():
-        try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
-            recs = results.result().face_records  #possible error
-        except:
-            print("Error processing detections for:",face_source)
-            traceback.print_exc()
-            return
-
+        recs = results.result().face_records
         i = 0
 
         dimg = None
+        faces_detected_in_a_frame = []
         for idx, face in enumerate(recs):
+            if idx == 0:
+                faces_detected_in_a_frame.append(face.source)
+                faces_detected_in_a_frame.append(face.frame)
+            
             global FACE_COUNT
             FACE_COUNT += 1
             # Filter faces based on min size
@@ -764,39 +592,32 @@ def processDetections(each):
                 if DETECTIONS_CSV == None:
                     DETECTIONS_FILE = open(options.detections_csv, 'w')
                     DETECTIONS_CSV = csv.writer(DETECTIONS_FILE)
-                    csv_header = ['source', 'frame', 'detect_id', 'type', 'score', 'x', 'y', 'w', 'h']
-                    if len(face.landmarks) > 0:
-                        for each_lpt in face.landmarks:
-                            pt_id_label = each_lpt.landmark_id
-                            xpt_label = pt_id_label + '_x'
-                            ypt_label = pt_id_label + '_y'
-                            csv_header.append(pt_id_label)
-                            csv_header.append(xpt_label)
-                            csv_header.append(ypt_label)
-
-                    DETECTIONS_CSV.writerow(csv_header)
-
-                csv_eachline = [face.source,
-                                face.frame,
-                                i,
-                                face.detection.detection_class,
-                                face.detection.score,
-                                face.detection.location.x,
-                                face.detection.location.y,
-                                face.detection.location.width,
-                                face.detection.location.height]
-
+                    
+                faces_detected_in_a_frame.append(i)
+                faces_detected_in_a_frame.append(face.detection.detection_class)
+                faces_detected_in_a_frame.append(face.detection.score)
+                faces_detected_in_a_frame.append(face.detection.location.x)
+                faces_detected_in_a_frame.append(face.detection.location.y)
+                faces_detected_in_a_frame.append(face.detection.location.width)
+                faces_detected_in_a_frame.append(face.detection.location.height)
+                
                 if len(face.landmarks) > 0:
                     for each_lpt in face.landmarks:
                         pt_id_label = each_lpt.landmark_id
                         xpt_label = each_lpt.location.x
                         ypt_label = each_lpt.location.y
-                        csv_eachline.append(pt_id_label)
-                        csv_eachline.append(xpt_label)
-                        csv_eachline.append(ypt_label)
-                DETECTIONS_CSV.writerow(csv_eachline)
+                        faces_detected_in_a_frame.append(pt_id_label)
+                        faces_detected_in_a_frame.append(xpt_label)
+                        faces_detected_in_a_frame.append(ypt_label)
+                
 
-                DETECTIONS_FILE.flush()
+                attributes = list(face.attributes)
+                attributes.sort(key=lambda x: x.key)
+                for attribute in attributes:
+                    key = attribute.key
+                    value = attribute.text
+                    faces_detected_in_a_frame.append(key)
+                    faces_detected_in_a_frame.append(value)
 
             # Process Detections
             if options.attributes_csv is not None:
@@ -823,7 +644,7 @@ def processDetections(each):
                 attributes.sort(key=lambda x: x.key)
                 for attribute in attributes:
                     key = attribute.key
-                    value = attribute.text
+                    value = attribute.fvalue
                     csv_eachline = [face.source,
                                     face.frame,
                                     i,
@@ -863,6 +684,8 @@ def processDetections(each):
                         dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y),
                                             radius=3, color='green', fill='green')
 
+                draw_axis(dimg, yaw_predicted, pitch_predicted, roll_predicted, tdx = (x_min + x_max) / 2, tdy= (y_min + y_max) / 2, size = bbox_height/2)
+
             if options.face_log:
                 if not os.path.exists(options.face_log):
                     os.makedirs(options.face_log, exist_ok=True)
@@ -884,8 +707,7 @@ def processDetections(each):
                     view.save(out_path)
                     print('Saving face:', out_path)
                 except:
-                    print("WARNING: Image not processed correctly:", face_source)
-                    traceback.print_exc()
+                    print("WARNING: Image not processed correctly:", face.source)
 
                 out_path = os.path.join(options.face_log, os.path.basename(base_name) + '_orig' + ext)
 
@@ -894,6 +716,9 @@ def processDetections(each):
             i += 1
         if options.detect_log and dimg is not None:
             dimg.asAnnotated().save(os.path.join(options.detect_log, os.path.basename(base_name) + ext))
+        if options.detections_csv is not None:
+            DETECTIONS_CSV.writerow(faces_detected_in_a_frame)
+            DETECTIONS_FILE.flush()
         return False
     return True
 
@@ -951,31 +776,17 @@ SEARCH_FILE = None
 
 
 def processSearchResults(each):
-    face_source, im, results, options = each
-    im = pv.Image(im[:,:,::-1]) # RGB to BGR
+    print('Search results...')
+    im, results, options = each
 
     if results.done():
+        print('Done')
         recs = results.result().face_records
 
         i = 0
 
-        if options.search_log is not None:
-            try:
-                os.makedirs(options.search_log)
-            except:
-                pass
-
-        if options.search_index is not None:
-            try:
-                os.makedirs(options.search_index)
-            except:
-                pass
-            
-            
-        if options.search_log is not None:
-            im.annotateLabel(pv.Point(10,10),"Detections: %d"%(len(recs),),font=16,color='yellow')
-
         for face in recs:
+        #for face in recs.face_records:
             # Filter faces based on min size
             size = min(face.detection.location.width, face.detection.location.height)
             if size < options.min_size:
@@ -985,30 +796,29 @@ def processSearchResults(each):
             if not processAttributeFilter(face, options):
                 continue
 
-            face_source = face.source
-            face_detect_id = face.detection.detection_id
-            face_detect_rect = pt.rect_proto2pv(face.detection.location)
-
             # Process Detections
+            print("Face")
             if options.search_csv is not None:
+                print('******  search file: %s' % options.search_csv)
                 global SEARCH_CSV
                 global SEARCH_FILE
                 import csv
                 if SEARCH_CSV == None:
                     # if options.verbose:
+                    print('****** Opening search file: %s' % options.search_csv)
                     SEARCH_FILE = open(options.search_csv, 'w')
                     SEARCH_CSV = csv.writer(SEARCH_FILE)
                     SEARCH_CSV.writerow(['face_source', 'face_detect_id',
                                          'gal_sub_id', 'gal_name', 'gal_source',
                                          'gal_score', 'gal_key', 'x', 'y', 'w', 'h'])
 
+                face_source = face.source
+                face_detect_id = face.detection.detection_id
+                # face_detect_rect = face.detection.location.rect
 
-            if options.search_log is not None:
-
-                if len(face.search_results.face_records) > 0:
-                    gal = face.search_results.face_records[0]
+                for gal in face.search_results.face_records:
                     gal_name = gal.name
-                    gal_sub_id = gal.subject_id
+                    gal_sub_id = gal.name
                     gal_source = gal.source
                     gal_score = gal.score
                     gal_key = gal.gallery_key
@@ -1022,165 +832,164 @@ def processSearchResults(each):
                     # string gallery_key = 15;
 
                     SEARCH_CSV.writerow([face_source, face_detect_id,
-                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key, face_detect_rect.x,face_detect_rect.y,face_detect_rect.w,face_detect_rect.h
+                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key
                                          ]),
-
-                    im.annotateThickRect(face_detect_rect,width=3,color='yellow')
-                    im.annotateLabel(pv.Point(face_detect_rect.x,face_detect_rect.y+face_detect_rect.h+5),"%s - %s"%(gal_sub_id,gal_name),font=16,color='yellow')
-                else:
-                    im.annotateThickRect(face_detect_rect,color='white',width=2)
-
                 SEARCH_FILE.flush()
 
             i += 1
-
-            if options.search_index is not None:
-
-                if len(face.search_results.face_records) > 0:
-                    gal = face.search_results.face_records[0]
-                    gal_name = gal.name
-                    gal_sub_id = gal.subject_id
-                    gal_source = gal.source
-                    gal_score = gal.score
-                    gal_key = gal.gallery_key
-
-                    dir_name = os.path.join(options.search_index,gal_sub_id+'-'+"_".join(gal_name.split()))
-                    link_name = os.path.join(dir_name,os.path.basename(face_source))
-
-                    try:
-                        os.makedirs(dir_name)
-                    except:
-                        pass
-
-                    try:
-                        os.remove(link_name)
-                    except:
-                        pass
-
-                    os.symlink(os.path.abspath(face_source), link_name)
-
-        if options.search_log is not None:
-            try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
-                out_name = os.path.join(options.search_log,os.path.basename(face_source))
-                im.asAnnotated().save(out_name)
-            except:
-                print("Error processing:",face_source)
-                traceback.print_exc()
-                return False
-
         return False
     return True
 
-VIDEO_HEADER_FILE = None
+def draw_axis(atts, tdx, tdy, size=100):
+
+    yaw, roll, pitch = None, None, None, None
+    for each_atts in atts:
+        if each_atts.key == 'Yaw':
+            yaw = float(each_atts.value)
+        elif each_atts.key == 'Roll':
+            roll = float(each_atts.value)
+        elif each_atts.key == 'Pitch':
+            pitch = float(each_atts.value)
+
+    pitch = pitch * np.pi / 180
+    yaw = -(yaw * np.pi / 180)
+    roll = roll * np.pi / 180
+
+    # X-Axis pointing to right. drawn in red
+    x1 = size * (cos(yaw) * cos(roll)) + tdx
+    y1 = size * (cos(pitch) * sin(roll) + cos(roll) * sin(pitch) * sin(yaw)) + tdy
+
+    # Y-Axis | drawn in green
+    #        v
+    x2 = size * (-cos(yaw) * sin(roll)) + tdx
+    y2 = size * (cos(pitch) * cos(roll) - sin(pitch) * sin(yaw) * sin(roll)) + tdy
+
+    # Z-Axis (out of the screen) drawn in blue
+    x3 = size * (sin(yaw)) + tdx
+    y3 = size * (-cos(yaw) * sin(pitch)) + tdy
+
+    return x1, y1, x2, y2, x3, y3 
 
 def process_video_detections(each):
-    global VIDEO_HEADER_FILE
-    im, results, options, file_identifier = each
+    img_info, results, options, file_identifier, fl = each
     if results.done():
+        dimg = img_info['img']
+        dimg = pv.Image(dimg[:, :, ::-1])
+        base_name = img_info['vname']
+        if options.detect_log:
+            if not os.path.isdir(os.path.join(os.path.join(options.detect_log, base_name))):
+                os.makedirs(os.path.join(options.detect_log, base_name), exist_ok=True)
+        
+        if options.face_log:
+            face_log_dir = os.path.join(options.face_log, base_name)
+            if not os.path.exists(face_log_dir):
+                os.makedirs(face_log_dir, exist_ok=True)
+
         recs = results.result().face_records
         i = 0
         detect_log_dir = None
-        frame_id = None
-        dimg = None
+        faces_detected_in_a_frame = []
         for idx, face in enumerate(recs):
+            if idx == 0:
+                actual_filename = os.path.basename(face.source)
+                faces_detected_in_a_frame.append("filename")                                              
+                faces_detected_in_a_frame.append(actual_filename)
+                faces_detected_in_a_frame.append("frame_num")
+                faces_detected_in_a_frame.append(face.frame)
             base_name, ext = os.path.splitext(os.path.basename(face.source))
             # Filter faces based on min size
             size = min(face.detection.location.width, face.detection.location.height)
             if size < options.min_size:
                 continue
-
-            if (options.detections_csv is not None):    
-                if VIDEO_HEADER_FILE:
-                    csv_header = ['source', 'frame', 'detect_id', 'type', 'score', 'x', 'y', 'w', 'h']
-                    if len(face.landmarks) > 0:
-                        for each_lpt in face.landmarks:
-                            pt_id_label = each_lpt.landmark_id
-                            xpt_label = pt_id_label + '_x'
-                            ypt_label = pt_id_label + '_y'
-                            csv_header.append(pt_id_label)
-                            csv_header.append(xpt_label)
-                            csv_header.append(ypt_label)
-                    file_identifier.writerow(csv_header)
-                    VIDEO_HEADER_FILE = False
-
-                csv_eachline = [face.source,
-                                face.frame,
-                                i,
-                                face.detection.detection_class,
-                                face.detection.score,
-                                face.detection.location.x,
-                                face.detection.location.y,
-                                face.detection.location.width,
-                                face.detection.location.height]
+            
+            if options.detections_csv is not None:
+                faces_detected_in_a_frame.append("face_id")
+                faces_detected_in_a_frame.append(i)
+                faces_detected_in_a_frame.append(face.detection.detection_class)
+                faces_detected_in_a_frame.append("confidence_score")
+                faces_detected_in_a_frame.append(face.detection.score)
+                faces_detected_in_a_frame.append("upper_left_x")
+                faces_detected_in_a_frame.append(face.detection.location.x)
+                faces_detected_in_a_frame.append("upper_left_y")
+                faces_detected_in_a_frame.append(face.detection.location.y)
+                faces_detected_in_a_frame.append("width")
+                faces_detected_in_a_frame.append(face.detection.location.width)
+                faces_detected_in_a_frame.append("height")
+                faces_detected_in_a_frame.append(face.detection.location.height)
 
                 if len(face.landmarks) > 0:
                     for each_lpt in face.landmarks:
                         pt_id_label = each_lpt.landmark_id
                         xpt_label = each_lpt.location.x
                         ypt_label = each_lpt.location.y
-                        csv_eachline.append(pt_id_label)
-                        csv_eachline.append(xpt_label)
-                        csv_eachline.append(ypt_label)
+                        faces_detected_in_a_frame.append(pt_id_label + '_x')
+                        faces_detected_in_a_frame.append(xpt_label)
+                        faces_detected_in_a_frame.append(pt_id_label + '_y')
+                        faces_detected_in_a_frame.append(ypt_label)
 
-                file_identifier.writerow(csv_eachline)
-
+                attributes = list(face.attributes)
+                attributes.sort(key=lambda x: x.key)
+                for attribute in attributes:
+                    key = attribute.key
+                    value = attribute.text
+                    faces_detected_in_a_frame.append(key)
+                    faces_detected_in_a_frame.append(value)
+                
             if options.detect_log:
                 detect_log_dir = os.path.join(os.path.join(options.detect_log, base_name))
-                frame_id = face.frame
-                if not os.path.exists(detect_log_dir):
-                    os.makedirs(detect_log_dir, exist_ok=True)
-
                 rect = pt.rect_proto2pv(face.detection.location)
-                if dimg is None:
-                    dimg = pv.Image(im[:, :, ::-1])
-                dimg.annotateThickRect(rect)
-                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 5), face.detection.detection_class)
-                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 20),
-                                   "Score: %0.4f" % (face.detection.score,), color='yellow')
+                dimg.annotateRect(rect, 'black', fill_color = 'black')
                 if len(face.landmarks) > 0:
                     for each_lmark in face.landmarks:
                         dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y),
                                             radius=3, color='green', fill='green')
 
             if options.face_log:
-                face_log_dir = os.path.join(options.face_log, base_name)
-                if not os.path.exists(face_log_dir):
-                    os.makedirs(face_log_dir, exist_ok=True)
-
-                rect = pt.rect_proto2pv(face.detection.location)
                 rect = rect.rescale(1.5)
                 affine = pv.AffineFromRect(rect, (128, 128))
                 try:
                     pvim = pv.Image(im[:, :, ::-1])
                     view = affine(pvim)
                     out_path = os.path.join(face_log_dir, os.path.basename(base_name) +
-                                            '_Frame_%09d' % face.frame +
+                                            '_Frame_' + (('%0' + fl +'d') % face.frame) +
                                             '_face_%03d' % (face.detection.detection_id,) + '.jpg')
                     if len(face.landmarks) > 0:
                         for each_lmark in face.landmarks:
                             transformed_lmarks = affine(pv.Point(each_lmark.location.x, each_lmark.location.y))
                             view.annotateCircle(transformed_lmarks, radius=3, color='green', fill='green')
+                    attributes = list(face.attributes)
+                    attributes.sort(key=lambda x: x.key)
+                    tdx = face.detection.location.x + 0.5 * face.detection.location.width
+                    tdy = face.detection.location.y + 0.5 * face.detection.location.height
+                    x1, y1, x2, y2, x3, y3 = draw_axis(attributes, tdx, tdy,  size = face.detection.location.height/2)
+                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x1,y1), 'red', 2)
+                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x2,y2), 'blue', 2) 
+                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x3,y3), 'red', 2)
                     view.asAnnotated().save(out_path)
-                    #print('Saving face:', out_path)
                 except:
                     print("WARNING: Image not processed correctly:", face.source)
             i += 1
 
-        if options.detect_log and detect_log_dir is not None:
-            dimg.asAnnotated().save(os.path.join(detect_log_dir,
-                                                 os.path.basename(base_name) + '_Frame_%09d' % frame_id + '.jpg'))
+        if options.detect_log:    
+            dimg.asAnnotated().save(os.path.join(options.detect_log, base_name,
+                                   base_name + '_Frame_' + (('%0' + fl +'d') % img_info['frame_id']) + '.jpg'))
+        
+        if options.detections_csv is not None:
+            file_identifier.writerow(faces_detected_in_a_frame)
+
         return False
     return True
 
-
+ 
 def process_single_videos(each_video, face_client, options):
-    global VIDEO_HEADER_FILE
-    VIDEO_HEADER_FILE = True
     detect_queue = []
     # Read Video
     video = pv.Video(each_video)
     video_name, ext = os.path.splitext(os.path.basename(each_video))
-    
+    frame_digits_length = video._numframes #str(len(list(video))) #str(len(str(int(video.nframe)))+1)
+    tmp = cv2.VideoCapture( each_video )
+    fps = tmp.get(cv2.CAP_PROP_FPS)     
+    del tmp
     if options.detections_csv:
         _, tmp_ext = os.path.splitext(os.path.basename(options.detections_csv))
         if tmp_ext:
@@ -1189,17 +998,20 @@ def process_single_videos(each_video, face_client, options):
                 save_video_csvfile_dir = os.getcwd()
         else:
             save_video_csvfile_dir = options.detections_csv
+    
         if not os.path.isdir(save_video_csvfile_dir):
-            os.makedirs(save_video_csvfile_dir)    
+            os.makedirs(save_video_csvfile_dir)
+ 
         fid = open(os.path.join(save_video_csvfile_dir, video_name + '.csv'), 'w')
         video_detections_csv = csv.writer(fid)
     else:
         video_detections_csv = None
-
+    iw, ih = None, None
     start_time = time.time()
     for frame_id, each_frame in enumerate(video):
-
         each_frame = each_frame.asOpenCV2()[:, :, ::-1]  # convert to opencv and then bgrtorgb
+        if frame_id == 0:
+            ih, iw, _ = each_frame.shape
         if options.max_size is not None:
             each_frame = preprocessImage(each_frame, options)
         results = face_client.detect(each_frame, best=options.best,
@@ -1208,9 +1020,9 @@ def process_single_videos(each_video, face_client, options):
                                      run_async=True,
                                      source=each_video,
                                      frame=frame_id + 1)
-        detect_queue.append([each_frame, results, options, video_detections_csv])
+        vinfo = {'img': each_frame, 'frame_id': frame_id + 1, 'vname':video_name}
+        detect_queue.append([vinfo, results, options, video_detections_csv, frame_digits_length])
         detect_queue = list(filter(process_video_detections, detect_queue))
-
     while len(detect_queue):
         detect_queue = list(filter(process_video_detections, detect_queue))
         time.sleep(0.05)
@@ -1221,7 +1033,19 @@ def process_single_videos(each_video, face_client, options):
 
     if options.detections_csv:
         fid.close()
-
+        
+    if options.detect_log:
+        import glob
+        import shutil
+        detect_log_dir = os.path.join(os.path.join(options.detect_log, video_name))
+        detect_img_list = glob.glob(os.path.join(detect_log_dir,'*.jpg'))
+        if not os.path.isdir(os.path.join(save_video_csvfile_dir, 'result_videos')):
+            os.makedirs(os.path.join(save_video_csvfile_dir, 'result_videos'))
+        out = cv2.VideoWriter(os.path.join(save_video_csvfile_dir, 'result_videos', video_name + '.avi'), cv2.VideoWriter_fourcc(*'MP42'), fps, (iw ,ih))
+        for img_num, each_img in enumerate(detect_img_list):
+            out_img = cv2.imread(each_img)
+            out.write(out_img)
+        #shutil.rmtree(detect_log_dir)
 
 def process_videos(vlist, face_client, options):
     
@@ -1257,7 +1081,7 @@ def process_images(ilist, face_client, options):
         results = face_client.detect(im, best=options.best, threshold=options.detect_thresh, min_size=options.min_size,
                                      run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([filename, im, results, options])
+        detect_queue.append([im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
         image_count += 1
         if options.max_images is not None and image_count >= options.max_images:
@@ -1285,10 +1109,8 @@ def detect():
 
     if len(image_list) != 0:
         process_images(image_list, face_client, options)
-
     if len(video_list) != 0:
         process_videos(video_list, face_client, options)
-
 
 def detectExtract():
     options, args = detectParseOptions()
@@ -1315,7 +1137,7 @@ def detectExtract():
         results = face_client.detectExtract(im, best=options.best, threshold=options.detect_thresh,
                                             min_size=options.min_size, run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([filename, im, results, options])
+        detect_queue.append([im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
 
         image_count += 1
@@ -1383,7 +1205,7 @@ def extractOnly():
 
         results = face_client.extract(im, detections, run_async=True)
 
-        detect_queue.append([filename, im, results, options])
+        detect_queue.append([im, results, options])
         detect_queue = list(filter(processDetections, detect_queue))
 
         image_count += 1
@@ -1430,9 +1252,9 @@ def enroll():
         results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best=options.best,
                                                   threshold=options.detect_thresh, min_size=options.min_size,
                                                   run_async=True, source=filename, frame=-1,
-                                                  subject_name=options.subject_name, subject_id=options.subject_id)
+                                                  subject_name=options.subject_name)
 
-        detect_queue.append([filename, im, results, options])
+        detect_queue.append([im, results, options])
         enroll_queue.append([im, results, options])
 
         # Process results that are completed.
@@ -1457,79 +1279,20 @@ def enroll():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
 
-
-def enroll_csv():
-    import time
-
-    start = time.time()
-
-    options, args = enrollCsvParseOptions()
+def glist():
+    options,args = galleryListOptions()
     face_client = connectToFaroClient(options)
 
-    #print( args )
+    result = face_client.galleryList()
     
-    csv_filename = args[1]
-    if options.verbose:
-        print("Processing files in ",csv_filename)
-
-    import csv
-
-    csv_file = csv.DictReader(open(csv_filename,'r'))
-
-    #image_list, video_list = collect_files(args[1:], options)
-
-    #if options.verbose:
-    #    print("Processing images.")
-
-    image_count = 0
-    detect_queue = []
-    enroll_queue = []
-
-    for row in csv_file:
-        print("Processing:", row)
-
-        subject_id = row['subject_id']
-        name = row['name']
-        filename = row['filename']
-
-        im = cv2.imread(filename)
-        im = im[:, :, ::-1]  # BGR to RGB
-
-        im = preprocessImage(im, options)
-
-        results = face_client.detectExtractEnroll(im, enroll_gallery=options.enroll_gallery, best=options.best,
-                                                  threshold=options.detect_thresh, min_size=options.min_size,
-                                                  run_async=True, source=filename, frame=-1,
-                                                  subject_name=name, subject_id=subject_id)
-
-        detect_queue.append([filename, im, results, options])
-        enroll_queue.append([im, results, options])
-
-        # Process results that are completed.
-        detect_queue = list(filter(processDetections, detect_queue))
-        enroll_queue = list(filter(processEnrollments, enroll_queue))
-
-        image_count += 1
-        if options.max_images is not None and image_count >= options.max_images:
-            break
-
-
-    # Finish processing.
-    while len(detect_queue):
-        detect_queue = list(filter(processDetections, detect_queue))
-        time.sleep(0.05)
-
-    while len(enroll_queue):
-        enroll_queue = list(filter(processEnrollments, enroll_queue))
-        time.sleep(0.05)
-
-    #if len(video_list) > 0:
-    #    print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
-
-    finish = time.time()
-    print("Processed %d files in %0.2fsec.  %0.2f images/sec"%(image_count,finish-start,image_count/(finish-start)))
-
-def elist():
+    print()
+    print("%-24s | %10s"%('GALLERY NAME','FACE_COUNT'))
+    print('-'*37)
+    for gallery in result.galleries:
+        print("%-24s | %10d"%(gallery.gallery_name,gallery.face_count))
+    print()
+    
+def flist():
     options,args = faceListOptions()
     face_client = connectToFaroClient(options)
     
@@ -1542,16 +1305,6 @@ def elist():
     for face in result.face_records:
         print("%-48s | %-16s | %-32s | %-40s | %10d"%(face.gallery_key, face.subject_id, face.name, face.source, face.frame))
     print()
-    
-def sdelete():
-    options,args = subjectDeleteOptions()
-    face_client = connectToFaroClient(options)
-    
-    gallery_name = args[1]
-    subject_id = args[2]
-    result = face_client.subjectDelete(gallery_name,subject_id)
-    
-    print("Deleted %d records."%(result.delete_count))
     
 def search():
     options, args = searchParseOptions()
@@ -1572,20 +1325,16 @@ def search():
     for filename in image_list:
         print("Processing:", filename)
         im = cv2.imread(filename)
-        if im is None: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
-            print("Warning: could not process ",filename)
-            continue
         im = im[:, :, ::-1]  # BGR to RGB
 
         im = preprocessImage(im, options)
 
         results = face_client.detectExtractSearch(im, search_gallery=options.search_gallery, best=options.best,
                                                   threshold=options.detect_thresh, min_size=options.min_size,
-                                                  run_async=True, source=filename, frame=-1,
-                                                  search_threshold=options.search_threshold, max_results=options.max_results)
+                                                  run_async=True, source=filename, frame=-1)
 
-        detect_queue.append([filename,im, results, options])
-        search_queue.append([filename,im, results, options])
+        detect_queue.append([im, results, options])
+        search_queue.append([im, results, options])
 
         # Process results that are completed.
         detect_queue = list(filter(processDetections, detect_queue))
@@ -1609,109 +1358,64 @@ def search():
     if len(video_list) > 0:
         print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
 
-def process_image_dir(img_dir, dir_type, fc, options):
-    if options.verbose:
-        print("Scanning {} directory for images and videos".format(dir_type))
-    
-    image_list, video_list = collect_files([img_dir], options)
-    if options.verbose:
-        print("Processing Images")
-
-    image_count = 0
-    detect_queue = []
-    for filename in image_list:
-        im = cv2.imread(filename)
-        im = im[:, :, ::-1]
-        im = preprocessImage(im, options)
-        results = fc.detectExtract(im, best=options.best, threshold=options.detect_thresh,
-                                            min_size=options.min_size, run_async=True, source=filename, frame=-1)
-        
-        detect_queue.append([filename, results])     
-        
-        image_count += 1
-        if options.max_images is not None and image_count >= options.max_images:
-            break
-    
-    templates = []
-    while len(detect_queue):
-        fname, res = detect_queue[0]
-        if res.done():
-            recs = res.result().face_records
-            for each_record in recs:
-                templates.append(each_record)
-            detect_queue.pop(0)
-        time.sleep(0.05)
-    if len(video_list) > 0:
-        print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,)) 
-    
-    return templates
-
 def test():
     """
     Run a recognition test and compute a distance matrix and optionally other results.
     """
     options, args = testParseOptions()
-    face_client = connectToFaroClient(options)
-    g_templates = None
-    p_templates = None
-    smat = None
-    if len(args[1:]) == 1:
-        gallery_dir = args[1]
-        g_templates = process_image_dir(gallery_dir, "gallery", face_client, options)
-        p_templates = g_templates.copy()
-        smat = face_client.score(g_templates, p_templates)
-    elif len(args[1:]) == 2:
-        gallery_dir = args[1]
-        g_templates = process_image_dir(gallery_dir, "gallery", face_client, options)
-        probe_dir = args[2]
-        p_templates = process_image_dir(probe_dir, "probe", face_client, options)
-        smat = face_client.score(g_templates, p_templates)
-    else:
-        print("Something is wrong")
-    
-    if options.distance_matrix is not None:
-        scores_csv_file = open(options.distance_matrix,'w')
-        scores_csv = csv.writer(scores_csv_file)
-        scores_csv.writerow(['face_id1','filename1','face_id2','filename2','score'])
-        scores_csv_file.flush()
-        
-        r,c = smat.shape
-        for i in range(0,r):
-            for j in range(0,c):
-                filename1 = g_templates[i].source
-                filename2 = p_templates[j].source
-                if scores_csv is not None:
-                    scores_csv.writerow([i,filename1,j,filename2,smat[i,j]])
-                    scores_csv_file.flush()
-        scores_csv_file.close()
-    
-def status():
-    """
-    Conects to the server and gets status information.
-    """
-    options,args = statusParseOptions()
 
     face_client = connectToFaroClient(options)
 
-    message = face_client.status()
+    if options.verbose:
+        print("Scanning directories for images and videos.")
 
-    print()
-    print (message)
-    print()
+    image_list, video_list = collect_files(args[1:], options)
 
- 
+    if options.verbose:
+        print("Processing images.")
+
+    image_count = 0
+    detect_queue = []
+    search_queue = []
+
+    for filename in image_list:
+        print("Processing:", filename)
+        im = cv2.imread(filename)
+        im = im[:, :, ::-1]  # BGR to RGB
+
+        im = preprocessImage(im, options)
+
+        results = face_client.detectExtract(im, search_gallery=options.search_gallery, best=options.best,
+                                            threshold=options.detect_thresh, min_size=options.min_size, run_async=True,
+                                            source=filename, frame=-1)
+
+        detect_queue.append([im, results, options])
+
+        # Process results that are completed.
+        detect_queue = list(filter(processDetections, detect_queue))
+
+        image_count += 1
+        if options.max_images is not None and image_count >= options.max_images:
+            break
+
+    import time
+
+    # Finish processing.
+    while len(detect_queue):
+        detect_queue = list(filter(processDetections, detect_queue))
+        time.sleep(0.05)
+
+    if len(video_list) > 0:
+        print("WARNING: Video Processing Is Not Implemented. %d videos skipped." % (video_list,))
+
 
 COMMANDS = {
-    'status' : ['Connects to the server and displays version and status information.',status],
     'detect' : ['Only run face detection.',detect],
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],
     'enroll' : ['Extract faces and enroll faces in a gallery.',enroll],
-    'enrollCsv' : ['Extract faces and enroll faces in a gallery.',enroll_csv],
-    'elist' : ['List the enrollments in a gallery.',elist],
-    'sdelete' : ['Delete a subjects in a gallery.',sdelete],
-    'glist' : ['List the galleries on the service.',command_line.glist],
-    'gdelete' : ['Delete a gallery.',command_line.gdelete],
+    'flist' : ['List the faces in a gallery.',flist],
+    'glist' : ['List the galleries on the service.',glist],
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
             }
@@ -1731,4 +1435,4 @@ def face_command_line():
 
 
 if __name__ == '__main__':
-    raise NotImplementedError("This main function has been removed. Please use: 'python -m faro ...'")
+    face_command_line()

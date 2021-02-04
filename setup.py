@@ -30,7 +30,6 @@ setup(name='faro',
       packages=['faro',
                 'faro.proto',
                 'faro.face_workers',
-                'faro.command_line',
                 ],
       package_dir = {'': 'src'},
       install_requires=[

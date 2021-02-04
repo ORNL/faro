@@ -29,90 +29,62 @@ Created on Jul 26, 2018
 
 import numpy as np
 import pyvision as pv
-import cv2
-import urllib
-
 
 import faro.proto.geometry_pb2 as geometry
 import faro.proto.image_pb2 as image
 import faro.proto.face_service_pb2 as fsd
 
-def image_cv2proto(im, compression='uint8',quality=99):
+def image_np2proto(im):
     '''Convert a numpy array to a protobuf format.'''
+    #if isinstance(im,pv.Image):
+    #    im = im.asOpenCV2()[:,:,::-1] # Convert bgr to rgb
+    #im = np.array(im,dtype=np.uint8)
+    #print('dtype',im.dtype,im.shape,im)
     assert im.dtype == np.uint8 # Currently only uint8 supported
-    assert quality >= 0 and quality <= 100
-
+    result = image.Image()
+    result.width = im.shape[1]
+    result.height = im.shape[0]
+    if len(im.shape) > 2:
+        result.channels = im.shape[2]
+    else:
+        result.channels = 1
+    result.type = image.Image.UINT8
+    result.data = im.tostring()
+    return result
+    
+def image_pv2proto(im):
+    '''Convert a numpy array to a protobuf format.'''
+    assert isinstance(im,pv.Image)
+    im = im.asOpenCV2()[:,:,::-1] # Convert bgr to rgb
+    assert im.dtype == np.uint8 # Currently only uint8 supported
     result = image.Image()
     result.width = im.shape[1]
     result.height = im.shape[0]
     result.channels = im.shape[2]
-    if compression == 'uint8':
-        result.type = image.Image.UINT8
-        result.data = im.tostring()
-    elif compression in ('jpg','png'):
-        buf = cv2.imencode('.'+compression, im, [int(cv2.IMWRITE_JPEG_QUALITY), quality])[1].tobytes()
-        if compression == 'jpg':
-            result.type = image.Image.JPG
-        elif compression == 'png':
-            result.type = image.Image.PNG
-        else:
-            raise ValueError("Unknown type:" + compression)
-        result.data = buf
-
-    # Check compression info:
-    #print("Image Size:",result.width,result.height,result.channels,"   Compression:",compression,quality, "   Rate:",len(result.SerializeToString()),len(result.SerializeToString())/(result.width*result.height*result.channels))
-    
+    result.type = image.Image.UINT8
+    result.data = im.tostring()
     return result
-
-
-def image_np2proto(im,compression='uint8',quality=99):
-    '''Convert a numpy array to a protobuf format.'''
-
-    if len(im.shape) > 2:
-        im = im[:,:,::-1] # RGB to BGR
-
-    return image_cv2proto(im, compression=compression, quality=quality)
-
-
-def image_pv2proto(im, compression='uint8',quality=99):
-    '''Convert a numpy array to a protobuf format.'''
-    assert isinstance(im,pv.Image)
-
-    im = im.asOpenCV2()[:,:,::-1] # Convert bgr to rgb
-
-    return image_cv2proto(im, compression=compression, quality=quality)
-
     
-def image_proto2cv(pb_data):
-    '''Convert a protobuf image to a opencv array.'''
-    shape = pb_data.height,pb_data.width,pb_data.channels
-    if pb_data.type == image.Image.UINT8:
-        data = np.fromstring(pb_data.data,dtype=np.uint8)
-        data.shape = shape
-        data = data[:,:,::-1]
-    elif pb_data.type in (image.Image.PNG,image.Image.JPG):
-        tmp = np.fromstring(pb_data.data,dtype='uint8')
-        data = cv2.imdecode(tmp,cv2.IMREAD_COLOR)
-    elif pb_data.type in (image.Image.URL):
-        link = pb_data.data
-        f = urllib.urlopen(link)
-        tmp = f.read()
-        data = cv2.imdecode(tmp,cv2.IMREAD_COLOR)
-    else:
-        raise ValueError("ImageType not supported: "+repr(pb_data.type))
-        
-    return data
-
 def image_proto2np(pb_data):
     '''Convert a protobuf image to a numpy array.'''
-    data = image_proto2cv(pb_data)
-    data = data[:,:,::-1] # Convert BGR to RGB
+    shape = pb_data.height,pb_data.width,pb_data.channels
+    assert pb_data.type == image.Image.UINT8 # Currently only uint8 supported
+    data = np.fromstring(pb_data.data,dtype=np.uint8)
+    data.shape = shape
     return data
 
 def image_proto2pv(pb_data):
     '''Convert a protobuf image to a numpy array.'''
-    data = image_proto2cv(pb_data)
-    data = pv.Image(data) # OpenCV to pyvision
+    shape = pb_data.height,pb_data.width,pb_data.channels
+    assert pb_data.type == image.Image.UINT8 # Currently only uint8 supported
+    data = np.fromstring(pb_data.data,dtype=np.uint8)
+    data.shape = shape
+    if shape[2] == 3:
+        data = pv.Image(data[:,:,::-1]) # convert rgb to bgr
+    elif shape[2] == 1:
+        data = pv.Image(1.0*data[:,:,0].T) # convert rgb to bgr
+    else:
+        raise ValueError("Unhandled image format. shape=%s  type=%s"%(shape,data.dtype))
     return data
 
 

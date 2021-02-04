@@ -52,10 +52,9 @@ def getDefaultClientOptions():
     
     options = ClientOptions()
     options.max_async = 4
-    options.port = 'localhost:50030'
+    options.detect_port = 'localhost:50030'
+    options.rec_port = 'localhost:50030'
     options.verbose = False
-    options.quality=95
-    options.compression='uint8'
     
     return options
 
@@ -66,8 +65,6 @@ class FaceClient(object):
     '''
     def __init__(self,options,max_message_length=-1):
         
-        self.options = options
-
         channel_options = [("grpc.max_send_message_length", max_message_length),
                            ("grpc.max_receive_message_length", max_message_length)]
 
@@ -82,14 +79,14 @@ class FaceClient(object):
         self.async_sleep_time = 0.001
         self.running_async_jobs = []
         
-        channel = grpc.insecure_channel(options.port,
+        channel = grpc.insecure_channel(options.detect_port,
                                         options=channel_options)
         
-        self.service_stub = fs.FaceRecognitionStub(channel)
+        self.detect_stub = fs.FaceRecognitionStub(channel)
         
-        #channel = grpc.insecure_channel(options.rec_port,
-        #                                options=channel_options)
-        #self.rec_stub = fs.FaceRecognitionStub(channel)
+        channel = grpc.insecure_channel(options.rec_port,
+                                        options=channel_options)
+        self.rec_stub = fs.FaceRecognitionStub(channel)
         
         self.is_ready,self.info = self.status(False)
         
@@ -104,12 +101,12 @@ class FaceClient(object):
                 time.sleep(self.async_sleep_time)
 
 
-    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None,downsample=0):
+    def detect(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectRequest()
         try:
-            request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
+            request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
+            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
             
         # Setup the source and subject information.
         request.source='UNKNOWN_SOURCE'
@@ -123,7 +120,6 @@ class FaceClient(object):
 
         
         request.detect_options.best=best
-        request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_options.threshold = self.info.detection_threshold
@@ -131,10 +127,10 @@ class FaceClient(object):
             request.detect_options.threshold = float(threshold)
             
         if run_async == False:
-            face_records = self.service_stub.detect(request,None)
+            face_records = self.detect_stub.detect(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.service_stub.detect.future(request,None)
+            face_records = self.detect_stub.detect.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -144,32 +140,32 @@ class FaceClient(object):
     def extract(self, im, face_records, run_async=False):
         request = fsd.ExtractRequest()
         try:
-            request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
+            request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
+            request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
             
         request.records.CopyFrom(face_records)
         
         if run_async == False:
-            face_records = self.service_stub.extract(request,None)
+            face_records = self.rec_stub.extract(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.service_stub.extract.future(request,None)
+            face_records = self.rec_stub.extract.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
         
         return face_records
 
-    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None,downsample=0):
+    def detectExtract(self,im,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectExtractRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
             
 
         # Setup the source and subject information.
@@ -184,7 +180,6 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
-        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold
@@ -194,28 +189,28 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.service_stub.detectExtract(request,None)
+            face_records = self.detect_stub.detectExtract(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.service_stub.detectExtract.future(request,None)
+            face_records = self.detect_stub.detectExtract.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
+                                
         return face_records
     
     
     
-    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,
-                            subject_id=None,subject_name=None,frame=None,downsample=0):
+    def detectExtractEnroll(self,im,enroll_gallery='default',best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,subject_name=None,frame=None):
         request = fsd.DetectExtractEnrollRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
         request.enroll_request.CopyFrom( fsd.EnrollRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
             
         request.enroll_request.enroll_gallery = enroll_gallery
 
@@ -233,7 +228,6 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
-        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold
@@ -243,10 +237,10 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.service_stub.detectExtractEnroll(request,None)
+            face_records = self.detect_stub.detectExtractEnroll(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.service_stub.detectExtractEnroll.future(request,None)
+            face_records = self.detect_stub.detectExtractEnroll.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -254,18 +248,16 @@ class FaceClient(object):
         return face_records
     
     
-    def detectExtractSearch(self,im,search_gallery='default',max_results=3,search_threshold=None,best=False,
-                                threshold=None,min_size=None, run_async=False,source=None,subject_id=None,
-                                frame=None,downsample=0):
+    def detectExtractSearch(self,im,search_gallery='default',max_results=3,search_threshold=None,best=False,threshold=None,min_size=None, run_async=False,source=None,subject_id=None,frame=None):
         request = fsd.DetectExtractSearchRequest()
         request.detect_request.CopyFrom( fsd.DetectRequest() )
         request.extract_request.CopyFrom( fsd.ExtractRequest() )
         request.search_request.CopyFrom( fsd.SearchRequest() )
 
         try:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im, compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im))
         except:
-            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1], compression=self.options.compression, quality=self.options.quality))
+            request.detect_request.image.CopyFrom( pt.image_np2proto(im.asOpenCV2()[:,:,::-1]))
             
         request.search_request.search_gallery = search_gallery
         request.search_request.max_results=max_results
@@ -288,7 +280,6 @@ class FaceClient(object):
             
             
         request.detect_request.detect_options.best=best
-        request.detect_request.detect_options.downsample=downsample
         
         if threshold == None:
             request.detect_request.detect_options.threshold = self.info.detection_threshold
@@ -298,10 +289,10 @@ class FaceClient(object):
             
             
         if run_async == False:
-            face_records = self.service_stub.detectExtractSearch(request,None)
+            face_records = self.detect_stub.detectExtractSearch(request,None)
         elif run_async == True:
             self.waitOnResults()
-            face_records = self.service_stub.detectExtractSearch.future(request,None)
+            face_records = self.detect_stub.detectExtractSearch.future(request,None)
             self.running_async_jobs.append(face_records)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -311,10 +302,15 @@ class FaceClient(object):
     
     def enroll(self,faces, enroll_gallery, subject_id=None, subject_name=None, run_async=False,**kwargs):
         request = fsd.EnrollRequest()
-        request.enroll_gallery = enroll_gallery  
+        
+        #print( "enrolling:",gallery_name,subject_id,subject_name)
+        
+        request.enroll_gallery = enroll_gallery
+        
         if subject_id is not None:
             for face in faces.face_records:
                 face.subject_id = subject_id
+        
         if subject_name is not None:
             for face in faces.face_records:
                 face.name = subject_name
@@ -322,10 +318,10 @@ class FaceClient(object):
         request.records.CopyFrom(faces)
     
         if run_async == False:
-            error = self.service_stub.enroll(request,None)
+            error = self.rec_stub.enroll(request,None)
         elif run_async == True:
             self.waitOnResults()
-            error = self.service_stub.enroll.future(request,None)
+            error = self.rec_stub.enroll.future(request,None)
             self.running_async_jobs.append(error)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -338,45 +334,21 @@ class FaceClient(object):
         
         request = fsd.GalleryListRequest()
         
-        result = self.service_stub.galleryList(request)
+        result = self.rec_stub.galleryList(request)
         
         return result
     
-
-    def galleryDelete(self, gallery_name):
-        '''Get a list of the galleries'''
-        
-        request = fsd.GalleryDeleteRequest()
-        
-        request.gallery_name = gallery_name
-
-        result = self.service_stub.galleryDelete(request)
-        
-        return result
-    
-
     def faceList(self,gallery_name):
         '''Get a list faces in a gallery'''
         
-        request = fsd.EnrollmentListRequest()
+        request = fsd.FaceListRequest()
         request.gallery_name = gallery_name
-        result = self.service_stub.enrollmentList(request)
+        result = self.rec_stub.faceList(request)
         
         return result
 
 
-    def subjectDelete(self,gallery_name,subject_id):
-        '''Get a list faces in a gallery'''
-        
-        request = fsd.EnrollmentDeleteRequest()
-        request.gallery_name = gallery_name
-        request.subject_id = subject_id
-        result = self.service_stub.subjectDelete(request)
-        
-        return result
-
-
-    def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False, **kwargs):
+    def search(self, faces, search_gallery, max_results=3, search_threshold=None, run_async=False,**kwargs):
         request = fsd.SearchRequest()
         
         request.probes.CopyFrom(faces)
@@ -387,10 +359,10 @@ class FaceClient(object):
             request.threshold=search_threshold
             
         if run_async == False:
-            error = self.service_stub.search(request,None)
+            error = self.rec_stub.search(request,None)
         elif run_async == True:
             self.waitOnResults()
-            error = self.service_stub.search.future(request,None)
+            error = self.rec_stub.search.future(request,None)
             self.running_async_jobs.append(error)
         else:
             raise ValueError("Unexpected run_async value: %s"%(run_async,))
@@ -410,15 +382,10 @@ class FaceClient(object):
             request.template_gallery.templates.add().CopyFrom(face_rec.template)
         
         # Run the computation on the server
-        dist_mat = self.service_stub.score(request,None)
+        dist_mat = self.rec_stub.score(request,None)
         return pt.matrix_proto2np(dist_mat)
 
-    def generateMatchDistribution(self,gallery_name):
-        request = fsd.EnrollmentListRequest()
-        request.gallery_name = gallery_name
-        dist_mat = self.service_stub.generateMatchDistribution(request)
-        return pt.matrix_proto2np(dist_mat)
-        
+
     def echo(self,mat):
         '''
         '''
@@ -426,7 +393,7 @@ class FaceClient(object):
         
         
         # Run the computation on the server
-        dist_mat = self.service_stub.echo(request,None)
+        dist_mat = self.rec_stub.echo(request,None)
         
         return pt.matrix_proto2np(dist_mat)
 
@@ -434,7 +401,7 @@ class FaceClient(object):
     def status(self,verbose=False):
         request = fsd.FaceStatusRequest()
         
-        status_message = self.service_stub.status(request,None)
+        status_message = self.rec_stub.status(request,None)
         if verbose:
             print(type(status_message),status_message)
             
@@ -442,16 +409,12 @@ class FaceClient(object):
             
         return status_message.status == fsd.READY, status_message
     
-    def trainFromGallery(self,gallery_name):
-        request = fsd.EnrollmentListRequest()
-        request.gallery_name = gallery_name
-        result = self.service_stub.trainFromGallery(request)
-        return result
+    
     
     
     
 if __name__ == '__main__':
-    raise NotImplementedError("This main function has been removed. Please use: 'python -m faro ...'")
+    faro.face_command_line()
         
 
 

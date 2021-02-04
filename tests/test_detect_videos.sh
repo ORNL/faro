@@ -13,7 +13,7 @@ if [ ! -d data_videos ]; then
 
 fi
 
-python -m faro detect -d detections_videos.csv --detect-log=detect_videos --face-log=faces_videos data_videos
+python -m faro.FaceClient detect -d detections_videos.csv --detect-log=detect_videos --face-log=faces_videos data_videos
 
 
 

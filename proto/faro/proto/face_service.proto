@@ -28,7 +28,6 @@ syntax = "proto3";
 import "faro/proto/image.proto";
 import "faro/proto/geometry.proto";
 
-option csharp_namespace="Faro.Proto";
 
 
 
@@ -106,32 +105,23 @@ message DetectionOptions{
 	bool best = 2;
 	float threshold = 3;
 	
-	// optional - break the image up for larger images
 	int32 scale_levels = 4; // number of times to reduce the image by half (pyrDown) before detection
 	int32 scan_levels = 5; // number of times to reduce the image by half and then scan using the detector
 	float scan_overlap = 6; // amount of overlap to use at each scan level.
 
 	int32 min_size = 7;
 
-	bool save_request = 9; // log the image on the server - Useful for debugging and record keeping
-	bool debug = 10; // Save or print more info on the server side
-
-	int32 downsample = 11; // downsample the images to improve speed during detection
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 
 message ExtractOptions{
 	string algorithm_id = 1;
 
-	bool save_request = 2; // log the image on the server - Useful for debugging and record keeping
-	bool debug = 3; // Save or print more info on the server side
-
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 
 message EnrollOptions{
-	bool save_request = 2; // log the image on the server - Useful for debugging and record keeping
-	bool debug = 3; // Save or print more info on the server side
+
 	repeated Attribute attributes = 8; // Used for passing algorithm specific options
 }
 
@@ -175,19 +165,11 @@ message FaceTemplate{
     // Typically just populate one of these fields.
 	Vector data = 1;    // A standard floating point feature vector.
 	bytes buffer = 2;   // General storage.  Can be used for raw data templates from commercial systems.
-	string algorithm = 3;
 }
 
 
 message TemplateList{
 	repeated FaceTemplate templates = 1;
-}
-
-message AccessRecord{
-	float datetime = 1;
-	string notes = 2;
-	string credential = 3;
-	repeated Attribute metadata = 4;
 }
 
 
@@ -198,13 +180,8 @@ message FaceRecord{
 	string name = 5;
 	string source = 4;
 	int64 frame = 14;
-	string algorithm = 20;
 	string notes = 6;
 	string gallery_key = 15;
-	float collection_date = 16;
-	float enrollment_date = 17;
-	repeated Attribute metadata = 18;
-	repeated AccessRecord access_records = 19;
 
 	Image view = 7;                        // A cropped and scaled image to be viewed by humans, similar to a passport photo.
 	Image aligned = 9;                     // An aligned image used for template extraction.
@@ -317,6 +294,8 @@ message DetectExtractSearchRequest{
     SearchRequest  search_request  = 3; // The face list is replaced by the result of the extract results.
 }
 
+
+
 message FaceStatusRequest{ }
 
 message FaceServiceInfo{
@@ -333,42 +312,15 @@ message FaceServiceInfo{
     string          notes               = 11;
 }
 
-/********* Gallery Management ********/
 message GalleryListRequest {}
 
-message GalleryDeleteRequest {
+message FaceListRequest {
     string gallery_name = 1;
 }
 
-/********* Enrollment Management ********/
-message EnrollmentListRequest {
-    string gallery_name = 1;
+message GalleryClearRequest {
+    string name = 1;
 }
-
-
-
-message EnrollmentInfo {
-    string subject_id = 1;
-	string name = 2;
-	int32 face_count = 3;
-}
-
-message EnrollmentListResponse {
-	string gallery_name = 1;
-	repeated EnrollmentInfo enrollments = 2;
-}
-
-message EnrollmentDeleteRequest {
-	string gallery_name = 1;
-	string subject_id = 2;
-	string gallery_key = 3;
-}
-
-message EnrollmentDeleteResponse {
-	int64 delete_count = 1;
-}
-
-
 
 message GalleryInfo{
     string          gallery_name = 1;
@@ -403,16 +355,8 @@ service FaceRecognition{
 
     // Gallery Management
     rpc galleryList(GalleryListRequest) returns (GalleryList){};
-    rpc galleryDelete(GalleryDeleteRequest) returns (Empty){};
-    rpc enrollmentList(EnrollmentListRequest) returns (FaceRecordList){};
-    rpc trainFromGallery(EnrollmentListRequest) returns (Empty){};
-	rpc subjectDelete(EnrollmentDeleteRequest) returns (EnrollmentDeleteResponse){};
-	rpc generateMatchDistribution(EnrollmentListRequest) returns (Matrix){};
-	// Source Management
-	//rpc retrieveSourceImage(SourceImageRequest) returns (Image){};
-
-	//rpc enrollmentDeleteConditional(EnrollmentDeleteRequest) returns (FaceRecordList){};
-	//rpc enrollmentTransfer(EnrollmentDeleteRequest) returns (FaceRecordList){};
+    rpc galleryClear(GalleryClearRequest) returns (GalleryInfo){};
+    rpc faceList(FaceListRequest) returns (FaceRecordList){};
 
     // Test
 	rpc echo(Matrix) returns (Matrix){}; // test large messages

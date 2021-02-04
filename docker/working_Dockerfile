@@ -1,0 +1,77 @@
+FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04 AS faro_fr_orbio_server
+MAINTAINER Nisha Srinivas (srinivasn1@ornl.gov)
+
+
+RUN mkdir /faro
+RUN cd /faro/
+WORKDIR /faro
+
+###################################################################
+#                      INSTALL DEPENDENCIES 
+###################################################################
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+
+RUN apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository ppa:deadsnakes/ppa && \
+        apt-get update -y  && \
+        apt-get install -y build-essential python3.6 python3.6-dev python3-pip && \
+        apt-get install -y git  && \
+        # update pip
+        python3.6 -m pip install --upgrade pip && \
+        #python3.6 -m pip install wheel && \
+        cd /usr/local/bin && \
+        ln -s /usr/bin/python3.6 python
+
+
+RUN apt-get update && apt-get install -y vim git wget cmake lsof unzip
+
+
+RUN apt install -y python-sklearn python-opencv python-scipy
+RUN pip3.6 install -U protobuf==3.14.0 grpcio==1.33.2 grpcio.tools==1.33.2
+RUN pip3.6 install -U h5py scikit-image
+RUN pip3.6 install -U mxnet-cu90==1.5.1.post0
+RUN pip3.6 install -U keras_vggface insightface
+RUN pip3.6 install dlib
+RUN pip3.6 install -U --no-deps pyvision-toolkit
+RUN pip3.6 install -U keras==2.2.0 
+RUN pip3.6 uninstall -y tensorflow-gpu tensorflow \
+  && pip3.6 install -U tensorflow-gpu==1.14.0
+RUN pip3.6 install keras-applications==1.0.2
+RUN pip3.6 install keras-preprocessing==1.0.1
+RUN pip3.6 install torch==1.1.0
+RUN pip3.6 install torchvision==0.3.0
+####################################################################
+##                        INSTALL FARO
+####################################################################
+#
+## Increment the build to rerun from this point on...
+ENV FARO_DOCKER_BUILD="0001"
+
+COPY . ./
+
+ENV FARO_STORAGE="/faro/faro_storage"
+
+RUN mkdir $FARO_STORAGE 
+
+EXPOSE 50030
+
+ENV PYTHONPATH="/faro/src"
+
+
+####################################################################
+#BUILD CLIENT
+####################################################################
+
+#FROM faro_fr_orbio_server AS faro_fr_orbio_client
+
+#COPY /docker-entrypoint.sh /usr/local/bin
+#RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \
+#    && ln -s /usr/local/bin/docker-entrypoint.sh /
+
+#ENTRYPOINT ["docker-entrypoint.sh"]
+
+
+

@@ -1,0 +1,23 @@
+version: '3.4'
+services:
+    server:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile 
+            target: faro_fr_orbio_server
+        ports:
+            - "127.0.0.1:50030:50030"
+        command: python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=1 --gpus='' --algorithm=vgg #/bin/sh -c "/faro/services/arcface/run-arcface-gpu.sh"
+        volumes: 
+            - $HOME/faro_storage:/faro/faro_storage:rw
+#    client:
+#        build: 
+#            context: .
+#            dockerfile: Dockerfile
+#            target: faro_fr_orbio_client
+#        command: ./bin/faro_recognize --detect-thresh 0.5 --recognition-port=server:50030 --detect-port=server:50030 -m /faro/faro_storage/matches -f /faro/faro_storage/faces -d /faro/faro_storage/detections.csv -a /faro/faro_storage/attributes.csv -s /faro/faro_storage/scores.csv /faro/faro_storage/data
+#        volumes: 
+#            - $HOME/faro_storage:/faro/faro_storage:rw
+#
+
+#python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=4 --algorithm=dlib
