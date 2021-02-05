@@ -14,6 +14,8 @@ import faro.proto.proto_types as pt
 import csv
 from faro.proto.face_service_pb2 import FaceRecordList,GalleryListRequest
 import time
+import numpy as np
+from math import cos, sin
 
 FACE_COUNT = 0
 
@@ -569,8 +571,11 @@ def processDetections(each):
         dimg = None
         faces_detected_in_a_frame = []
         for idx, face in enumerate(recs):
+            base_name, ext = os.path.splitext(os.path.basename(face.source))
             if idx == 0:
-                faces_detected_in_a_frame.append(face.source)
+                faces_detected_in_a_frame.append("filename")
+                faces_detected_in_a_frame.append(base_name + ext)
+                faces_detected_in_a_frame.append("frame_num")
                 faces_detected_in_a_frame.append(face.frame)
             
             global FACE_COUNT
@@ -592,14 +597,20 @@ def processDetections(each):
                 if DETECTIONS_CSV == None:
                     DETECTIONS_FILE = open(options.detections_csv, 'w')
                     DETECTIONS_CSV = csv.writer(DETECTIONS_FILE)
-                    
-                faces_detected_in_a_frame.append(i)
+                
+                faces_detected_in_a_frame.append("face_id")
                 faces_detected_in_a_frame.append(face.detection.detection_class)
+                faces_detected_in_a_frame.append("confidence_score")
                 faces_detected_in_a_frame.append(face.detection.score)
+                faces_detected_in_a_frame.append("upper_left_x")
                 faces_detected_in_a_frame.append(face.detection.location.x)
+                faces_detected_in_a_frame.append("upper_left_y")
                 faces_detected_in_a_frame.append(face.detection.location.y)
+                faces_detected_in_a_frame.append("width")
                 faces_detected_in_a_frame.append(face.detection.location.width)
+                faces_detected_in_a_frame.append("height")
                 faces_detected_in_a_frame.append(face.detection.location.height)
+
                 
                 if len(face.landmarks) > 0:
                     for each_lpt in face.landmarks:
@@ -684,7 +695,15 @@ def processDetections(each):
                         dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y),
                                             radius=3, color='green', fill='green')
 
-                draw_axis(dimg, yaw_predicted, pitch_predicted, roll_predicted, tdx = (x_min + x_max) / 2, tdy= (y_min + y_max) / 2, size = bbox_height/2)
+                attributes = list(face.attributes)
+                attributes.sort(key=lambda x: x.key)
+                tdx = face.detection.location.x + 0.5 * face.detection.location.width
+                tdy = face.detection.location.y + 0.5 * face.detection.location.height
+                x1, y1, x2, y2, x3, y3 = draw_axis(attributes, tdx, tdy,  size = face.detection.location.height/2)
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x1,y1), 'red', 2)
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x2,y2), 'blue', 2)
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x3,y3), 'green', 2)
+
 
             if options.face_log:
                 if not os.path.exists(options.face_log):
@@ -699,7 +718,6 @@ def processDetections(each):
                     view = affine(pvim)
                     # print('Face',rect)
                     # print(view)
-                    base_name, ext = os.path.splitext(os.path.basename(face.source))
                     out_path = os.path.join(options.face_log,
                                             os.path.basename(base_name) + '_face_%03d' % (
                                             face.detection.detection_id,) + ext)
@@ -714,8 +732,10 @@ def processDetections(each):
                 if not os.path.lexists(out_path):
                     os.symlink(os.path.abspath(face.source), out_path)
             i += 1
+        
         if options.detect_log and dimg is not None:
             dimg.asAnnotated().save(os.path.join(options.detect_log, os.path.basename(base_name) + ext))
+        
         if options.detections_csv is not None:
             DETECTIONS_CSV.writerow(faces_detected_in_a_frame)
             DETECTIONS_FILE.flush()
@@ -842,14 +862,14 @@ def processSearchResults(each):
 
 def draw_axis(atts, tdx, tdy, size=100):
 
-    yaw, roll, pitch = None, None, None, None
+    yaw, roll, pitch = None, None, None
     for each_atts in atts:
         if each_atts.key == 'Yaw':
-            yaw = float(each_atts.value)
+            yaw = float(each_atts.text)
         elif each_atts.key == 'Roll':
-            roll = float(each_atts.value)
+            roll = float(each_atts.text)
         elif each_atts.key == 'Pitch':
-            pitch = float(each_atts.value)
+            pitch = float(each_atts.text)
 
     pitch = pitch * np.pi / 180
     yaw = -(yaw * np.pi / 180)
@@ -890,10 +910,10 @@ def process_video_detections(each):
         detect_log_dir = None
         faces_detected_in_a_frame = []
         for idx, face in enumerate(recs):
+            base_name, ext = os.path.splitext(os.path.basename(face.source))
             if idx == 0:
-                actual_filename = os.path.basename(face.source)
                 faces_detected_in_a_frame.append("filename")                                              
-                faces_detected_in_a_frame.append(actual_filename)
+                faces_detected_in_a_frame.append(base_name + ext)
                 faces_detected_in_a_frame.append("frame_num")
                 faces_detected_in_a_frame.append(face.frame)
             base_name, ext = os.path.splitext(os.path.basename(face.source))
@@ -904,7 +924,6 @@ def process_video_detections(each):
             
             if options.detections_csv is not None:
                 faces_detected_in_a_frame.append("face_id")
-                faces_detected_in_a_frame.append(i)
                 faces_detected_in_a_frame.append(face.detection.detection_class)
                 faces_detected_in_a_frame.append("confidence_score")
                 faces_detected_in_a_frame.append(face.detection.score)
@@ -938,12 +957,19 @@ def process_video_detections(each):
             if options.detect_log:
                 detect_log_dir = os.path.join(os.path.join(options.detect_log, base_name))
                 rect = pt.rect_proto2pv(face.detection.location)
-                dimg.annotateRect(rect, 'black', fill_color = 'black')
+                dimg.annotateThickRect(rect, 'red', width=3)
                 if len(face.landmarks) > 0:
                     for each_lmark in face.landmarks:
                         dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y),
                                             radius=3, color='green', fill='green')
-
+                attributes = list(face.attributes)
+                attributes.sort(key=lambda x: x.key)
+                tdx = face.detection.location.x + 0.5 * face.detection.location.width
+                tdy = face.detection.location.y + 0.5 * face.detection.location.height
+                x1, y1, x2, y2, x3, y3 = draw_axis(attributes, tdx, tdy,  size = face.detection.location.height/2)
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x1,y1), 'red', 2)
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x2,y2), 'blue', 2) 
+                dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x3,y3), 'green', 2)
             if options.face_log:
                 rect = rect.rescale(1.5)
                 affine = pv.AffineFromRect(rect, (128, 128))
@@ -957,14 +983,6 @@ def process_video_detections(each):
                         for each_lmark in face.landmarks:
                             transformed_lmarks = affine(pv.Point(each_lmark.location.x, each_lmark.location.y))
                             view.annotateCircle(transformed_lmarks, radius=3, color='green', fill='green')
-                    attributes = list(face.attributes)
-                    attributes.sort(key=lambda x: x.key)
-                    tdx = face.detection.location.x + 0.5 * face.detection.location.width
-                    tdy = face.detection.location.y + 0.5 * face.detection.location.height
-                    x1, y1, x2, y2, x3, y3 = draw_axis(attributes, tdx, tdy,  size = face.detection.location.height/2)
-                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x1,y1), 'red', 2)
-                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x2,y2), 'blue', 2) 
-                    dimg.annotateLine(pv.Point(tdx,tdy), pv.Point(x3,y3), 'red', 2)
                     view.asAnnotated().save(out_path)
                 except:
                     print("WARNING: Image not processed correctly:", face.source)
@@ -986,7 +1004,7 @@ def process_single_videos(each_video, face_client, options):
     # Read Video
     video = pv.Video(each_video)
     video_name, ext = os.path.splitext(os.path.basename(each_video))
-    frame_digits_length = video._numframes #str(len(list(video))) #str(len(str(int(video.nframe)))+1)
+    frame_digits_length = str(len(str(video._numframes))) #str(len(list(video))) #str(len(str(int(video.nframe)))+1)
     tmp = cv2.VideoCapture( each_video )
     fps = tmp.get(cv2.CAP_PROP_FPS)     
     del tmp

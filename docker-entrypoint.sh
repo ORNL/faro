@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
  
-sleep 5
+sleep 30
  
 exec "$@"

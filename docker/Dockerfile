@@ -1,75 +1,80 @@
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+####################################################################
+# This Dockerfile creates a Docker Image that porvide both face    #
+# recognition services and atrribute prediction services from orbio#
+#################################################################### 
+FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04 AS faro_server_fhwa
 MAINTAINER Nisha Srinivas (srinivasn1@ornl.gov)
-
 
 RUN mkdir /faro
 RUN cd /faro/
-WORKDIR /faro
+WORKDIR /faro/
+
 
 ###################################################################
-#                      INSTALL DEPENDENCIES 
+#                      INSTALL DEPENDENCIES                       #  
 ###################################################################
 
-#*******************************************
-#
-# Image Arguments and Environment Variables 
-#
-#*******************************************
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Specifies where Anaconda will be installed.
-ENV CONDA_PATH=/opt/anaconda3
+RUN apt-get update && apt-get install -y vim git wget cmake lsof unzip
 
-# Specifies the environment name to use.
-ENV ENVIRONMENT_NAME=fhwa_faro_server
+RUN apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository ppa:deadsnakes/ppa && \
+        apt-get update -y  && \
+        apt-get install -y build-essential python3.6 python3.6-dev python3-pip && \
+        apt-get install -y git  && \
+        # update pip
+        python3.6 -m pip install --upgrade pip && \
+        #python3.6 -m pip install wheel && \
+        cd /usr/local/bin && \
+        ln -s /usr/bin/python3.6 python
 
-#*******************************************
-#
-# General initializations 
-#
-#*******************************************
+RUN apt install -y python-sklearn python-opencv python-scipy
+RUN pip3.6 install -U protobuf==3.14.0 grpcio==1.33.2 grpcio.tools==1.33.2
+RUN pip3.6 install -U h5py scikit-image
+RUN pip3.6 install -U mxnet-cu90==1.5.1.post0
+RUN pip3.6 install -U keras_vggface insightface
+RUN pip3.6 install dlib
+RUN pip3.6 install -U --no-deps pyvision-toolkit
+RUN pip3.6 install -U keras==2.2.0
+RUN pip3.6 uninstall -y tensorflow-gpu tensorflow \
+  && pip3.6 install -U tensorflow-gpu==1.14.0
+RUN pip3.6 install keras-applications==1.0.2
+RUN pip3.6 install keras-preprocessing==1.0.1
+RUN pip3.6 install torch==1.1.0
+RUN pip3.6 install torchvision==0.3.0
+RUN pip3.6 install h5py==2.10.0
 
-# Set default shell to bash for this session.
-# By default CUDA image uses dash (/bin/sh -> dash) 
-SHELL ["/bin/bash", "-c"]
 
-#*******************************************
-#
-# Install and Prepare Anaconda 
-#
-#*******************************************
+###################################################################
+#                        INSTALL FARO
+###################################################################
 
-# curl is required to download Anaconda.
-RUN apt-get update && apt-get install curl libgl1-mesa-glx vim git wget cmake lsof unzip -y
+# Increment the build to rerun from this point on...
+ENV FARO_DOCKER_BUILD="0001"
 
-# Download and install Anaconda.
-RUN cd /tmp && curl -O https://repo.anaconda.com/archive/Anaconda3-2019.07-Linux-x86_64.sh
-RUN chmod +x /tmp/Anaconda3-2019.07-Linux-x86_64.sh
-RUN mkdir /root/.conda
-RUN bash -c "/tmp/Anaconda3-2019.07-Linux-x86_64.sh -b -p ${CONDA_PATH}"
+COPY . ./
 
-# Initializes Conda for shell interaction.
-RUN ${CONDA_PATH}/bin/conda init bash
+ENV FARO_STORAGE="/faro/faro_storage"
 
-# Upgrade Conda to the latest version
-RUN ${CONDA_PATH}/bin/conda update -n base -c defaults conda -y
+RUN mkdir $FARO_STORAGE 
 
-# Create the working environment and setup its activation on start.
-RUN ${CONDA_PATH}/bin/conda create --name ${ENVIRONMENT_NAME} -y
-RUN echo conda activate ${ENVIRONMENT_NAME} >> /root/.bashrc
+EXPOSE 50030
 
-#*******************************************
-#
-# Install packages from environment.yml 
-#
-#*******************************************
+ENV PYTHONPATH="/faro/src"
 
-# Copy environment.yml to /tmp
-COPY environment.yml /tmp/
 
-# This statement illustrates how to install packages using environment.yml on image creation.
 
-# Update the working environment if USE_ENVIRONMENT_FILE is true.
-RUN . ${CONDA_PATH}/bin/activate ${ENVIRONMENT_NAME} \
-  && conda env update --file /tmp/environment.yml --prune
+####################################################################
+#BUILD CLIENT
+####################################################################
 
+FROM faro_server_fhwa AS faro_client_fhwa
+
+COPY docker-entrypoint.sh /usr/local/bin
+RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \
+    && ln -s /usr/local/bin/docker-entrypoint.sh /
+
+ENTRYPOINT ["docker-entrypoint.sh"]
 

@@ -131,7 +131,8 @@ def worker_init(options):
                         gpu_id_str = gpu_id_str + str(i)
                 os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id_str
     else:
-        options.gpuid = -1    
+        options.gpuid = -1   
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1" 
     global FACE_ALG 
     try: 
         FACE_ALG = FACE_WORKER_LIST[options.algorithm][0](options)

@@ -4,20 +4,67 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile 
-            target: faro_fr_orbio_server
+            target: faro_server_fhwa
+        image: ornl_faro_server
         ports:
             - "127.0.0.1:50030:50030"
-        command: python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=1 --gpus='' --algorithm=vgg #/bin/sh -c "/faro/services/arcface/run-arcface-gpu.sh"
+        command: python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=1 --gpus=0 --max-message-size=-1 --algorithm=arcface
         volumes: 
             - $HOME/faro_storage:/faro/faro_storage:rw
-#    client:
-#        build: 
-#            context: .
-#            dockerfile: Dockerfile
-#            target: faro_fr_orbio_client
-#        command: ./bin/faro_recognize --detect-thresh 0.5 --recognition-port=server:50030 --detect-port=server:50030 -m /faro/faro_storage/matches -f /faro/faro_storage/faces -d /faro/faro_storage/detections.csv -a /faro/faro_storage/attributes.csv -s /faro/faro_storage/scores.csv /faro/faro_storage/data
-#        volumes: 
-#            - $HOME/faro_storage:/faro/faro_storage:rw
-#
+        tty: true
+    client:
+        build: 
+            context: .
+            dockerfile: docker/Dockerfile
+            target: faro_client_fhwa
+        image: ornl_faro_client
+        command: bin/faro detect -d /faro/faro_storage/name_of_output_directory --min-size 0  --detect-port=server:50030 --recognition-port=server:50030  /faro/faro_storage/data
+        volumes: 
+            - $HOME/faro_storage:/faro/faro_storage:rw
+        tty: true
 
-#python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=4 --algorithm=dlib
+
+# bin/faro detect --help 
+#Run detection on a collection of images.
+#
+#Options:
+#  --version             show program's version number and exit
+#  -h, --help            show this help message and exit
+#  -v, --verbose         Print out more program information.
+#  -n MAX_IMAGES, --max-images=MAX_IMAGES
+#                        Process at N images and then stop.
+#  --maximum-size=MAX_SIZE
+#                        If too large, images will be scaled to have this
+#                        maximum size. Default=1920
+#
+#  Detector Options:
+#    Configuration for the face detector.
+#
+#    -d DETECTIONS_CSV, --detections-csv=DETECTIONS_CSV
+#                        Save detection data to the file.
+#                       If it is a directory of images - specify a csv file like /faro/faro_stroage/detections.csv -> all the detections in an images for all the iamges will be saved in detections.csv
+#                       It does not save a csv file for each image.
+#                       If it is a directory of videos - specify a directory path like /faro/faro_storage/detections  -> a csv file with detections and pose details per video will be saved.
+#    --detect-log=DETECT_LOG
+#                        A directory for saving the images or videos  with bounding boxes on them
+#    -b, --best          Detect the 'best' highest scoring face in the image. Set this flag if you want only the best detection in an imgae/frame
+#    --detect-thresh=DETECT_THRESH
+#                        The threshold for a detection. For retinaface (i.e. algorithm=arcface (see command under service type server)) the detection threshold is set to 0.5 by default.)
+#    --min-size=MIN_SIZE
+#                        Faces with a height less that this will be ignored.
+#
+#  Connection Options:
+#    Control the connection to the FaRO service.
+#
+#    --max-async=MAX_ASYNC
+#                        The maximum number of asyncronous call to make at a
+#                        time. Default=8
+#    --max-message-size=MAX_MESSAGE_SIZE
+#                        Maximum GRPC message size. Set to -1 for unlimited.
+#                        Default=67108864
+#    -p DETECT_PORT, --port=DETECT_PORT
+#                        The port used for the recognition service.
+#    --detect-port=DETECT_PORT
+#                        The port used for the recognition service.
+#    --recognition-port=REC_PORT
+#                        The port used for the recognition service.
