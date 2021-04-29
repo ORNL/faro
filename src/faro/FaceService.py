@@ -59,41 +59,6 @@ WORKER_GPU_MAPPING = {}
 GALLERIES = {}
 STORAGE = {}
 
-def filterDetectMinSize(face_records, min_size):
-    if min_size is not None:
-        # iterate through the list in reverse order because we are deleting as we go
-        for i in range(len(face_records.face_records))[::-1]:
-            if face_records.face_records[i].detection.location.width < min_size:
-                del face_records.face_records[i]
-    return face_records
-        
-def filterDetectBest(face_records, im, best):
-    # TODO: This is a temporary fix.
-    if best and len(face_records.face_records) > 1:
-        print( "WARNING: detector service does not seem to support best mode.  To many faces returned." )
-        face_records.face_records.sort(key=lambda x: -x.detection.score)
-        #print(detections.detections)
-        while len(face_records.face_records) > 1:
-            del face_records.face_records[-1]
-            
-        assert len(face_records.face_records) == 1
-    
-    if best and len(face_records.face_records) == 0:
-        print( "WARNING: detector service does not seem to support best mode.  No faces returned." )
-        
-        # in this case select the center of the image
-        det = face_records.face_records.add().detection
-        h,w = im.shape[:2]
-        s = 0.8*min(w,h)
-        det.location.CopyFrom(pt.rect_val2proto(0.5*w-0.5*s,0.5*h-0.5*s, s, s))
-        det.score = -1.0 
-        
-        det.detection_id = 1
-        
-        assert len(face_records.face_records) == 1     
-        
-    return face_records       
-   
 
 def worker_init(options):
     ''' Initalize the worker processes. '''
@@ -165,10 +130,7 @@ def worker_detect(mat,options):
         # uncomment this line to check that the image is comming through properly.
         # skimage.io.imsave('/tmp/test.png', mat)
         face_record_list = FaceRecordList()
-        FACE_ALG.detect(mat,face_record_list,options)
-        
-        filterDetectMinSize(face_record_list, options.min_size)
-        filterDetectBest(face_record_list, mat, options.best)
+        FACE_ALG.detect(mat,face_record_list,options)        
         return face_record_list
     except:
         print("ERROR in worker executing detect method.")
@@ -220,7 +182,6 @@ def worker_cleanexit():
 class FaceService(fs.FaceRecognitionServicer):
     
     def __init__(self,options):
-        #self.alg = FaceAlgorithms.FaceAlgorithms()
         self.galleries = {}
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
         
@@ -282,13 +243,10 @@ class FaceService(fs.FaceRecognitionServicer):
             mat = pt.image_proto2np(request.image)
             options = request.detect_options
             notes = "Image Size %s"%(mat.shape,)
-            #print('time_check AA:',time.time()-start)
             worker_result = self.workers.apply_async(worker_detect,[mat,options])
-            #print('time_check BB:',time.time()-start)
             face_records_list = worker_result.get()
             
             notes += ", Detections %s"%(len(face_records_list.face_records),)
-            #print('time_check CC:',time.time()-start)
                         
             for face in face_records_list.face_records:
                 face.source = request.source
@@ -296,18 +254,11 @@ class FaceService(fs.FaceRecognitionServicer):
                 face.subject_id = request.subject_id
                 face.name = request.subject_name
                             
-            #date = request.image.date
-            #time_ = request.image.time
-            #module = request.image.module
-            #camera = request.image.camera
-            #event = request.image.event
-            #image_num = request.image.image_num
 
             stop = time.time()
             global LOG_FORMAT
             print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes)))
     
-            #print (face_records_list)
             return face_records_list
         
         except:
@@ -322,7 +273,6 @@ class FaceService(fs.FaceRecognitionServicer):
         try:
             start = time.time()
             
-            #display = False
             img = pt.image_proto2np(request.image)
             face_records = request.records
             
@@ -497,17 +447,11 @@ class FaceService(fs.FaceRecognitionServicer):
         try:
             start = time.time()
             
-            #face_records = request.records
-            
-            #worker_result = self.workers.apply_async(worker_score,[request])
-            #dist_mat = worker_result.get()
             stop = time.time()
 
             size = "?X?"
-            #speed = "? per second"
             try:
                 size = "%dX%d"%(len(request.rows),len(request.rows[0].data))
-                #speed = "%0.1f per second"%(len(dist_mat.rows)*len(dist_mat.rows[0].data)/(stop-start))
             except: 
                 pass
             notes = ""                        
@@ -687,19 +631,10 @@ def parseOptions(face_workers_list):
     
     # Setup the parser
     parser = optparse.OptionParser(usage='%s [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
-
-    # Here are some templates for standard option formats.
-    #parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-    #                 help="Decrease the verbosity of the program")
-    
+ 
     parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
                       help="When possible run on the cpu and ignore the GPU.")
 
-    #parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
-    #                  help="don't print status messages to stdout")
-    
-    #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
-    #                  help="Choose an option.")
 
     ALG_NAMES = list(FACE_WORKER_LIST.keys())
     ALG_NAMES.sort()
@@ -711,15 +646,6 @@ def parseOptions(face_workers_list):
     parser.add_option( "--algorithm", type="choice", choices=ALG_NAMES, dest="algorithm", default=DEFAULT_ALG_NAME,
                       help="Choose an algorithm; default=%s - %s"%(DEFAULT_ALG_NAME,ALG_NAMES))
 
-    #parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
-    #                  help="A floating point value.")
-
-    #parser.add_option( "--match-thresh", type="float", dest="match_thresh", default=0.5218667,
-    #                  help="The threshold for a match.")
-
-    #parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
-    #                  help="An integer value.")
-
     parser.add_option( "--gpus", type="str", dest="gpus", default="",
                       help="Specify the gpus to use.")
 
@@ -729,45 +655,15 @@ def parseOptions(face_workers_list):
     parser.add_option( "--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
                       help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d"%(faro.DEFAULT_MAX_MESSAGE_SIZE))
 
-    #parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
-    #                  help="Process at N images and then stop.")
-
-    #parser.add_option( "--min-size", type="int", dest="min_size", default=50,
-    #                  help="Faces with a height less that this will be ignored.")
-
-    #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
-    #                  help="A string value.")
     
     parser.add_option( "--storage", type="str", dest="storage_dir", default=faro.DEFAULT_STORAGE_DIR,
                       help="A location to store persistant files. DEFAULT=%s"%faro.DEFAULT_STORAGE_DIR)
 
     model_options = parser.add_option_group("Options for machine learning models.")
-    model_options.add_option( "--detect-model", type="str", dest="detect_model", default='default',
-                      help="A model file to use for detection.")
-
-    model_options.add_option( "--extract-model", type="str", dest="extract_model", default='default',
-                      help="A model file to use for template extraction.")
-
-    model_options.add_option( "--classify-model", type="str", dest="classify_model", default='default',
-                      help="A model file to use for classification.")
-
-    #parser.add_option( "--face-log", type="str", dest="face_log", default=None,
-    #                  help="A directory for faces.")
-
-    #parser.add_option( "--match-log", type="str", dest="match_log", default=None,
-    #                  help="A directory to store matching faces.")
-
-    #parser.add_option( "-d","--detect-port", type="str", dest="detect_port", default="localhost:50030",
-    #                  help="The port used for the recognition service.")
-
-    #parser.add_option( "-r","--recognition-port", type="str", dest="rec_port", default="localhost:50035",
-    #                  help="The port used for the recognition service.")
     
     for key in face_workers_list:
         if face_workers_list[key][1] is not None:
             face_workers_list[key][1](parser)
-
-
 
     port = socket.gethostname() + ":50030"
 
@@ -781,9 +677,7 @@ def parseOptions(face_workers_list):
     
     if len(args) != n_args:
         parser.print_help()
-        print()
         print(( "Please supply exactly %d arguments."%n_args ))
-        print()
         exit(-1)
         
     return options,args
@@ -791,8 +685,7 @@ def parseOptions(face_workers_list):
     
     
 def serve():
-    print('Configuring Server...')
-    
+    print('Configuring Server...') 
     print('Detecting Workers...')
     
     # Scan for faro workers
@@ -804,15 +697,11 @@ def serve():
     scripts = list(scripts)
     scripts.sort()
     
-    print('scripts1',scripts)
     
     # Scan for other workers
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
-        print("Workers Dirs:",worker_dirs)
-        for worker_dir in worker_dirs:
-    
-            #import_dir = faro.__path__[0]
+        for worker_dir in worker_dirs: 
             try:
                 worker_scripts = os.listdir(worker_dir)
             except:
@@ -823,8 +712,8 @@ def serve():
             scripts += list(worker_scripts)
             scripts.sort()
             
-    print('scripts2',scripts)
     
+
     for each in scripts:
         module = importlib.import_module(each[:-3])
         class_obj = getattr(module,each[:-3])
@@ -837,18 +726,13 @@ def serve():
     
     options,_ = parseOptions(FACE_WORKER_LIST)
     
-    
-    print("storage",os.environ['HOME'])
-    
+    print("storage",os.environ['HOME']) 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=2*options.worker_count),
                          options=[('grpc.max_send_message_length', options.max_message_size),
                                   ('grpc.max_receive_message_length', options.max_message_size)])
     
     face_client = FaceService(options)
     
-    print("Batch loading a watchlist.")
-    #face_client.batchLoad("../tests/watchlist.csv", 'authorized')
-
     fs.add_FaceRecognitionServicer_to_server(face_client, server)
 
     server.add_insecure_port(options.port)

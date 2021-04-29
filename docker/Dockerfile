@@ -2,7 +2,7 @@
 # This Dockerfile creates a Docker Image that porvide both face    #
 # recognition services and atrribute prediction services from orbio#
 #################################################################### 
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04 AS faro_server_fhwa
+FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04 AS faro_server_fhwa_v2
 MAINTAINER Nisha Srinivas (srinivasn1@ornl.gov)
 
 RUN mkdir /faro
@@ -70,7 +70,7 @@ ENV PYTHONPATH="/faro/src"
 #BUILD CLIENT
 ####################################################################
 
-FROM faro_server_fhwa AS faro_client_fhwa
+FROM faro_server_fhwa_v2 AS faro_client_fhwa_v2
 
 COPY docker-entrypoint.sh /usr/local/bin
 RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \

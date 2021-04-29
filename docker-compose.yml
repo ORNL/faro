@@ -4,11 +4,11 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile 
-            target: faro_server_fhwa
-        image: ornl_faro_server
+            target: faro_server_fhwa_v2
+        image: ornl_faro_server_v2
         ports:
             - "127.0.0.1:50030:50030"
-        command: python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=1 --gpus=0 --max-message-size=-1 --algorithm=arcface
+        command: python -m faro.FaceService --port=0.0.0.0:50030 --worker-count=1 --gpus=0 --max-message-size=-1 --algorithm=handtracker
         volumes: 
             - $HOME/faro_storage:/faro/faro_storage:rw
         tty: true
@@ -16,9 +16,9 @@ services:
         build: 
             context: .
             dockerfile: docker/Dockerfile
-            target: faro_client_fhwa
-        image: ornl_faro_client
-        command: bin/faro detect -d /faro/faro_storage/name_of_output_directory --min-size 0  --detect-port=server:50030 --recognition-port=server:50030  /faro/faro_storage/data
+            target: faro_client_fhwa_v2
+        image: ornl_faro_client_v2
+        command: bin/faro detect -d /faro/faro_storage/test_images_output_handtracker.csv --detect-log /faro/faro_storage/test_images_output_handtracker --min-size 0  --detect-port=server:50030 --recognition-port=server:50030  /faro/faro_storage/test_images
         volumes: 
             - $HOME/faro_storage:/faro/faro_storage:rw
         tty: true
