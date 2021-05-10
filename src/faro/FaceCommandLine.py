@@ -1685,9 +1685,12 @@ def process_image_dir(img_dir, dir_type, fc, options):
     while len(detect_queue):
         fname, res = detect_queue[0]
         if res.done():
-            recs = res.result().face_records
-            for each_record in recs:
-                templates.append(each_record)
+            try:
+                recs = res.result().face_records
+                for each_record in recs:
+                    templates.append(each_record)
+            except Exception as e:
+                print("could not get future for file ",fname, ": ",e)
             detect_queue.pop(0)
         time.sleep(0.05)
     if len(video_list) > 0:
@@ -1760,7 +1763,7 @@ def fuse():
     score_dict = defaultdict(dict)
     if options.verbose:
         print('collecting scores')
-    for f in tqdm(csv_files):
+    for f in csv_files:
         fname = os.path.basename(f)
         with open(f,'r') as fp:
             lines = fp.readlines()
@@ -1769,7 +1772,7 @@ def fuse():
                 assert("Error: file ", f, " is of length ", len(lines), " while the previous file was of length ", line_len)
             else:
                 line_len = len(lines)
-            for l in lines[1:]:
+            for l in tqdm(lines[1:]):
                 parts = l.split(',')
                 if len(parts) >= 5:
                     p1 = parts[1].strip().rstrip()
@@ -1785,14 +1788,19 @@ def fuse():
     for pair in tqdm(allpairs):
         alg_scores = score_dict[pair]
         scores = []
+        #prevsize =
         for alg in filenames:
             
             if alg in alg_scores:
                 scores.append(alg_scores[alg])
+            else:
+                print('match ', pair, ' does not have a score for algorithm ', alg)
+                scores.append(.5)
         if len(fusion_matrix) > 1: #check to make sure each match pair has the same amount of scores associated with it
             if len(scores) == len(fusion_matrix[-1]):
                 pass
             else:
+                print('algorithm length mismatch for ', list(pair), ' only has ', len(scores), 'score results, and should have ', len(fusion_matrix[-1]))
                 assert('algorithm length mismatch for ', list(pair), ' only has ', len(scores), 'score results, and should have ', len(fusion_matrix[-1]))
         fusion_matrix.append(scores)
     # the fusion matrix in the format of one algorithm per column, with a shape NxM, where N is the number of match pairs and M is the number of algorithms
