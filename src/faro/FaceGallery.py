@@ -273,6 +273,183 @@ class GalleryWorker(object):
 
         return face
 
+class RabbitMQGalleryWorker(GalleryWorker):
+    def __init__(self,options):
+        GalleryWorker.__init__(self,options)
+
+        self.score_type = "Custom"
+        self.indexes = {}
+        self.face_ids = {}
+
+    def isSearchable(self):
+        ''' Return true of the gallery implements fast search. '''
+        return True
+
+    def loadGalleries(self):
+        '''Load gallery information into memory on startup.'''
+        import h5py
+        global STORAGE
+
+        galleries = os.listdir(self.gallery_storage)
+
+        galleries = list(filter(lambda x: x.endswith('.h5'), galleries))
+
+        print("Loading %d galleries: %s" % (len(galleries), galleries))
+        for each in galleries:
+            gallery_name = each[:-3]
+            path = os.path.join(self.gallery_storage, gallery_name + '.h5')
+            STORAGE[gallery_name] = h5py.File(path, 'a')  # Open in read/write mode
+            face_count = len(STORAGE[gallery_name]['faces'])
+
+            print("   * Loaded %s with %d faces." % (gallery_name, face_count))
+
+        print('Done Loading Galleries.')
+
+    def galleryNames(self):
+        return list(STORAGE)
+
+    def size(self, gallery_name):
+        ''' Return the size a gallery. '''
+        return len(STORAGE[gallery_name]['faces'])
+
+    def addFaceToGallery(self, gallery_name, gallery_key, face):
+        ''' Enrolls the faces in the gallery. '''
+        import h5py
+
+        global STORAGE
+
+        replaced = 0
+        print('Gallery name:', gallery_name)
+        print(list(STORAGE.keys()))
+        if gallery_name not in STORAGE:
+            path = os.path.join(self.gallery_storage, gallery_name + '.h5')
+            print('adding new gallery at ', path)
+            STORAGE[gallery_name] = h5py.File(path, 'a')
+            STORAGE[gallery_name].create_group('faces')
+            STORAGE[gallery_name].create_group('sources')
+            STORAGE[gallery_name].create_group('detections')
+            STORAGE[gallery_name].create_group('tags')
+            STORAGE[gallery_name].create_group('logs')
+
+        enrolled = 0
+
+        face_id = faro.generateFaceId(face)
+        face.gallery_key = face_id
+
+        enrolled += 1
+
+        if face_id in STORAGE[gallery_name]['faces']:
+            del STORAGE[gallery_name]['faces'][face_id]  # delete so it can be replaced.
+            replaced += 1
+        STORAGE[gallery_name]['faces'][face_id] = np.bytes_(face.SerializeToString())
+
+        template = pt.vector_proto2np(face.template.data)
+        temp_length = template.shape[0]
+        print('template shape: ', template.shape)
+        if 'templates' not in STORAGE[gallery_name]:
+            # Create an empty dataset
+            f = STORAGE[gallery_name]
+            dset = f.create_dataset('templates', data=np.zeros((0, temp_length)), maxshape=(None, temp_length),
+                                    dtype=np.float32)
+
+        if 'facelist' not in STORAGE[gallery_name]:
+            # Create an empty dataset
+            f = STORAGE[gallery_name]
+            dt = h5py.special_dtype(vlen=str)
+            dset = f.create_dataset('facelist', (0,), maxshape=(None,), dtype=dt)
+
+        # Append to the end
+        dset = STORAGE[gallery_name]['templates']
+        size = dset.shape
+        print('dataset size 2:', size)
+        dset.resize((size[0] + 1, size[1]))
+        dset[-1, :] = template
+
+        dset = STORAGE[gallery_name]['facelist']
+        size = dset.shape
+        dset.resize((size[0] + 1,))
+        dset[-1] = face_id
+
+        STORAGE[gallery_name].flush()
+
+        self.clearIndex(gallery_name)
+
+        return enrolled, replaced
+
+    def deleteGallery(self, gallery_name):
+        ''' Delete a gallery. '''
+
+        if gallery_name not in STORAGE:
+            raise ValueError("Gallery '" + gallery_name + "' not found.")
+
+        deleted_faces = len(STORAGE[gallery_name]['faces'])
+
+        # Close and remove the file
+        STORAGE[gallery_name].close()
+        del STORAGE[gallery_name]
+
+        # Delete the file from disk
+        path = os.path.join(self.gallery_storage, gallery_name + '.h5')
+        os.remove(path)
+
+        return deleted_faces
+
+    def enrollmentList(self, gallery_name):
+        ''' List the faces enrolled in this gallery. '''
+        result = FaceRecordList()
+
+        global STORAGE
+        count = 0
+        for face_id in STORAGE[gallery_name]['faces']:
+            data = STORAGE[gallery_name]['faces'][face_id]
+            face_record = FaceRecord()
+            face_record.ParseFromString(np.array(data).tobytes())
+
+            face = result.face_records.add()
+            face.gallery_key = face_id
+            face.name = face_record.name
+            face.subject_id = face_record.subject_id
+            face.source = face_record.source
+            face.frame = face_record.frame
+
+            count += 1
+        return result
+
+    def subjectDelete(self, gallery_name, subject_id):
+        ''' List the galleries for this service. '''
+        self.clearIndex(gallery_name)
+
+        if gallery_name not in STORAGE:
+            raise ValueError("No gallery named '%s'" % (gallery_name,))
+
+        delete_count = 0
+
+        keys = list(STORAGE[gallery_name]['faces'])
+        for gallery_key in keys:
+            tmp = STORAGE[gallery_name]['faces'][gallery_key]
+            face = FaceRecord()
+            face.ParseFromString(np.array(tmp).tobytes())
+
+            if face.subject_id == subject_id:
+                del STORAGE[gallery_name]['faces'][gallery_key]
+                delete_count += 1
+
+        self.clearIndex()
+
+        STORAGE[gallery_name].flush()
+
+        return delete_count
+
+    def clearIndex(self, gallery_name):
+        ''' Remove the index to free space and allow it to be regenerated when needed. '''
+        pass
+
+    def generateIndex(self, gallery_name):
+        ''' Process the gallery to generate a fast index. '''
+        raise NotImplementedError()
+
+
+        return face
 
 
 class SearchableGalleryWorker(GalleryWorker):
