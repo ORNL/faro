@@ -31,8 +31,9 @@ import faro.proto.geometry_pb2 as geo
 import faro.proto.proto_types as pt
 import numpy as np
 import scipy as sp
+import socket
 import scipy.spatial as spat          
-from faro.FaceGallery import GalleryWorker                                                    
+from faro.FaceGallery import GalleryWorker
 
 # Standard scores can be computed by the client which may offer 
 # performance benefits.  In some cases scores can only be computed 
@@ -152,7 +153,8 @@ class FaceWorker(object):
         status_message.status = fsd.READY
         
         return status_message
-        
+
+
     def recommendedThreshold(self,far=-1.0):
         '''Return the method used to create a score from the template.
         

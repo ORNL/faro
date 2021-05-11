@@ -45,6 +45,7 @@ def addConnectionOptions(parser):
 
     connection_group.add_option("-p", "--port", type="str", dest="port", default="localhost:50030",
                                 help="The port used for the recognition service.")
+    connection_group.add_option("--service-name",type="str",dest="service_name",default=None,help="The name of a visible service on the network (enumerate services using `faro status --active`")
 
     parser.add_option_group(connection_group)
 
@@ -322,7 +323,9 @@ def statusParseOptions():
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="Print out more program information.")
-
+    parser.add_option("-a", "--all", action='store_true',dest='all',default=False,help='Show all possible workers (sniffs the network), active and inactive (searches in FARO_WORKER_DIR)')
+    parser.add_option("--active",action="store_true",dest="active",default=False,help='Show only worker services currently active and available on the network')
+    parser.add_option("--inactive",action="store_true",dest='inactive',default=False,help="Show only worker services that are currently not loaded")
     addConnectionOptions(parser)
     # Here are some templates for standard option formats.
     # parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
@@ -1835,14 +1838,13 @@ def status():
     Conects to the server and gets status information.
     """
     options,args = statusParseOptions()
-
-    face_client = connectToFaroClient(options)
-
-    message = face_client.status()
-
-    print()
-    print (message)
-    print()
+    command_line.status(options)
+    if not options.all and not options.active and not options.inactive:
+        face_client = connectToFaroClient(options)
+        message = face_client.status()
+        print()
+        print (message)
+        print()
 
  
 

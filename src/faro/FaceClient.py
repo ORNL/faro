@@ -34,7 +34,11 @@ import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
 import time
 import faro
-
+try:
+    from zeroconf import ServiceInfo,Zeroconf,ServiceBrowser
+except:
+    Zeroconf = None
+    print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
 
 
 class ClientOptions(object):
@@ -81,8 +85,13 @@ class FaceClient(object):
         self.max_async_jobs = max(self.max_async_jobs,1)
         self.async_sleep_time = 0.001
         self.running_async_jobs = []
-        
-        channel = grpc.insecure_channel(options.port,
+
+        port = None
+        if options.service_name is not None:
+            port = self.getAddressByName(options.service_name)
+        if port is None:
+            port = options.port
+        channel = grpc.insecure_channel(port,
                                         options=channel_options)
         
         self.service_stub = fs.FaceRecognitionStub(channel)
@@ -95,8 +104,21 @@ class FaceClient(object):
         
         if options.verbose:
             print (self.status)
-        
-        
+
+    def getAddressByName(self,name):
+        if Zeroconf is not None:
+            self.zeroconf = Zeroconf()
+            import faro.command_line as command_line
+            serviceList = command_line.getRunningWorkers()
+            for service in serviceList:
+                if service['Name'] == name:
+                    print('found a good service currently hosted')
+                    return service['address']+":"+str(service['port'])
+            else:
+                print('Found no running services named \"',name,'\"')
+                return None
+        return None
+
     def waitOnResults(self):
         while len(self.running_async_jobs) >= self.max_async_jobs:
             self.running_async_jobs = list(filter(lambda x: x.running(),self.running_async_jobs))
@@ -433,14 +455,22 @@ class FaceClient(object):
 
     def status(self,verbose=False):
         request = fsd.FaceStatusRequest()
-        
-        status_message = self.service_stub.status(request,None)
+        iserror = False
+        try:
+            status_message = self.service_stub.status(request,None)
+        except Exception as e:
+            iserror = True
+            status_message = "cannot connect"
+            if verbose:
+                status_message = "cannot connect:" + str(e)
         if verbose:
             print(type(status_message),status_message)
-            
-        self.match_threshold = status_message.match_threshold
-            
-        return status_message.status == fsd.READY, status_message
+        if not iserror:
+            self.match_threshold = status_message.match_threshold
+
+            return status_message.status == fsd.READY, status_message
+        else:
+            return False, status_message
     
     def trainFromGallery(self,gallery_name):
         request = fsd.EnrollmentListRequest()

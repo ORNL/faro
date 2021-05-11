@@ -46,8 +46,18 @@ import h5py
 import skimage.io
 import cv2
 import inspect
-
+import urllib.request
 from faro.FaceGallery import GalleryWorker
+try:
+    from random_word import RandomWords
+except:
+    RandomWords = None
+    print('Warning: could not load random word generator. Defaulting to numbers. Perform `pip install random-word`')
+try:
+    from zeroconf import ServiceInfo,Zeroconf
+except:
+    Zeroconf = None
+    print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
 
 LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s    < %s >"
 #FFD = dlib.get_frontal_face_detector()
@@ -64,6 +74,13 @@ GALLERY_WORKER = None
 WORKER_GPU_MAPPING = {}
 
 # STORAGE = {}
+def getRandomWord():
+    if RandomWords is not None:
+        r = RandomWords()
+        return r.get_random_word()
+    else:
+        import random
+        return str(random.randint(1000,9999))
 
 def filterDetectMinSize(face_records, min_size):
     if min_size is not None:
@@ -251,13 +268,22 @@ class FaceService(fs.FaceRecognitionServicer):
         options.functiondict = self.worker_functionality_dict
         options.queue_semaphore = self.worker_init_semaphore
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
+
+
+
         try:
-            while(self.worker_init_semaphore.value > 0):
+            while((self.worker_init_semaphore.value > 1 and options.worker_count > 1 ) or (self.worker_init_semaphore.value > 0 and options.worker_count == 1)):
                 time.sleep(.1)
         except:
             pass
+
+
         print("Found functions in worker: ",options.functiondict.keys())
-        
+
+        self.setup_zeroconf(options)
+        print('starting broadcast...')
+        self.broadcast()
+        print('broadcasting!')
         # TODO: Change this to gallery worker
 
         print(FACE_WORKER_LIST[options.algorithm][2])
@@ -303,9 +329,48 @@ class FaceService(fs.FaceRecognitionServicer):
 
     #     print('Done Loading Galleries.')
 
-                
-            
-        
+    def setup_zeroconf(self,options):
+        # storing network info about ourselves
+        if Zeroconf is not None:
+            self.zeroconf = Zeroconf()
+            fqdn = socket.gethostname()
+            self.ip = None
+            try:
+                self.ip = socket.gethostbyname(fqdn)
+            except:
+                pass
+            if self.ip is None:
+                try:
+                    fqdn = socket.getfqdn()
+                    self.ip = socket.gethostbyname(fqdn)
+                except:
+                    pass
+            if self.ip is None:
+                fqdn = 'localhost'
+                self.ip = socket.gethostbyname(fqdn)
+
+            self.name = options.service_name
+            if self.name is None:
+                self.name = getRandomWord()
+            self.hostname = fqdn.split('.')[0]
+            self.port = int(options.port.split(':')[1])
+            self.external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+            self.wsDesc = {'Name': self.name, 'FaRO version': str(faro.__version__),"external IP":self.external_ip,"Algorithm":str(options.algorithm),'functionality':options.functiondict.keys()}
+            self.deviceType = "_faro"
+            self.serviceName = "_" + options.algorithm + "."
+            self.serviceSuffix = '._tcp.local.'
+            # self.wsInfo = ServiceInfo(self.broadcastType,self.broadcastName,socket.inet_aton(self.ip),self.port,0,0,self.wsDesc,self.hostname+'.local.')
+            self.wsInfo = ServiceInfo(self.deviceType + self.serviceSuffix,
+                                      self.serviceName + self.deviceType + self.serviceSuffix,
+                                      addresses=[socket.inet_aton(self.ip)], port=int(self.port), properties=self.wsDesc,
+                                      server=self.serviceName + 'local.')
+
+    def broadcast(self):
+        if Zeroconf is not None:
+            self.zeroconf.register_service(self.wsInfo)
+
+
+
     def status(self,request,context):
         ''' Returns the status of the service. '''
         try:
@@ -378,8 +443,6 @@ class FaceService(fs.FaceRecognitionServicer):
         except:
             traceback.print_exc()
             raise
-
-    
 
 
     def extract(self,request,context):
@@ -794,12 +857,22 @@ class FaceService(fs.FaceRecognitionServicer):
             raise
     
 
-
+    def __del__(self):
+        try:
+            print('DEL EXITING')
+            self.zeroconf.unregister_service(self.wsInfo)
+            self.zeroconf.close()
+        except:
+            pass
         
     def cleanexit(self):
+        print('CLEANLY EXITING')
         ''' Deinitialize commercial softwares. '''
+
         worker_result = self.workers.apply_async(worker_cleanexit,[])
         worker_result.get()
+        self.zeroconf.unregister_service(self.wsInfo)
+        self.zeroconf.close()
   
 def parseOptions(face_workers_list):
     '''
@@ -856,6 +929,7 @@ def parseOptions(face_workers_list):
 
     parser.add_option( "--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
                       help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d"%(faro.DEFAULT_MAX_MESSAGE_SIZE))
+    parser.add_option( "-n","--service-name", type="str", dest="service_name",default=None,help="Unique name to identify the service on the network. Default Provides a random name.")
 
     #parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
     #                  help="Process at N images and then stop.")
@@ -973,7 +1047,7 @@ def serve():
                                   ('grpc.max_receive_message_length', options.max_message_size)])
     
     face_client = FaceService(options)
-    
+    zcinfo = face_client.wsInfo
     print("Batch loading a watchlist.")
     #face_client.batchLoad("../tests/watchlist.csv", 'authorized')
 
@@ -989,7 +1063,12 @@ def serve():
         face_client.cleanexit()
         server.stop(0)
         print('Server Stopped.')
-
+    try:
+        zc = Zeroconf()
+        zc.unregister_service(zcinfo)
+        zc.close()
+    except:
+        pass
 
 if __name__ == '__main__': 
     serve()
