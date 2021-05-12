@@ -65,8 +65,6 @@ LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s    < %s >"
 
 
 FACE_ALG = None
-        
-FACE_WORKER_LIST = {}     
 
 GALLERY_WORKER = None
 
@@ -124,9 +122,8 @@ def worker_init(options):
     print("Starting worker process:",mp.current_process())
     
     global MYNET,WORKER_INDEX,OPTIONS
-    global FACE_WORKER_LIST
     global WORKER_GPU_MAPPING
-
+    FACE_WORKER_LIST = options.fwl
     #cfg.TEST.HAS_RPN = True  # Use RPN for proposals
     proc = mp.current_process()
     WORKER_INDEX = (int(proc.name.split('-')[-1])-1)%options.worker_count
@@ -268,7 +265,7 @@ class FaceService(fs.FaceRecognitionServicer):
         options.functiondict = self.worker_functionality_dict
         options.queue_semaphore = self.worker_init_semaphore
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
-
+        FACE_WORKER_LIST = options.fwl
 
 
         try:
@@ -902,7 +899,7 @@ def parseOptions(face_workers_list):
     #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
     #                  help="Choose an option.")
 
-    ALG_NAMES = list(FACE_WORKER_LIST.keys())
+    ALG_NAMES = list(face_workers_list.keys())
     ALG_NAMES.sort()
     if 'dlib' in ALG_NAMES:
         DEFAULT_ALG_NAME = 'dlib'
@@ -980,7 +977,7 @@ def parseOptions(face_workers_list):
 
     # Parse the arguments and return the results.
     (options, args) = parser.parse_args()
-    
+    options.fwl = face_workers_list
     if len(args) != n_args:
         parser.print_help()
         print()
@@ -996,7 +993,7 @@ def serve():
     print('Configuring Server...')
     
     print('Detecting Workers...')
-    
+    FACE_WORKER_LIST = {}
     # Scan for faro workers
     import_dir = faro.__path__[0]
     scripts = os.listdir(os.path.join(import_dir,'face_workers'))
