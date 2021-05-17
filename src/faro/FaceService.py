@@ -59,6 +59,17 @@ except:
     Zeroconf = None
     print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
 
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
+
+
 LOG_FORMAT = "%-20s: %8.4fs: %-15s - %s    < %s >"
 #FFD = dlib.get_frontal_face_detector()
 
