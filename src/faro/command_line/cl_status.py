@@ -45,6 +45,11 @@ except:
     Zeroconf = None
     print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
 
+try:
+    from tqdm import tqdm
+except:
+    tqdm = None
+
 def status(options):
     active = options.active
     inactive = options.inactive
@@ -52,13 +57,17 @@ def status(options):
         active = True
         inactive = True
     if inactive:
-        inactiveWorkers = getNonrunningWorkers()
-        print("\nWorkers not currently runnin gon network")
-        print(tabulator(inactiveWorkers))
+        availableFaceWorkers = getFaceWorkers()
+        print("\nCurrently available FaRO Face Workers")
+        print(tabulator(availableFaceWorkers))
     if active:
-        print("\nWorkers currently running on network:")
+
         activeWorkers = getRunningWorkers()
-        print(tabulator(activeWorkers))
+        if len(activeWorkers) > 0:
+            print("\nWorkers currently running on network:")
+            print(tabulator(activeWorkers))
+        else:
+            print("No actively broadcasting workers found")
 
 class ServiceListener:
     availableServices = SortedDict()
@@ -89,20 +98,24 @@ def getRunningWorkers():
         listener = ServiceListener()
         browser = ServiceBrowser(zeroconf, "_faro._tcp.local.", listener)
         starttime = time.time()
+        print('Scanning for workers on network...')
+        if tqdm is not None:
+            pbar = tqdm(total=100)
         while True:
             if listener.lastUpdate > 0:
                 if time.time()-listener.lastUpdate >= listener.timeout or time.time()-starttime > 10:
                     break
             elif time.time()-starttime > 10:
                 break
-
+            pbar.update()
+            time.sleep(.1)
         return listener.availableServices_tableform.values()
     else:
         print('\nBonjour libraries are not installed.  Please perform `pip install zeroconf` to access broadcasting capabilities')
         return []
 
 
-def getNonrunningWorkers():
+def getFaceWorkers():
     # Scan for faro workers
     import_dir = faro.__path__[0]
     scripts = os.listdir(os.path.join(import_dir, 'face_workers'))
@@ -113,11 +126,13 @@ def getNonrunningWorkers():
     scripts.sort()
     FACE_WORKER_LIST = SortedDict()
     # Scan for other workers
+
+    #TODO make the services path an env, not hard coded
+    SERVICE_DIRS=["/Users/2r6/faro/services/"]
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
-        print("Workers Dirs:", worker_dirs)
         for worker_dir in worker_dirs:
-
+            print('worker_dir:',worker_dirs)
             # import_dir = faro.__path__[0]
             try:
                 worker_scripts = os.listdir(worker_dir)
@@ -131,10 +146,31 @@ def getNonrunningWorkers():
             scripts.sort()
     tablerows = []
 
+    availableServices = {}
+    for sdir in SERVICE_DIRS:
+        availableServices.update({d:os.path.join(sdir,d) for d in os.listdir(sdir)})
+    print('available services:', availableServices)
     for each,loc in zip(scripts,script_locations):
         name = each[:-13].lower()
         loadable = True
-        row = SortedDict({"Algorithm": name,'location':loc})
+
+        # Check if the given FaceWorker has an associated service environment
+        serviceLocation = None
+        serviceLoadType = "Native"
+        if name in availableServices:
+            serviceLocation = availableServices[name]
+            serviceFiles = os.listdir(serviceLocation)
+            if "Dockerfile" in serviceFiles:
+                serviceLoadType = "Docker"
+            if "environment.yml" in serviceFiles:
+                serviceLoadType = "Conda"
+            if "requirements.txt" in serviceFiles:
+                serviceLoadType = "venv"
+
+        row = SortedDict({"Algorithm": name, 'location': loc, 'service files':serviceLocation,'environment Type':serviceLoadType})
+
+
+
         try:
             module = importlib.import_module(each[:-3])
             class_obj = getattr(module, each[:-3])

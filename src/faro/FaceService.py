@@ -351,7 +351,11 @@ class FaceService(fs.FaceRecognitionServicer):
                 self.name = getRandomWord()
             self.hostname = fqdn.split('.')[0]
             self.port = int(options.port.split(':')[1])
-            self.external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+            self.external_ip = None
+            try:
+                self.external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+            except:
+                self.external_ip = None
             self.wsDesc = {'Name': self.name, 'FaRO version': str(faro.__version__),"external IP":self.external_ip,"Algorithm":str(options.algorithm),'functionality':options.functiondict.keys()}
             self.deviceType = "_faro"
             self.serviceName = "_" + options.algorithm + "."
