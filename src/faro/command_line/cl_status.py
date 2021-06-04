@@ -107,10 +107,12 @@ def getRunningLocalWorkers(options): #no zeroconf
         if faro.util.pingDomain(domain):
             portrange = range(50000,50254)
             if options.verbose: portrange = tqdm(portrange)
+            options.service_name=None
             for portnum in portrange:
                 t0 = time.time()
                 port = domain+":"+str(portnum)
                 options.port = port
+
                 face_client = connectToFaroClient(options,no_exit=True,quiet=True,timeout=2)
                 available,message = face_client.status(timeout=2)
                 if available:

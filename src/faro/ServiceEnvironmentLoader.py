@@ -3,11 +3,11 @@ import sys
 import faro
 import numpy as np
 import subprocess
-# try:
-import docker
-# except:
-#     print("Warning: Docker SDK is not installed. This will prevent FaRO from loading Docker images. Run `pip install docker`")
-#     docker = None
+try:
+    import docker
+except:
+    print("Warning: Docker SDK is not installed. This will prevent FaRO from loading Docker images. Run `pip install docker`")
+    docker = None
 
 
 
@@ -48,7 +48,11 @@ def startByDocker(options,service_instance_name,service_dir):
     client = docker.from_env()
     print('looking for containers named ',docker_instance_name)
     print('looking for images named ', docker_image_name)
-    print(images)
+    if docker_image_name not in images and docker_instance_name not in containers:
+        print('No images or containers were found in Docker. Building dockerfile instead')
+        buildDockerFile(os.path.join(service_dir), docker_image_name)
+    containers = getDockercontainers()
+    images = getDockerImages()
     if docker_instance_name in containers:
         print('we found a container called ', docker_instance_name)
         containerstatus = containers[docker_instance_name].attrs['State']['Status']
@@ -62,17 +66,15 @@ def startByDocker(options,service_instance_name,service_dir):
             pass
     elif docker_image_name in images:
         print('we found an uninstantiated docker image named ', docker_image_name)
-        print(options.port,service_instance_name,options.num_workers)
         host = options.port.split(':')
         hostport = int(host[1])
         host = host[0]
-        command = "python -m faro.FaceService --port=" + "0.0.0.0:"+str(hostport) + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
-        # command = "./run-dlib.sh"
-
-        print(command)
-        client.containers.run(docker_image_name, command,ports={50034:hostport},stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
+        if options.verbose:
+            print(command)
+        client.containers.run(docker_image_name, command,ports={50030:hostport},stdout=True,remove=True,name=docker_instance_name,privileged=True)
     else:
-        print('No images or containers were found in Docker. Building dockerfile instead')
+        print('Final: No images or containers were found in Docker. Building dockerfile instead')
         buildDockerFile(os.path.join(service_dir),docker_image_name)
 
 
@@ -107,7 +109,7 @@ def getDockerImages():
 
 def buildDockerFile(filePath,tag):
     if os.path.isdir(filePath):
-        cmd = ["docker", "build", "--no-cache","--rm","-t", tag, filePath]
+        cmd = ["docker", "build","-t", tag, filePath]
         print(" ".join(cmd))
         os.system(" ".join(cmd))
         # process = subprocess.Popen(["docker", "build", "--no-cache" ,"-t", tag, filePath],stdout=subprocess.PIPE,
