@@ -4,7 +4,7 @@ import os
 
 
 setup(name='faro',
-      version='1.0.0',
+      version='1.5.0',
       description='Face Recognition From Oak Ridge.',
       author='David Bolme',
       author_email='dbolme@gmail.com',
