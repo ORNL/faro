@@ -54,7 +54,7 @@ except:
     RandomWords = None
     print('Warning: could not load random word generator. Defaulting to numbers. Perform `pip install random-word`')
 try:
-    from zeroconf import ServiceInfo,Zeroconf
+    from zeroconf import ServiceInfo,Zeroconf,InterfaceChoice
 except:
     Zeroconf = None
     print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
@@ -340,22 +340,9 @@ class FaceService(fs.FaceRecognitionServicer):
     def setup_zeroconf(self,options):
         # storing network info about ourselves
         if Zeroconf is not None:
-            self.zeroconf = Zeroconf()
+            self.zeroconf = Zeroconf(interfaces=InterfaceChoice(2))
             fqdn = socket.gethostname()
-            self.ip = None
-            try:
-                self.ip = socket.gethostbyname(fqdn)
-            except:
-                pass
-            if self.ip is None:
-                try:
-                    fqdn = socket.getfqdn()
-                    self.ip = socket.gethostbyname(fqdn)
-                except:
-                    pass
-            if self.ip is None:
-                fqdn = 'localhost'
-                self.ip = socket.gethostbyname(fqdn)
+            self.ip = faro.util.getHostName()
 
             self.name = options.service_name
             if self.name is None:
@@ -367,7 +354,10 @@ class FaceService(fs.FaceRecognitionServicer):
                 self.external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
             except:
                 self.external_ip = None
-            self.wsDesc = {'Name': self.name, 'FaRO version': str(faro.__version__),"external IP":self.external_ip,"Algorithm":str(options.algorithm),'functionality':options.functiondict.keys()}
+            worker_result = self.workers.apply_async(worker_status, [])
+            status_message = worker_result.get()
+
+            self.wsDesc = {'Name': self.name, 'FaRO version': str(faro.__version__),"external IP":self.external_ip, "Algorithm":str(status_message.algorithm),'functionality':options.functiondict.keys(),'workers':str(options.worker_count)}
             self.deviceType = "_faro"
             self.serviceName = "_" + options.algorithm + "."
             self.serviceSuffix = '._tcp.local.'
@@ -391,6 +381,8 @@ class FaceService(fs.FaceRecognitionServicer):
             worker_result = self.workers.apply_async(worker_status,[])
             status_message = worker_result.get()
             status_message.worker_count = len(self.workers._pool);
+            status_message.faro_version = str(faro.__version__)
+            status_message.instance_name = self.name
             # print('Status Request', '<',status_message,'>')
             # print(context.peer())
             notes = None
@@ -902,8 +894,8 @@ def parseOptions(face_workers_list):
     parser = optparse.OptionParser(usage='%s [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
 
     # Here are some templates for standard option formats.
-    #parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-    #                 help="Decrease the verbosity of the program")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
+                    help="Decrease the verbosity of the program")
     
     parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
                       help="When possible run on the cpu and ignore the GPU.")
@@ -1050,14 +1042,16 @@ def serve():
         except Exception as e:
             print("Could not load worker ", name, ": ", e)
     options,_ = parseOptions(FACE_WORKER_LIST)
-    
-    
-    print("storage",os.environ['HOME'])
-    
+
+    if options.verbose:
+        print("storage",os.environ['HOME'])
+    if options.verbose:
+        print("initializing gRPC server...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=2*options.worker_count),
                          options=[('grpc.max_send_message_length', options.max_message_size),
                                   ('grpc.max_receive_message_length', options.max_message_size)])
-    
+    if options.verbose:
+        print('starting Face Service')
     face_client = FaceService(options)
     zcinfo = face_client.wsInfo
     print("Batch loading a watchlist.")

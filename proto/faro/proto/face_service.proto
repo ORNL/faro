@@ -331,6 +331,9 @@ message FaceServiceInfo{
     float           match_threshold     = 9;
     string          algorithm           = 10;
     string          notes               = 11;
+    string					faro_version				= 12;
+    string					instance_name				= 13;
+
 }
 
 /********* Gallery Management ********/

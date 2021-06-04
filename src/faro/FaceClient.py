@@ -68,7 +68,7 @@ class FaceClient(object):
     '''
     
     '''
-    def __init__(self,options,max_message_length=-1):
+    def __init__(self,options,max_message_length=-1,timeout=None):
         
         self.options = options
 
@@ -88,36 +88,29 @@ class FaceClient(object):
 
         port = None
         if options.service_name is not None:
-            port = self.getAddressByName(options.service_name)
+            port = self.getAddressByName(options, options.service_name)
         if port is None:
             port = options.port
         channel = grpc.insecure_channel(port,
                                         options=channel_options)
-        
         self.service_stub = fs.FaceRecognitionStub(channel)
-        
         #channel = grpc.insecure_channel(options.rec_port,
         #                                options=channel_options)
         #self.rec_stub = fs.FaceRecognitionStub(channel)
-        
-        self.is_ready,self.info = self.status(False)
-        
+        self.is_ready,self.info = self.status(False,timeout=timeout)
         if options.verbose:
             print (self.status)
 
-    def getAddressByName(self,name):
-        if Zeroconf is not None:
-            self.zeroconf = Zeroconf()
-            import faro.command_line as command_line
-            serviceList = command_line.getRunningWorkers()
-            for service in serviceList:
-                if service['Name'] == name:
-                    print('found a good service currently hosted')
-                    return service['address']+":"+str(service['port'])
-            else:
-                print('Found no running services named \"',name,'\"')
-                return None
-        return None
+    def getAddressByName(self,options,name):
+        self.zeroconf = Zeroconf()
+        import faro.command_line as command_line
+        serviceList = command_line.getRunningWorkers(options)
+        for service in serviceList:
+            if service['Name'] == name:
+                return service['address']+":"+str(service['port'])
+        else:
+            print('Found no running services named \"',name,'\"')
+            return None
 
     def waitOnResults(self):
         while len(self.running_async_jobs) >= self.max_async_jobs:
@@ -453,11 +446,11 @@ class FaceClient(object):
         return pt.matrix_proto2np(dist_mat)
 
 
-    def status(self,verbose=False):
+    def status(self,verbose=False,timeout=None):
         request = fsd.FaceStatusRequest()
         iserror = False
         try:
-            status_message = self.service_stub.status(request,None)
+            status_message = self.service_stub.status(request,timeout=timeout)
         except Exception as e:
             iserror = True
             status_message = "cannot connect"

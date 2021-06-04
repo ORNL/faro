@@ -26,11 +26,13 @@ import optparse
 import os
 import socket
 import time
+import copy
 
 import faro
 import importlib
 import sys
 from sortedcollections import SortedDict
+from faro.command_line.cl_common import connectToFaroClient
 try:
     import tabulate
     def tabulator(x):
@@ -61,19 +63,22 @@ def status(options):
         print("\nCurrently available FaRO Face Workers")
         print(tabulator(availableFaceWorkers))
     if active:
-
-        activeWorkers = getRunningWorkers()
+        print('Scanning for workers on network...')
+        activeWorkers = getRunningWorkers(options)
         if len(activeWorkers) > 0:
             print("\nWorkers currently running on network:")
             print(tabulator(activeWorkers))
         else:
             print("No actively broadcasting workers found")
+        # getRunningLocalWorkers(options)
 
 class ServiceListener:
     availableServices = SortedDict()
     availableServices_tableform = SortedDict()
     timeout = 1
     lastUpdate = -1
+    def __init__(self):
+        self.hostname = faro.util.getHostName()
     def remove_service(self, zeroconf, type, name):
         # print("Service %s removed" % (name,))
         del self.availableServices[name]
@@ -84,7 +89,10 @@ class ServiceListener:
         self.availableServices[name] = info
         props = {k.decode():info.properties[k].decode() for k in info.properties}
         # row = {'algorithm':props['algorithm'],'address':socket.inet_ntoa(info.addresses[0]),'port':info.port,'FaRO version':props['version']}
-        row = SortedDict({'address':socket.inet_ntoa(info.addresses[0]),'port':info.port})
+        address = socket.inet_ntoa(info.addresses[0])
+        if self.hostname == address:
+            address = "localhost"
+        row = SortedDict({'address':address,'port':info.port,'found via':'bonjour'})
         row.update(props)
         if 'functionality' in row:
             del row['functionality']
@@ -92,30 +100,72 @@ class ServiceListener:
         self.lastUpdate = time.time()
         # print("Service %s added, service info: %s" % (name, info))
 
-def getRunningWorkers():
+def getRunningLocalWorkers(options): #no zeroconf
+    localservices = []
+    for domain in faro.util.getServiceDomains():
+        # print('looking at', domain)
+        if faro.util.pingDomain(domain):
+            portrange = range(50000,50254)
+            if options.verbose: portrange = tqdm(portrange)
+            for portnum in portrange:
+                t0 = time.time()
+                port = domain+":"+str(portnum)
+                options.port = port
+                face_client = connectToFaroClient(options,no_exit=True,quiet=True,timeout=2)
+                available,message = face_client.status(timeout=2)
+                if available:
+                    row = SortedDict({'address': domain, 'port': str(portnum),'Algorithm':message.algorithm,"workers":message.worker_count,"Name":message.instance_name,"FaRO version":message.faro_version,"found via":'port sweep'})
+                    localservices.append(row)
+                t1 = time.time()
+                if t1-t0 > 2: #this connection is taking too long
+                    break
+        else:
+            if options.verbose:
+                print('Domain ', domain, ' is unavailable')
+    return localservices
+
+
+def getRunningWorkers(options,asDict=False,keyedOn='Name'):
+    bonjourservicesLocations = []
     if Zeroconf is not None:
         zeroconf = Zeroconf()
         listener = ServiceListener()
         browser = ServiceBrowser(zeroconf, "_faro._tcp.local.", listener)
         starttime = time.time()
-        print('Scanning for workers on network...')
-        if tqdm is not None:
-            pbar = tqdm(total=100)
-        while True:
-            if listener.lastUpdate > 0:
-                if time.time()-listener.lastUpdate >= listener.timeout or time.time()-starttime > 10:
-                    break
-            elif time.time()-starttime > 10:
-                break
-            pbar.update()
-            time.sleep(.1)
-        return listener.availableServices_tableform.values()
+        # if tqdm is not None:
+        #     pbar = tqdm(total=100)
+        # while True:
+        #     if listener.lastUpdate > 0:
+        #         if time.time()-listener.lastUpdate >= listener.timeout or time.time()-starttime > 10:
+        #             break
+        #     elif time.time()-starttime > 1.75:
+        #         break
+        #     pbar.update(8)
+        #     time.sleep(.1)
+        localservices = getRunningLocalWorkers(copy.copy(options))
+        bonjourservices = list(listener.availableServices_tableform.values())
+        bonjourservicesLocations = [s['address']+str(s['port']) for s in bonjourservices]
+        for s in localservices:
+            if s['address']+str(s['port']) not in bonjourservicesLocations:
+                bonjourservices.append(s)
+        if asDict:
+            return {s[keyedOn]:s for s in bonjourservices}
+        return bonjourservices
+
     else:
-        print('\nBonjour libraries are not installed.  Please perform `pip install zeroconf` to access broadcasting capabilities')
+        print('\nBonjour libraries are not installed.  Please perform `pip install zeroconf` to access WLAN broadcasting capabilities')
+        try:
+            localservices = getRunningLocalWorkers(copy.copy(options))
+            if asDict:
+                return {s[keyedOn]: s for s in localservices}
+            return localservices
+        except Exception as e:
+            print(e)
+        if asDict: return {}
         return []
 
 
-def getFaceWorkers():
+def getFaceWorkers(asDict=False):
     # Scan for faro workers
     import_dir = faro.__path__[0]
     scripts = os.listdir(os.path.join(import_dir, 'face_workers'))
@@ -128,7 +178,10 @@ def getFaceWorkers():
     # Scan for other workers
 
     #TODO make the services path an env, not hard coded
-    SERVICE_DIRS=["/Users/2r6/faro/services/"]
+    SERVICE_DIRS=[]
+    if os.getenv('FARO') is not None:
+        SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
+
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
         for worker_dir in worker_dirs:
@@ -148,24 +201,26 @@ def getFaceWorkers():
 
     availableServices = {}
     for sdir in SERVICE_DIRS:
-        availableServices.update({d:os.path.join(sdir,d) for d in os.listdir(sdir)})
-    print('available services:', availableServices)
+        if os.path.exists(sdir) and os.path.isdir(sdir):
+            availableServices.update({d:os.path.join(sdir,d) for d in os.listdir(sdir)})
     for each,loc in zip(scripts,script_locations):
         name = each[:-13].lower()
         loadable = True
 
         # Check if the given FaceWorker has an associated service environment
         serviceLocation = None
-        serviceLoadType = "Native"
+        serviceLoadType = []
         if name in availableServices:
             serviceLocation = availableServices[name]
             serviceFiles = os.listdir(serviceLocation)
             if "Dockerfile" in serviceFiles:
-                serviceLoadType = "Docker"
+                serviceLoadType.append("Docker")
             if "environment.yml" in serviceFiles:
-                serviceLoadType = "Conda"
+                serviceLoadType.append("Conda")
             if "requirements.txt" in serviceFiles:
-                serviceLoadType = "venv"
+                serviceLoadType.append("venv")
+        if len(serviceLoadType)==0:
+            serviceLoadType.append('native')
 
         row = SortedDict({"Algorithm": name, 'location': loc, 'service files':serviceLocation,'environment Type':serviceLoadType})
 
@@ -187,4 +242,6 @@ def getFaceWorkers():
             row['natively loadable'] = False
             row['error'] = e
         tablerows.append(row)
+    if asDict:
+        return {s['Algorithm']:s for s in tablerows}
     return tablerows

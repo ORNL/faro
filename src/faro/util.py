@@ -27,7 +27,9 @@ Created on Feb 10, 2019
 '''
 
 import os
-
+import sys
+import socket
+import subprocess
 _keras = None
 _K = None
 
@@ -72,3 +74,70 @@ def getTensorflowSession(gpu_id = None):
         _tf_sess = tf.Session(config=config)
         
     return _tf, _tf_sess
+
+def optionalImport(libname):
+    if getPythonVersion() == 3:
+        import importlib
+        try:
+            module = importlib.import_module(libname)
+            return module
+        except Exception as E:
+            print('could not load optional module: ', libname)
+            return None
+    elif getPythonVersion() == 2:
+        import imp
+        try:
+            imp.find_module(libname)
+            module = imp.load_module(libname)
+            return module
+        except ImportError:
+            print('could not load optional module: ', libname)
+            return None
+    return None
+
+def getPythonVersion():
+    if (sys.version_info > (3, 0)):
+        # Python 3 code in this block
+        return 3
+    else:
+        # Python 2 code in this block
+        return 2
+
+def getHostName():
+    fqdn = socket.gethostname()
+    ip = None
+    try:
+        ip = socket.gethostbyname(fqdn)
+    except:
+        pass
+    if ip is None:
+        try:
+            fqdn = socket.getfqdn()
+            ip = socket.gethostbyname(fqdn)
+        except:
+            pass
+    if ip is None:
+        fqdn = 'localhost'
+        ip = socket.gethostbyname(fqdn)
+    return ip
+
+def getServiceDomains():
+    # Scan for other workers
+    service_domains = ['localhost']
+    if 'FARO_DOMAINS' in os.environ:
+        service_domains.extend(os.environ['FARO_DOMAINS'].split(":"))
+    return service_domains
+
+def pingDomain(domain):
+    process = subprocess.Popen("ping -c 1 " + domain, shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    # wait for the process to terminate
+    response, err = process.communicate()
+    errcode = process.returncode
+    # response = os.system()
+    # and then check the response...
+    if errcode == 0:
+        return True
+    else:
+        return False

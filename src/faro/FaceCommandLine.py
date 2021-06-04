@@ -327,52 +327,49 @@ def statusParseOptions():
     parser.add_option("--active",action="store_true",dest="active",default=False,help='Show only worker services currently active and available on the network')
     parser.add_option("--inactive",action="store_true",dest='inactive',default=False,help="Show only worker services that are currently not loaded")
     addConnectionOptions(parser)
-    # Here are some templates for standard option formats.
-    # parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-    #                 help="Decrease the verbosity of the program")
-
-    # parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
-    #                  help="don't print status messages to stdout")
-
-    # parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
-    #                  help="Choose an option.")
-
-    # parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
-    #                  help="A floating point value.")
-
-    # parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
-    #                  help="An integer value.")
-
-    # parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
-    #                  help="A string value.")
-
-    # parser.add_option( "--enroll", type="str", dest="enroll_gallery", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--search", type="str", dest="search_gallery", default=None,
-    #                  help="Search images for faces from a gallery.")
-
-    # parser.add_option( "--name", type="str", dest="subject_name", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--subject-id", type="str", dest="subject_id", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "--search-log", type="str", dest="search_log", default=None,
-    #                  help="Enroll detected faces into a gallery.")
-
-    # parser.add_option( "-m","--match-log", type="str", dest="match_log", default=None,
-    #                  help="A directory to store matching faces.")
-
-    # parser.add_option( "--same-person", type="str", dest="same_person", default=None,
-    #                  help="Specifies a python function that returns true if the filenames indicate a match.  Example: lambda x,y: x[:5] == y[:5]")
-
-    # parser.add_option( "-s","--scores-csv", type="str", dest="scores_csv", default=None,
-    #                  help="Save similarity scores to this file.")
 
     # Parse the arguments and return the results.
     (options, args) = parser.parse_args()
 
+    if len(args) != 1:
+        parser.print_help()
+        print()
+        print(("Please supply exactly %d arguments." % 0))
+        print()
+        exit(-1)
+
+    return options, args
+
+def startUpParseOptions():
+    """
+    Parse command line arguments.
+    """
+    args = ['']  # Add the names of arguments here.
+    n_args = len(args)
+    args = " ".join(args)
+    description = '''Start up an available FaRO service using its given container instructions. To see available services, perform `faro status -a`'''
+    epilog = '''Created by Joel Brogan - broganjr@ornl.gov'''
+
+    version = faro.__version__
+
+    # Setup the parser
+    parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
+                                   version=version, description=description, epilog=epilog)
+
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print out more program information.")
+    # parser.add_option("--service-name",type="str",dest="service_name",default=None,help="The name to be given to the service")
+    parser.add_option("--algorithm",type="str",dest="algorithm",default=None,help="the algorithm to start up")
+    parser.add_option( "--mode", type="choice", choices=['docker','venv','conda','native',None], dest="mode", default=None,
+                     help="Choose an option.")
+    parser.add_option("--num-workers", type="int", dest="num_workers", default=1,
+                      help="How many workers to start up for asyrconous usage. Default=1")
+
+    # addConnectionOptions(parser)
+
+    # Parse the arguments and return the results.
+    addConnectionOptions(parser)
+    (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.print_help()
         print()
@@ -1772,7 +1769,7 @@ def fuse():
             lines = fp.readlines()
             if line_len < 0: line_len = len(lines)
             if not len(lines) == line_len:
-                assert("Error: file ", f, " is of length ", len(lines), " while the previous file was of length ", line_len)
+                assert False, "Error: file " + f + " is of length "+ str(len(lines)) + " while the previous file was of length " + str(line_len)
             else:
                 line_len = len(lines)
             for l in tqdm(lines[1:]):
@@ -1804,7 +1801,7 @@ def fuse():
                 pass
             else:
                 print('algorithm length mismatch for ', list(pair), ' only has ', len(scores), 'score results, and should have ', len(fusion_matrix[-1]))
-                assert('algorithm length mismatch for ', list(pair), ' only has ', len(scores), 'score results, and should have ', len(fusion_matrix[-1]))
+                assert False, 'algorithm length mismatch for ' + str(list(pair)) + ' only has ' + len(scores) + ' score results, and should have ' + len(fusion_matrix[-1])
         fusion_matrix.append(scores)
     # the fusion matrix in the format of one algorithm per column, with a shape NxM, where N is the number of match pairs and M is the number of algorithms
     fusion_matrix = np.vstack(fusion_matrix)
@@ -1846,10 +1843,13 @@ def status():
         print (message)
         print()
 
- 
+def startUp():
+    options,args = startUpParseOptions()
+    command_line.startService(options)
 
 COMMANDS = {
     'status' : ['Connects to the server and displays version and status information.',status],
+    'startUp' : ['Starts up an instance of a given FaRO service',startUp],
     'detect' : ['Only run face detection.',detect],
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],

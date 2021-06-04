@@ -25,5 +25,6 @@ SOFTWARE.
 from faro.command_line.cl_common import addConnectionOptions, connectToFaroClient
 from faro.command_line.cl_gallery import glist, gdelete
 from faro.command_line.cl_status import *
+from faro.command_line.cl_startup import *
 
 

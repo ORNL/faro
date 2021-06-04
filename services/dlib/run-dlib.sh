@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HOST=localhost
-PORT=50034
+PORT=50035
 WORKER_COUNT=2
 if lsof -i:$PORT
 then
@@ -43,5 +43,5 @@ fi
 #c93227f4b3fbc60cf3b32a565ec22ed37217ad03  dlib_face_recognition_resnet_model_v1.dat.bz2
 #cd47b9dd2c67052e8695f693b50d3e7c828290f6  shape_predictor_5_face_landmarks.dat.bz2
 
-python -m faro.FaceService --port=$HOST:$PORT --service-name="weee" --worker-count=$WORKER_COUNT --algorithm=dlib 
+#python -m faro.FaceService --port=$HOST:$PORT --service-name="weee" --worker-count=$WORKER_COUNT --algorithm=dlib
 
