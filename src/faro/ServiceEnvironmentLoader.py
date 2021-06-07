@@ -72,7 +72,14 @@ def startByDocker(options,service_instance_name,service_dir):
         command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
         if options.verbose:
             print(command)
-        client.containers.run(docker_image_name, command,ports={50030:hostport},stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        networkmode = "host"
+        if sys.platform == "linux" or sys.platform == "linux2":
+            networkmode = "host"
+        elif sys.platform == "darwin":
+            networkmode = "bridge"
+        #     ports={50030:hostport}
+        # network_mode=networkmode
+        client.containers.run(docker_image_name, command,stdout=True,remove=True,name=docker_instance_name,privileged=True)
     else:
         print('Final: No images or containers were found in Docker. Building dockerfile instead')
         buildDockerFile(os.path.join(service_dir),docker_image_name)
@@ -123,5 +130,3 @@ def buildDockerFile(filePath,tag):
         # if errcode is not 0:
         #     print(err)
         print('done')
-if __name__ == '__main__':
-    detectImage("Orbio")

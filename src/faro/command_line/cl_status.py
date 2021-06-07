@@ -183,6 +183,7 @@ def getFaceWorkers(asDict=False):
     SERVICE_DIRS=[]
     if os.getenv('FARO') is not None:
         SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
+    print("service dirs:",SERVICE_DIRS)
 
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
@@ -212,9 +213,11 @@ def getFaceWorkers(asDict=False):
         # Check if the given FaceWorker has an associated service environment
         serviceLocation = None
         serviceLoadType = []
+        loc2 = loc
         if name in availableServices:
             serviceLocation = availableServices[name]
             serviceFiles = os.listdir(serviceLocation)
+            loc2 = serviceLocation
             if "Dockerfile" in serviceFiles:
                 serviceLoadType.append("Docker")
             if "environment.yml" in serviceFiles:
@@ -224,7 +227,7 @@ def getFaceWorkers(asDict=False):
         if len(serviceLoadType)==0:
             serviceLoadType.append('native')
 
-        row = SortedDict({"Algorithm": name, 'location': loc, 'service files':serviceLocation,'environment Type':serviceLoadType})
+        row = SortedDict({"Algorithm": name, 'location': loc2, 'service files':serviceLocation,'environment Type':serviceLoadType})
 
 
 
