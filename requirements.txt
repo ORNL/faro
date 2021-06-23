@@ -16,3 +16,4 @@ opencv-contrib-python
 dlib
 protobuf
 docker
+sortedcollections

@@ -1053,7 +1053,9 @@ def serve():
     if options.verbose:
         print('starting Face Service')
     face_client = FaceService(options)
-    zcinfo = face_client.wsInfo
+    zcinfo = None
+    if Zeroconf is not None:
+        zcinfo = face_client.wsInfo
     print("Batch loading a watchlist.")
     #face_client.batchLoad("../tests/watchlist.csv", 'authorized')
 
@@ -1070,9 +1072,10 @@ def serve():
         server.stop(0)
         print('Server Stopped.')
     try:
-        zc = Zeroconf()
-        zc.unregister_service(zcinfo)
-        zc.close()
+        if zcinfo is not None and Zeroconf is not None:
+            zc = Zeroconf()
+            zc.unregister_service(zcinfo)
+            zc.close()
     except:
         pass
 
