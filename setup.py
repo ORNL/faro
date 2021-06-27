@@ -1,4 +1,8 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except:
+    print('Warning: setuptools not installed.  Falling back to distutils.core')
+    from distutils.core import setup
 import os
 
 
@@ -9,7 +13,7 @@ setup(name='faro',
       author='David Bolme',
       author_email='dbolme@gmail.com',
       url='https://github.com/bolme/pyvision',
-      keywords = ["machine learning", "vision", "image", "face recognition", "deep learning"],
+      keywords = ["machine learning", "vision", "image", "face recognition", "deep learning","biometrics"],
          classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
@@ -42,8 +46,8 @@ setup(name='faro',
           'scikit-learn',
           'pyvision-toolkit',
           'protobuf',
-          'grpcio',
-          'grpcio.tools',
+          'grpcio==1.20.0',
+          'grpcio-tools==1.20.0',
           'keras==2.2.0',
           'keras_vggface',
           'dlib',
