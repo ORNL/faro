@@ -273,6 +273,8 @@ class FaceService(fs.FaceRecognitionServicer):
         self.worker_functionality_dict = self.manager.dict()
         self.galleries = {}
         self.worker_init_semaphore = self.manager.Value('c',options.worker_count)
+        self.wsInfo = None
+        self.name = options.algorithm
         options.functiondict = self.worker_functionality_dict
         options.queue_semaphore = self.worker_init_semaphore
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
