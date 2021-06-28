@@ -31,13 +31,9 @@ DEFAULT_MAX_SIZE = 1920
 
 
 from .FaceWorker import FaceWorker, SCORE_L1, SCORE_L2, SCORE_DOT, SCORE_SERVER, STATUS_READY
-#from faro.face_workers import DlibFaceWorker
-#from faro.face_workers import VggFaceWorker
-#from faro.face_workers import RcnnFaceWorker
 from .util import loadKeras
 from .FaceCommandLine import face_command_line
 from .ServiceEnvironmentLoader import *
-#from .FaceGallery import Gallery
 
 from .FaceClient import FaceClient, getDefaultClientOptions
 

@@ -26,5 +26,11 @@ from faro.command_line.cl_common import addConnectionOptions, connectToFaroClien
 from faro.command_line.cl_gallery import glist, gdelete
 from faro.command_line.cl_status import *
 from faro.command_line.cl_startup import *
+from faro.command_line.cl_fusion import *
+from faro.command_line.cl_test import *
+from faro.command_line.cl_search import *
+from faro.command_line.cl_enroll import *
+from faro.command_line.cl_detect import *
+from faro.command_line.cl_extract import *
 
 

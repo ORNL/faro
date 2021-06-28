@@ -33,26 +33,25 @@ import importlib
 import sys
 from sortedcollections import SortedDict
 from faro.command_line.cl_common import connectToFaroClient
-try:
-    import tabulate
-    def tabulator(x):
-        return tabulate.tabulate(x,headers='keys')
-except:
-    print('Warning: Tabulate not installed, defaulting to string print (install via `pip install tabulate`')
-    tabulator = str
-
+tabulator = faro.util.safe_tabulator()
+tqdm = faro.util.safe_tqdm()
 try:
     from zeroconf import ServiceInfo,Zeroconf,ServiceBrowser
 except:
     Zeroconf = None
     print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, install via `pip install zeroconf`')
 
-try:
-    from tqdm import tqdm
-except:
-    tqdm = None
+
 
 def status(options):
+    print('faro',faro.proc)
+    if not options.all and not options.active and not options.inactive:
+        face_client = connectToFaroClient(options)
+        message = face_client.status()
+        print()
+        print (message)
+        print()
+
     active = options.active
     inactive = options.inactive
     if options.all:

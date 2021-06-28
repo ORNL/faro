@@ -21,3 +21,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+
+import faro
+import faro.proc
+
+def detect(options,args):
+    face_client = faro.connectToFaroClient(options)
+
+    if options.verbose:
+        print("Scanning directories for images and videos.")
+
+    image_list, video_list = faro.proc.collect_files(args[1:], options)
+
+    if len(image_list) != 0:
+        faro.proc.process_images(image_list, face_client, options)
+
+    if len(video_list) != 0:
+        faro.proc.process_videos(video_list, face_client, options)

@@ -32,10 +32,7 @@ import importlib
 import sys
 from sortedcollections import SortedDict
 from faro.command_line.cl_common import connectToFaroClient
-try:
-    from tqdm import tqdm
-except:
-    tqdm = None
+tqdm = faro.util.safe_tqdm()
 
 
 #To start a service:

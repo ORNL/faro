@@ -30,6 +30,7 @@ import os
 import sys
 import socket
 import subprocess
+
 _keras = None
 _K = None
 
@@ -141,3 +142,24 @@ def pingDomain(domain):
         return True
     else:
         return False
+
+def safe_tqdm():
+    def progress_passthrough(v):
+        return v
+    try:
+        from tqdm import tqdm
+        return tqdm
+    except:
+        return progress_passthrough
+
+def safe_tabulator():
+    try:
+        import tabulate
+        def tabulator(x):
+            import tabulate
+            return tabulate.tabulate(x, headers='keys')
+    except:
+        print('Warning: Tabulate not installed, defaulting to string print (install via `pip install tabulate`')
+        tabulator = str
+    return tabulator
+
