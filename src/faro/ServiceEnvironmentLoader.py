@@ -6,7 +6,7 @@ import subprocess
 try:
     import docker
 except:
-    print("Warning: Docker SDK is not installed. This will prevent FaRO from loading Docker images. Run `pip install docker`")
+    print("Warning: Docker SDK is not installed. This will prevent FaRO from loading Docker images. (Install via `pip install docker`)")
     docker = None
 
 

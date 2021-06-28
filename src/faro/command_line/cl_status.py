@@ -45,7 +45,7 @@ try:
     from zeroconf import ServiceInfo,Zeroconf,ServiceBrowser
 except:
     Zeroconf = None
-    print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, perform `pip install zeroconf`')
+    print('Warning: could not load Bonjour services. This worker will not be broadcast. To enable broadcasting capabilities, install via `pip install zeroconf`')
 
 try:
     from tqdm import tqdm
