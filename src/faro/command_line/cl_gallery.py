@@ -107,7 +107,7 @@ def galleryDeleteOptions():
 def glist():
     options,args = galleryListOptions()
 
-    face_client = connectToFaroClient(options)
+    face_client = faro.command_line.connectToFaroClient(options)
 
     result = face_client.galleryList()
     

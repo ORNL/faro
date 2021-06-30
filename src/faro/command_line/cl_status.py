@@ -58,7 +58,7 @@ def status(options):
         active = True
         inactive = True
     if inactive:
-        availableFaceWorkers = getFaceWorkers()
+        availableFaceWorkers = getFaceWorkers(options)
         print("\nCurrently available FaRO Face Workers")
         print(tabulator(availableFaceWorkers))
     if active:
@@ -166,7 +166,7 @@ def getRunningWorkers(options,asDict=False,keyedOn='Name'):
         return []
 
 
-def getFaceWorkers(asDict=False):
+def getFaceWorkers(options,asDict=False):
     # Scan for faro workers
     import_dir = faro.__path__[0]
     scripts = os.listdir(os.path.join(import_dir, 'face_workers'))
@@ -182,7 +182,15 @@ def getFaceWorkers(asDict=False):
     SERVICE_DIRS=[]
     if os.getenv('FARO') is not None:
         SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
-    print("service dirs:",SERVICE_DIRS)
+    else:
+        try:
+            scriptpath = os.path.dirname(os.path.realpath(__file__))
+            servicespath = os.path.abspath(os.path.join(scriptpath,'../../../services'))
+            SERVICE_DIRS.append(servicespath)
+        except:
+            pass
+    if options.verbose:
+        print("service dirs:",SERVICE_DIRS)
 
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")

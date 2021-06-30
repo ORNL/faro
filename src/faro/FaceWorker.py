@@ -34,7 +34,7 @@ import scipy as sp
 import socket
 import scipy.spatial as spat          
 from faro.FaceGallery import GalleryWorker
-
+import os
 # Standard scores can be computed by the client which may offer 
 # performance benefits.  In some cases scores can only be computed 
 # on the server.
@@ -68,6 +68,8 @@ class FaceWorker(object):
         '''
         Constructor
         '''
+        print('inited worker ', os.getpid())
+
         
 
     def detect(self):
@@ -168,4 +170,5 @@ class FaceWorker(object):
     
     
     def cleanexit(self):
+        print('running clean exit on ', os.getpid())
         pass 

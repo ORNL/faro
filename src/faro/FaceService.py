@@ -47,6 +47,7 @@ import skimage.io
 import cv2
 import inspect
 import urllib.request
+import select
 from faro.FaceGallery import GalleryWorker
 try:
     from random_word import RandomWords
@@ -161,7 +162,8 @@ def worker_init(options):
             for f in functions: options.functiondict[f] = 0 
             is_loaded_for_exit = False
         except:
-            print('Warning: could not find any functionalities within faceworker ',options.algorithm)
+            if options.verbose:
+                print('Warning: could not find any functionalities within faceworker ',options.algorithm)
             is_loaded_for_exit = True
             pass 
         
@@ -257,7 +259,7 @@ def worker_extractTile(mat):
 def worker_cleanexit():
     global FACE_ALG
     assert FACE_ALG is not None
-
+    print('worker_cleanexit',FACE_ALG)
     try:
         FACE_ALG.cleanexit()
     except:
@@ -1046,7 +1048,7 @@ def serve():
     options,_ = parseOptions(FACE_WORKER_LIST)
 
     if options.verbose:
-        print("storage",os.environ['HOME'])
+        print("storage:",os.environ['HOME'])
     if options.verbose:
         print("initializing gRPC server...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=2*options.worker_count),
@@ -1066,13 +1068,24 @@ def serve():
     server.add_insecure_port(options.port)
     print('Starting Server on port: %s'%options.port)
     server.start()
+    print('To end server, press "esc" or "enter" key')
+    killKeys = [27,10,13]
     try:
         while True:
-            time.sleep(60)
+            char = faro.util.readInput(60)
+            shouldkill = False
+            for k in killKeys:
+                if ord(char) == k:
+                    shouldkill = True
+            if shouldkill:
+                break
+            # print('recieved ',char)
     except KeyboardInterrupt:
-        face_client.cleanexit()
-        server.stop(0)
-        print('Server Stopped.')
+        print('KEYBOARD INTERUPTED')
+
+    face_client.cleanexit()
+    server.stop(0)
+    print('Server Stopped.')
     try:
         if zcinfo is not None and Zeroconf is not None:
             zc = Zeroconf()

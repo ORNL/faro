@@ -27,7 +27,7 @@ import faro.proc
 import cv2
 
 def enroll(options,args):
-    face_client = faro.connectToFaroClient(options)
+    face_client = faro.command_line.connectToFaroClient(options)
 
     if options.verbose:
         print("Scanning directories for images and videos.")
@@ -84,7 +84,7 @@ def enroll_csv(options,args):
 
     start = time.time()
 
-    face_client = faro.connectToFaroClient(options)
+    face_client = faro.command_line.connectToFaroClient(options)
 
     # print( args )
 

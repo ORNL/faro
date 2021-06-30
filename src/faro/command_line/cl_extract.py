@@ -78,7 +78,7 @@ def detectExtract(options,args):
 
 
 def extractOnly(options,args):
-    face_client = faro.connectToFaroClient(options)
+    face_client = faro.command_line.connectToFaroClient(options)
 
     if options.verbose:
         print("Scanning directories for images and videos.")

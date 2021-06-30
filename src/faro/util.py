@@ -30,6 +30,8 @@ import os
 import sys
 import socket
 import subprocess
+import threading
+import time
 
 _keras = None
 _K = None
@@ -163,3 +165,55 @@ def safe_tabulator():
         tabulator = str
     return tabulator
 
+
+def readInput_unix(timeout = 5):
+    pass
+
+fgetch = None
+try:
+    import msvcrt
+    fgetch = msvcrt.getch
+except:
+    pass
+if fgetch is None:
+    try:
+        import getch
+        fgetch = getch.getch
+    except:
+        print('warning: getch is not installed. Install via `pip install getch`')
+
+class KeyboardThread(threading.Thread):
+    def run(self):
+        self.timedout = False
+        self.input = ''
+        chr = fgetch()
+        # print("char: ",ord(chr))
+        self.input = chr
+        # if ord(chr) == 13:
+        #     break
+        return
+
+            # elif ord(chr) >= 32:
+            # self.input += chr
+            # if len(self.input) == 0 and self.timedout:
+            #     break
+
+
+def readInput(timeout = 5):
+    if fgetch is not None:
+        result = None
+        it = KeyboardThread()
+        # print('starting input thread')
+        it.start()
+        # print('joining input with ', timeout, 'seconds')
+        it.join(timeout)
+        # print('joined')
+        it.timedout = True
+        if len(it.input) > 0:
+            # wait for rest of input
+            it.join()
+            result = it.input
+        return result
+    else:
+        time.sleep(timeout)
+        return None

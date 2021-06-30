@@ -50,7 +50,7 @@ def startService(options):
         print('we have found a service already running with the name ',service_name)
 
     else:
-        available_algorithms = faro.command_line.getFaceWorkers(asDict=True)
+        available_algorithms = faro.command_line.getFaceWorkers(options,asDict=True)
         if options.algorithm in available_algorithms:
             print('we can start the algorithm, ', options.algorithm)
             alg = available_algorithms[options.algorithm]

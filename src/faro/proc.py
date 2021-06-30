@@ -21,6 +21,8 @@ ENROLL_CSV = None
 SEARCH_CSV = None
 SEARCH_FILE = None
 
+FACE_COUNT = 0
+
 def collect_files(args, options, extension=None):
     if options.verbose:
         if extension is None:

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HOST=localhost
-PORT=50035
+PORT=50030
 WORKER_COUNT=2
 if lsof -i:$PORT
 then

@@ -29,7 +29,7 @@ if [ ! -d data ]; then
 
 fi
 
-#python -m faro detect -d detections.csv --detect-log=faces --face-log=faces data
+python -m faro detect -d detections.csv --service-name dlib_service --detect-log=faces --face-log=faces data
 
 
 

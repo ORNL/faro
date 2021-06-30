@@ -668,13 +668,6 @@ def fuseParseOptions():
         exit(-1)
 
     return options, args
-    
-
-
-
-
-
-
 
 def detect():
     options, args = detectParseOptions()

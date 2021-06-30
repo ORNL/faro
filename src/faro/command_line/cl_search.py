@@ -26,7 +26,7 @@ import faro.proc
 import cv2
 
 def search(options,args):
-    face_client = faro.connectToFaroClient(options)
+    face_client = faro.command_line.connectToFaroClient(options)
 
     if options.verbose:
         print("Scanning directories for images and videos.")
