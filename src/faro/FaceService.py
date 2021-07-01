@@ -259,7 +259,6 @@ def worker_extractTile(mat):
 def worker_cleanexit():
     global FACE_ALG
     assert FACE_ALG is not None
-    print('worker_cleanexit',FACE_ALG)
     try:
         FACE_ALG.cleanexit()
     except:
@@ -867,14 +866,12 @@ class FaceService(fs.FaceRecognitionServicer):
 
     def __del__(self):
         try:
-            print('DEL EXITING')
             self.zeroconf.unregister_service(self.wsInfo)
             self.zeroconf.close()
         except:
             pass
         
     def cleanexit(self):
-        print('CLEANLY EXITING')
         ''' Deinitialize commercial softwares. '''
 
         worker_result = self.workers.apply_async(worker_cleanexit,[])

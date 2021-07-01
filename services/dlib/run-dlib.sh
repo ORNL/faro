@@ -2,7 +2,7 @@
 
 HOST=localhost
 PORT=50030
-WORKER_COUNT=2
+WORKER_COUNT=10
 if lsof -i:$PORT
 then
     echo ERROR - Port $PORT is in use.

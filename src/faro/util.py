@@ -186,11 +186,14 @@ class KeyboardThread(threading.Thread):
     def run(self):
         self.timedout = False
         self.input = ''
-        chr = fgetch()
-        # print("char: ",ord(chr))
-        self.input = chr
-        # if ord(chr) == 13:
-        #     break
+        try:
+            chr = fgetch()
+            # print("char: ",ord(chr))
+            self.input = chr
+            # if ord(chr) == 13:
+            #     break
+        except Exception as e:
+            print('Ended listener with exception: ',e)
         return
 
             # elif ord(chr) >= 32:
