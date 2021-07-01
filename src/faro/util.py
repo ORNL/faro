@@ -182,6 +182,16 @@ if fgetch is None:
     except:
         print('warning: getch is not installed. Install via `pip install getch`')
 
+
+class sigintThread(threading.Thread):
+    import signal
+    def signal_handler(sig, frame):
+        print('You pressed Ctrl+C! Press `enter` to terminate the server')
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+
 class KeyboardThread(threading.Thread):
     def run(self):
         self.timedout = False
@@ -201,11 +211,11 @@ class KeyboardThread(threading.Thread):
             # if len(self.input) == 0 and self.timedout:
             #     break
 
-
 def readInput(timeout = 5):
     if fgetch is not None:
         result = None
         it = KeyboardThread()
+
         # print('starting input thread')
         it.start()
         # print('joining input with ', timeout, 'seconds')

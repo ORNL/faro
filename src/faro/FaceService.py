@@ -1072,6 +1072,11 @@ def serve():
     print('Starting Server on port: %s'%options.port)
     server.start()
     print('To end server, press "esc" or "enter" key')
+
+    #this allows us to listen for ctl+c sigint so that we terminate peacefully
+    sig = faro.util.sigintThread()
+    sig.start()
+
     killKeys = [27,10,13]
     try:
         while True:
