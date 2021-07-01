@@ -283,8 +283,14 @@ class FaceService(fs.FaceRecognitionServicer):
 
 
         try:
-            while((self.worker_init_semaphore.value > 1 and options.worker_count > 1 ) or (self.worker_init_semaphore.value > 0 and options.worker_count == 1)):
+            t0 = time.time()
+            t1 = t0
+            worker_init_timeout = 5
+            while((self.worker_init_semaphore.value > 1 and options.worker_count > 1 ) or (self.worker_init_semaphore.value > 0 and options.worker_count == 1)) and t1-t0 < worker_init_timeout:
                 time.sleep(.1)
+                t1 = time.time()
+            if t1-t0 > worker_init_timeout:
+                print('Warning: could only load ', options.worker_count-self.worker_init_semaphore.value, ' workers, instead of the requested ', options.worker_count)
         except:
             pass
 
