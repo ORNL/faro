@@ -30,7 +30,7 @@ import os
 import faro.proto.proto_types as pt 
 import faro.proto.face_service_pb2 as fsd
 import numpy as np
-import pyvision as pv
+import faro.pyvision as pv
 #from keras_vggface.vggface import VGGFace
 #import keras
 #import tensorflow as tf

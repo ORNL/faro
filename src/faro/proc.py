@@ -1,5 +1,5 @@
 import os
-import pyvision as pv
+import faro.pyvision as pv
 import cv2
 import time
 import traceback

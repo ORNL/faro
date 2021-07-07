@@ -28,7 +28,7 @@ Created on Jul 23, 2018
 
 #from keras_vggface.vggface import VGGFace
 import dlib
-import pyvision as pv
+import faro.pyvision as pv
 import faro.proto.face_service_pb2 as fsd
 #import geometry_pb2 as geo
 #from face_service_pb2 import DetectionList

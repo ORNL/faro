@@ -8,7 +8,7 @@ import os
 import faro.proto.proto_types as pt 
 import faro.proto.face_service_pb2 as fsd
 import numpy as np
-import pyvision as pv
+import faro.pyvision as pv
 import time
 from PIL import Image
 import json

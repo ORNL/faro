@@ -9,7 +9,7 @@ import os
 
 import faro
 import faro.proc
-import pyvision as pv
+import faro.pyvision as pv
 import cv2
 import faro.proto.proto_types as pt
 import csv

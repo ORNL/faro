@@ -28,7 +28,7 @@ Created on Jul 26, 2018
 
 
 import numpy as np
-import pyvision as pv
+import faro.pyvision as pv
 import cv2
 import urllib
 
@@ -112,7 +112,7 @@ def image_proto2np(pb_data):
 def image_proto2pv(pb_data):
     '''Convert a protobuf image to a numpy array.'''
     data = image_proto2cv(pb_data)
-    data = pv.Image(data) # OpenCV to pyvision
+    data = pv.Image(data) # OpenCV to faro.pyvision
     return data
 
 

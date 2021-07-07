@@ -26,7 +26,7 @@ Created on Jul 18, 2018
 @author: bolme
 '''
 import grpc
-import pyvision as pv
+import faro.pyvision as pv
 import numpy as np
 import faro.proto.face_service_pb2_grpc as fs
 import faro.proto.face_service_pb2 as fsd
