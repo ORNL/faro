@@ -33,6 +33,8 @@ import subprocess
 import threading
 import time
 
+import faro.util
+
 _keras = None
 _K = None
 
@@ -182,51 +184,60 @@ if fgetch is None:
     except:
         print('warning: getch is not installed. Install via `pip install getch`')
 
-
+import signal
 class sigintThread(threading.Thread):
-    import signal
-    def signal_handler(sig, frame):
-        print('You pressed Ctrl+C! Press `enter` to terminate the server')
-        sys.exit(0)
+    def signalint_handler(sig, frame):
+        v=faro.util.getGlobalValue('shouldstopserver')
+        verbose = False
+        # if verbose:
+        # # sys.exit(0)
+    signal.signal(signal.SIGINT, signalint_handler)
 
-    signal.signal(signal.SIGINT, signal_handler)
+import multiprocessing as mp
 
-
-class KeyboardThread(threading.Thread):
+class KeyboardThread(mp.Process):
+    def __init__(self,inputVar):
+        super(KeyboardThread, self).__init__()
+        self.input = inputVar
     def run(self):
         self.timedout = False
-        self.input = ''
+
         try:
-            chr = fgetch()
-            # print("char: ",ord(chr))
-            self.input = chr
-            # if ord(chr) == 13:
-            #     break
+            try:
+                inp = fgetch()
+                self.input.value = inp
+            except OverflowError as e:
+                pass
+
         except Exception as e:
-            print('Ended listener with exception: ',e)
+            # print('exit from sigint',e)
+            self.input.value = chr(27)
         return
 
-            # elif ord(chr) >= 32:
-            # self.input += chr
-            # if len(self.input) == 0 and self.timedout:
-            #     break
+def waitForInput():
+    return fgetch()
 
 def readInput(timeout = 5):
     if fgetch is not None:
         result = None
-        it = KeyboardThread()
-
-        # print('starting input thread')
+        inputVar = mp.Manager().Value('c','')
+        it = KeyboardThread(inputVar)
         it.start()
-        # print('joining input with ', timeout, 'seconds')
         it.join(timeout)
-        # print('joined')
         it.timedout = True
-        if len(it.input) > 0:
-            # wait for rest of input
-            it.join()
-            result = it.input
+        if len(it.input.value) > 0:
+            result = it.input.value
         return result
     else:
         time.sleep(timeout)
         return None
+
+
+from multiprocessing import Manager
+globaldict = Manager().dict()
+def getGlobalValue(key):
+    if key in globaldict:
+        return globaldict[key]
+    return None
+def setGlobalValue(key,val):
+    globaldict[key] = val

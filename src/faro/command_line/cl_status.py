@@ -44,32 +44,31 @@ except:
 
 
 def status(options):
-    print('faro',faro.proc)
-    if not options.all and not options.active and not options.inactive:
-        face_client = connectToFaroClient(options)
-        message = face_client.status()
-        print()
-        print (message)
-        print()
 
-    active = options.active
-    inactive = options.inactive
-    if options.all:
-        active = True
-        inactive = True
-    if inactive:
-        availableFaceWorkers = getFaceWorkers(options)
-        print("\nCurrently available FaRO Face Workers")
-        print(tabulator(availableFaceWorkers))
-    if active:
-        print('Scanning for workers on network...')
-        activeWorkers = getRunningWorkers(options)
-        if len(activeWorkers) > 0:
-            print("\nWorkers currently running on network:")
-            print(tabulator(activeWorkers))
-        else:
-            print("No actively broadcasting workers found")
-        # getRunningLocalWorkers(options)
+    if not options.all and not options.active and not options.inactive:
+        face_client,message = connectToFaroClient(options,return_status=True)
+        print()
+        print(message)
+        print()
+    else:
+        active = options.active
+        inactive = options.inactive
+        if options.all:
+            active = True
+            inactive = True
+        if inactive:
+            availableFaceWorkers = getFaceWorkers(options)
+            print("\nCurrently available FaRO Face Workers")
+            print(tabulator(availableFaceWorkers))
+        if active:
+            print('Scanning for workers on network...')
+            activeWorkers = getRunningWorkers(options)
+            if len(activeWorkers) > 0:
+                print("\nWorkers currently running on network:")
+                print(tabulator(activeWorkers))
+            else:
+                print("No actively broadcasting workers found")
+            # getRunningLocalWorkers(options)
 
 class ServiceListener:
     availableServices = SortedDict()
@@ -169,6 +168,7 @@ def getRunningWorkers(options,asDict=False,keyedOn='Name'):
 def getFaceWorkers(options,asDict=False):
     # Scan for faro workers
     import_dir = faro.__path__[0]
+    print('reading scripts...')
     scripts = os.listdir(os.path.join(import_dir, 'face_workers'))
     scripts = filter(lambda x: x.endswith('FaceWorker.py'), scripts)
     sys.path.append(os.path.join(import_dir, 'face_workers'))
@@ -176,10 +176,12 @@ def getFaceWorkers(options,asDict=False):
     script_locations = [import_dir]*len(scripts)
     scripts.sort()
     FACE_WORKER_LIST = SortedDict()
+    print('got face worker list')
     # Scan for other workers
 
     #TODO make the services path an env, not hard coded
     SERVICE_DIRS=[]
+    print('reading service dirs...')
     if os.getenv('FARO') is not None:
         SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
     else:
@@ -208,7 +210,7 @@ def getFaceWorkers(options,asDict=False):
             script_locations += [worker_dir]*len(list(worker_scripts))
             scripts.sort()
     tablerows = []
-
+    print('got service dirs')
     availableServices = {}
     for sdir in SERVICE_DIRS:
         if os.path.exists(sdir) and os.path.isdir(sdir):

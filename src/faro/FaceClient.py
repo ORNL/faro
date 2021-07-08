@@ -97,7 +97,9 @@ class FaceClient(object):
         #channel = grpc.insecure_channel(options.rec_port,
         #                                options=channel_options)
         #self.rec_stub = fs.FaceRecognitionStub(channel)
-        self.is_ready,self.info = self.status(False,timeout=timeout)
+        self.initial_status = self.status(False,timeout=timeout)
+        self.is_ready = self.initial_status[0]
+        self.info = self.initial_status[1]
         if options.verbose:
             print (self.status)
 

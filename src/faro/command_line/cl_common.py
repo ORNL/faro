@@ -55,13 +55,15 @@ def addConnectionOptions(parser):
 
 
 
-def connectToFaroClient(options,no_exit=False,quiet=False,timeout=None):
+def connectToFaroClient(options,no_exit=False,quiet=False,timeout=None,return_status=False):
     if options.verbose:
         print('Connecting to FaRO Service...')
 
     face_client = faro.FaceClient(options,timeout=timeout)
-
-    is_ready, status = face_client.status(verbose=options.verbose,timeout=timeout)
+    message = face_client.initial_status
+    is_ready = message[0]
+    status = message[1]
+    # is_ready, status = face_client.status(verbose=options.verbose,timeout=timeout)
     if not is_ready:
         if not quiet:
             print("ERROR: the FaRO service is not ready.")
@@ -72,5 +74,7 @@ def connectToFaroClient(options,no_exit=False,quiet=False,timeout=None):
         if options.verbose:
             if not quiet:
                 print('Connection to FaRO service established. [ algorithm: %s ]' % (status.algorithm))
-
-    return face_client
+    if return_status:
+        return face_client,status
+    else:
+        return face_client

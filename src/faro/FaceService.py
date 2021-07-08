@@ -130,8 +130,8 @@ def filterDetectBest(face_records, im, best):
 
 def worker_init(options):
     ''' Initalize the worker processes. '''
-    
-    print("Starting worker process:",mp.current_process())
+    if options.verbose:
+        print("Starting worker process:",mp.current_process())
     
     global MYNET,WORKER_INDEX,OPTIONS
     global WORKER_GPU_MAPPING
@@ -162,20 +162,25 @@ def worker_init(options):
             for f in functions: options.functiondict[f] = 0 
             is_loaded_for_exit = False
         except:
-            if options.verbose:
-                print('Warning: could not find any functionalities within faceworker ',options.algorithm)
+            # if options.verbose:
+            #     print('Warning: could not find any functionalities within faceworker ',options.algorithm)
             is_loaded_for_exit = True
             pass 
         
         
     except:
         print ("ERROR: Worker %d could not be started."%WORKER_INDEX)
-        traceback.print_exc() 
+        options.queue_semaphore.value -= 5
+        if options.verbose:
+            traceback.print_exc()
         if not is_loaded_for_exit:
             options.queue_semaphore.value -= 1
+        time.sleep(30)
         raise   
-    
-    print( "Worker %d Ready."%(WORKER_INDEX) )
+    if not is_loaded_for_exit:
+        print( "Worker %d Ready."%(WORKER_INDEX) )
+    else:
+        print("Worker %d Stopped."%(WORKER_INDEX) )
     if not is_loaded_for_exit:
         options.queue_semaphore.value -= 1
 
@@ -271,9 +276,10 @@ class FaceService(fs.FaceRecognitionServicer):
     def __init__(self,options):
         #self.alg = FaceAlgorithms.FaceAlgorithms()
         self.manager = mp.Manager()
+
         self.worker_functionality_dict = self.manager.dict()
         self.galleries = {}
-        self.worker_init_semaphore = self.manager.Value('c',options.worker_count)
+        self.worker_init_semaphore = self.manager.Value('i',options.worker_count)
         self.wsInfo = None
         self.name = options.algorithm
         options.functiondict = self.worker_functionality_dict
@@ -281,7 +287,8 @@ class FaceService(fs.FaceRecognitionServicer):
         self.workers = mp.Pool(options.worker_count, worker_init, [options])
         FACE_WORKER_LIST = options.fwl
 
-
+        tries = 0
+        shouldExit = False
         try:
             t0 = time.time()
             t1 = t0
@@ -289,14 +296,25 @@ class FaceService(fs.FaceRecognitionServicer):
             while((self.worker_init_semaphore.value > 1 and options.worker_count > 1 ) or (self.worker_init_semaphore.value > 0 and options.worker_count == 1)) and t1-t0 < worker_init_timeout:
                 time.sleep(.1)
                 t1 = time.time()
+                tries += 1
+                if self.worker_init_semaphore.value <= -int(options.worker_count*1.1):
+                    print('Too many failed attempts. Aborting...')
+                    if not options.verbose:
+                        print('For more information, try running in verbose mode.')
+                    shouldExit = True
+                    self.workers.terminate()
+                    sys.exit(1)
+
             if t1-t0 > worker_init_timeout:
-                print('Warning: could only load ', options.worker_count-self.worker_init_semaphore.value, ' workers, instead of the requested ', options.worker_count)
+                if options.verbose:
+                    print('Warning: could only load ', options.worker_count-self.worker_init_semaphore.value, ' workers, instead of the requested ', options.worker_count)
         except:
             pass
 
 
-        print("Found functions in worker: ",options.functiondict.keys())
-
+        # print("Found functions in worker: ",options.functiondict.keys())
+        if shouldExit:
+            sys.exit(1)
         self.setup_zeroconf(options)
         print('starting broadcast...')
         self.broadcast()
@@ -363,8 +381,10 @@ class FaceService(fs.FaceRecognitionServicer):
                 self.external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
             except:
                 self.external_ip = None
+
             worker_result = self.workers.apply_async(worker_status, [])
             status_message = worker_result.get()
+
 
             self.wsDesc = {'Name': self.name, 'FaRO version': str(faro.__version__),"external IP":self.external_ip, "Algorithm":str(status_message.algorithm),'functionality':options.functiondict.keys(),'workers':str(options.worker_count)}
             self.deviceType = "_faro"
@@ -872,6 +892,10 @@ class FaceService(fs.FaceRecognitionServicer):
 
     def __del__(self):
         try:
+            self.cleanexit()
+        except:
+            pass
+        try:
             self.zeroconf.unregister_service(self.wsInfo)
             self.zeroconf.close()
         except:
@@ -879,11 +903,13 @@ class FaceService(fs.FaceRecognitionServicer):
         
     def cleanexit(self):
         ''' Deinitialize commercial softwares. '''
-
         worker_result = self.workers.apply_async(worker_cleanexit,[])
         worker_result.get()
-        self.zeroconf.unregister_service(self.wsInfo)
-        self.zeroconf.close()
+        try:
+            self.zeroconf.unregister_service(self.wsInfo)
+            self.zeroconf.close()
+        except:
+            pass
   
 def parseOptions(face_workers_list):
     '''
@@ -1039,7 +1065,7 @@ def serve():
         try:
             module = importlib.import_module(each[:-3])
             class_obj = getattr(module,each[:-3])
-            print("    Loaded: ",name,'-',class_obj)
+            # print("    Loaded: ",name,'-',class_obj)
        
             FACE_WORKER_LIST[name] = [class_obj,None,None]
             if 'getOptionsGroup' in dir(module):
@@ -1071,9 +1097,10 @@ def serve():
     server.add_insecure_port(options.port)
     print('Starting Server on port: %s'%options.port)
     server.start()
-    print('To end server, press "esc" or "enter" key')
+    print('To end server, press "ctl+c", "esc", or "enter" key')
 
     #this allows us to listen for ctl+c sigint so that we terminate peacefully
+    faro.util.setGlobalValue('shouldstopserver',25)
     sig = faro.util.sigintThread()
     sig.start()
 
@@ -1082,15 +1109,16 @@ def serve():
         while True:
             char = faro.util.readInput(60)
             shouldkill = False
-            for k in killKeys:
-                if ord(char) == k:
-                    shouldkill = True
+            if char is not None:
+                for k in killKeys:
+                    if ord(char) == k:
+                        shouldkill = True
             if shouldkill:
                 break
-            # print('recieved ',char)
-    except KeyboardInterrupt:
-        print('KEYBOARD INTERUPTED')
-
+    except Exception as e:
+        print('break ',e )
+        pass
+    print('starting the exit process')
     face_client.cleanexit()
     server.stop(0)
     print('Server Stopped.')
@@ -1101,7 +1129,6 @@ def serve():
             zc.close()
     except:
         pass
-
 if __name__ == '__main__': 
     serve()
     

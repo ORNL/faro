@@ -34,7 +34,6 @@ import numpy as np
 import faro.pyvision as pv
 import time
 #from _thread import _local
-
 dlib = None
 
 
@@ -59,7 +58,6 @@ class DlibFaceWorker(faro.FaceWorker):
         
         # This may run on the GPU.
         self.face_rec = dlib.face_recognition_model_v1(os.path.join(options.storage_dir,'models',"dlib_face_recognition_resnet_model_v1.dat"))
-
         #print("DLIB Models Loaded.")
 
         

@@ -69,7 +69,7 @@ class FaceWorker(object):
         Constructor
         '''
         print('inited worker ', os.getpid())
-
+        # self.options = options
         
 
     def detect(self):
@@ -167,8 +167,12 @@ class FaceWorker(object):
         '''
         
         raise NotImplementedError("Abstract Method Called.")
-    
+
+    def __del__(self):
+        try:
+            self.cleanexit()
+        except:
+            pass
     
     def cleanexit(self):
-        print('running clean exit on ', os.getpid())
-        pass 
+        pass
