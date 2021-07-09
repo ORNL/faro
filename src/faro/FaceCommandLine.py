@@ -755,6 +755,8 @@ COMMANDS = {
             }
 
 def face_command_line():
+    cv2.setNumThreads(16) # TODO: Make this an option
+
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         # Display a basic help message if no command is specified
         print()

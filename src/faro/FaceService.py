@@ -133,6 +133,9 @@ def worker_init(options):
     if options.verbose:
         print("Starting worker process:",mp.current_process())
     
+    # Keep the thread count low for worker processes.
+    cv2.setNumThreads(4) # TODO: make this an option
+    
     global MYNET,WORKER_INDEX,OPTIONS
     global WORKER_GPU_MAPPING
     FACE_WORKER_LIST = options.fwl
@@ -1031,7 +1034,8 @@ def parseOptions(face_workers_list):
     
 def serve():
     print('Configuring Server...')
-    
+    cv2.setNumThreads(16) # TODO: Make this an option
+
     print('Detecting Workers...')
     FACE_WORKER_LIST = {}
     # Scan for faro workers
