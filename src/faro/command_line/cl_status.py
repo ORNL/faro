@@ -81,7 +81,7 @@ class ServiceListener:
         # print("Service %s removed" % (name,))
         del self.availableServices[name]
         del self.availableServices_tableform[name]
-    def update(self):
+    def update_service(self):
         pass
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
