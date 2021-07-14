@@ -60,7 +60,7 @@ def getDefaultClientOptions():
     options.verbose = False
     options.quality=95
     options.compression='uint8'
-    options.service_name ='default'
+    options.service_name =None
     return options
 
 
