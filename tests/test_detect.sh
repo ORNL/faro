@@ -29,6 +29,8 @@ if [ ! -d data ]; then
 
 fi
 
+python -m faro detect data --max-async=8  --detect-log=detect-log --face-log=faces --min-size=20
+
 #python -m faro detect -d detections.csv --detect-log=faces --face-log=faces data
 
 

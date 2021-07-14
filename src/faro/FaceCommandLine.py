@@ -82,6 +82,16 @@ def addDetectorOptions(parser):
     detector_group.add_option("--attribute-filter", type="str", dest="attribute_filter", default=None,
                               help="A comma seperated list of filters example: 'Male>0.5'"
                               )
+    
+    detector_group.add_option("--show-2d-landmarks", action="store_true", dest="show_2d_landmarks", default=False,
+                              help="Show 2D landmarks in the detect log.")
+
+    detector_group.add_option("--show-3d-landmarks", action="store_true", dest="show_3d_landmarks", default=False,
+                              help="Show 3D landmarks in the detect log.")
+
+    detector_group.add_option("--show-demographics", action="store_true", dest="show_demographics", default=False,
+                              help="Show demographics in the detect log.")
+
 
     parser.add_option_group(detector_group)
 
@@ -782,6 +792,8 @@ ATTRIBUTES_CSV = None
 
 def processDetections(each):
     face_source, im, results, options = each
+    base_name = os.path.basename(face_source)
+    ext = '.jpg'
     if results.done():
         try: # TODO: A potential error point that may need to be addressed for corrupted images or filenames.
             recs = results.result().face_records  #possible error
@@ -904,13 +916,39 @@ def processDetections(each):
                 if dimg is None:
                     dimg = pv.Image(im[:, :, ::-1])
                 dimg.annotateThickRect(rect)
-                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 5), face.detection.detection_class)
-                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 20),
+                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 5), face.detection.detection_class, color='yellow')
+                dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 15),
                                    "Score: %0.4f" % (face.detection.score,), color='yellow')
                 if len(face.landmarks) > 0:
                     for each_lmark in face.landmarks:
                         dimg.annotateCircle(pv.Point(each_lmark.location.x, each_lmark.location.y),
                                             radius=3, color='green', fill='green')
+
+                for attribute in face.attributes:
+                    if options.show_3d_landmarks and attribute.key == 'landmark_3d_68':
+                        matrix = pt.matrix_proto2np(attribute.matrix)
+                        for point in matrix:
+                            x,y,z = point
+                            dimg.annotateCircle(pv.Point(x, y),
+                                            radius=2, color='red', fill='red')
+
+                    if options.show_2d_landmarks and attribute.key == 'landmark_2d_106':
+                        matrix = pt.matrix_proto2np(attribute.matrix)
+                        for point in matrix:
+                            x,y = point
+                            dimg.annotateCircle(pv.Point(x, y),
+                                            radius=2, color='yellow', fill='yellow')
+
+                    if options.show_demographics and attribute.key == 'sex':
+                        dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 25),
+                                   "Sex: %s" % (attribute.text,), color='yellow')
+                    
+                    if options.show_demographics and attribute.key == 'age':
+                        dimg.annotateLabel(pv.Point(rect.x + 5, rect.y + 35),
+                                   "Age: %s" % (attribute.fvalue,), color='yellow')
+
+
+
 
             if options.face_log:
                 if not os.path.exists(options.face_log):
@@ -942,7 +980,9 @@ def processDetections(each):
                     os.symlink(os.path.abspath(face.source), out_path)
             i += 1
         if options.detect_log and dimg is not None:
-            dimg.asAnnotated().save(os.path.join(options.detect_log, os.path.basename(base_name) + ext))
+            basename = os.path.basename(face_source)
+            basename = os.path.splitext(basename)[0]
+            dimg.asAnnotated().save(os.path.join(options.detect_log, basename + ext))
         return False
     return True
 
