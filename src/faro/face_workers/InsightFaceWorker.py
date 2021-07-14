@@ -95,6 +95,25 @@ class InsightFaceWorker(faro.FaceWorker):
             
             face_record.template.data.CopyFrom(pt.vector_np2proto(normed_embedding))
 
+            if hasattr(face,'landmark_2d_106'):
+                attribute = face_record.attributes.add()
+                attribute.key = 'landmark_2d_106'
+                attribute.matrix.CopyFrom(pt.matrix_np2proto(face.landmark_2d_106))
+
+            if hasattr(face,'landmark_3d_68'):
+                attribute = face_record.attributes.add()
+                attribute.key = 'landmark_3d_68'
+                attribute.matrix.CopyFrom(pt.matrix_np2proto(face.landmark_3d_68))
+
+            if hasattr(face,'sex'):
+                attribute = face_record.attributes.add()
+                attribute.key = 'sex'
+                attribute.text = face.sex
+
+            if hasattr(face,'age'):
+                attribute = face_record.attributes.add()
+                attribute.key = 'age'
+                attribute.fvalue = face.age
 
         if options.best:
             face_records.face_records.sort(key = lambda x: -x.detection.score)
