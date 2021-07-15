@@ -1,5 +1,5 @@
 # FARO: Readme
-
+![Software Logo](logo.jpg)
 ## Overview
 Face Recognition from Oak Ridge (FaRO) provides a well-defined server-client 
 interface to some of the best open source face recognition projects on the 
