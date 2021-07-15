@@ -323,7 +323,7 @@ def statusParseOptions():
 
     return options, args
 
-def startUpParseOptions():
+def startParseOptions():
     """
     Parse command line arguments.
     """
@@ -733,13 +733,13 @@ def status():
     command_line.status(options)
 
 
-def startUp():
-    options,args = startUpParseOptions()
+def start():
+    options,args = startParseOptions()
     command_line.startService(options)
 
 COMMANDS = {
     'status' : ['Connects to the server and displays version and status information.',status],
-    'startUp' : ['Starts up an instance of a given FaRO service',startUp],
+    'start' : ['Starts up an instance of a given FaRO service',start],
     'detect' : ['Only run face detection.',detect],
     'detectExtract' : ['Run face detection and template extraction.',detectExtract],
     'extractOnly' : ['Only run face extraction and attribute extraction.',extractOnly],

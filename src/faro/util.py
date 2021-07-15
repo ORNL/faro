@@ -187,10 +187,10 @@ if fgetch is None:
 import signal
 class sigintThread(threading.Thread):
     def signalint_handler(sig, frame):
-        v=faro.util.getGlobalValue('shouldstopserver')
+        faro.util.setGlobalValue('shouldstopserver',1)
         verbose = False
         # if verbose:
-        # # sys.exit(0)
+        # sys.exit(0)
     signal.signal(signal.SIGINT, signalint_handler)
 
 import multiprocessing as mp
@@ -234,10 +234,34 @@ def readInput(timeout = 5):
 
 
 from multiprocessing import Manager
-globaldict = Manager().dict()
+globaldict = None
 def getGlobalValue(key):
-    if key in globaldict:
-        return globaldict[key]
-    return None
+    # print('get global val',key)
+    try:
+        global globaldict
+        if globaldict == None:
+            # print('starting dictionary singleton')
+            globaldict = Manager().dict()
+    except Exception as e:
+        pass
+        # print('error in getglobalval')
+
+    try:
+        if key in globaldict:
+            return globaldict[key]
+    except:
+        return None
 def setGlobalValue(key,val):
-    globaldict[key] = val
+    try:
+        global globaldict
+        if globaldict == None:
+            # print('starting dictionary singleton')
+            globaldict = Manager().dict()
+    except Exception as e:
+        pass
+        # print('error in getglobalval')
+    try:
+        # print('set global val',val)
+        globaldict[key] = val
+    except:
+        pass

@@ -1101,24 +1101,29 @@ def serve():
     server.add_insecure_port(options.port)
     print('Starting Server on port: %s'%options.port)
     server.start()
-    print('To end server, press "ctl+c", "esc", or "enter" key')
+    print('To end server, press "ctl+c"')
 
     #this allows us to listen for ctl+c sigint so that we terminate peacefully
-    faro.util.setGlobalValue('shouldstopserver',25)
+    faro.util.setGlobalValue('shouldstopserver',0)
     sig = faro.util.sigintThread()
     sig.start()
 
     killKeys = [27,10,13]
     try:
         while True:
-            char = faro.util.readInput(60)
-            shouldkill = False
-            if char is not None:
-                for k in killKeys:
-                    if ord(char) == k:
-                        shouldkill = True
+            time.sleep(1)
+            # char = faro.util.readInput(60)
+            shouldkill= faro.util.getGlobalValue('shouldstopserver')
             if shouldkill:
                 break
+                # print('here now',char)
+
+                # for k in killKeys:
+                #     print(killkeys)
+                #     if ord(char) == k:
+                #         shouldkill = True
+            # if shouldkill:
+            #     break
     except Exception as e:
         print('break ',e )
         pass

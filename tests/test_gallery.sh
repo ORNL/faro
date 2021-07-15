@@ -40,9 +40,9 @@ if [ ! -d data ]; then
 fi
 
 
-python -m faro enroll --service-name dlib_service --maximum-size=1024 --gallery potus --subject-id=0043 --name="George W. Bush" gallery/bush.jpg
-python -m faro enroll --service-name dlib_service --maximum-size=1024 --gallery  potus --subject-id=0044 --name="Barack Obama"   gallery/obama.jpg
-python -m faro enroll --service-name dlib_service --maximum-size=1024 --gallery  potus --subject-id=0045 --name="Donald Trump"   gallery/trump.jpg
+python -m faro enroll --maximum-size=1024 --gallery potus --subject-id=0043 --name="George W. Bush" gallery/bush.jpg
+python -m faro enroll --maximum-size=1024 --gallery  potus --subject-id=0044 --name="Barack Obama"   gallery/obama.jpg
+python -m faro enroll --maximum-size=1024 --gallery  potus --subject-id=0045 --name="Donald Trump"   gallery/trump.jpg
 
 python -m faro search --gallery potus --search-log=search_log -s search.csv data
 
