@@ -25,7 +25,7 @@ src/faro/command_line/cl_extract.py
 src/faro/command_line/cl_fusion.py
 src/faro/command_line/cl_gallery.py
 src/faro/command_line/cl_search.py
-src/faro/command_line/cl_startup.py
+src/faro/command_line/cl_start.py
 src/faro/command_line/cl_status.py
 src/faro/command_line/cl_test.py
 src/faro/face_workers/ArcfaceFaceWorker.py

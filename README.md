@@ -31,11 +31,13 @@ collection devices.
 If you use FARO for publications please cite as:
 
 ```
-@misc{bolme2019faro,
-    title={{FaRO}: {FA}ce {R}ecognition From {O}ak ridge},
-    author={David S. Bolme and David C. Cornett III and Nisha Srinivas},
-    year={2019},
-    howpublished={https://github.com/ORNL/faro}
+@inproceedings{bolme2020face,
+  title={Face Recognition Oak Ridge (FaRO): A Framework for Distributed and Scalable Biometrics Applications},
+  author={Bolme, David S and Srinivas, Nisha and Brogan, Joel and Cornett, David},
+  booktitle={2020 IEEE International Joint Conference on Biometrics (IJCB)},
+  pages={1--8},
+  year={2020},
+  organization={IEEE}
 }
 ```
 
@@ -44,10 +46,10 @@ Many FaRO services should run nicely on limited hardware resources.  As we
 integrate more deep learning algorithms, those may require GPUs and additional 
 hardware.
 
- * Software: python3, virtualenv, cmake, wget
+ * Software: python3, venv, cmake, wget
  * Python Libraries: see requirements.txt
- * NVidia GPU with 8GB of Ram - GTX Titan X/1070/1080 or better 
- * nvidia-docker2 - supporting Cuda 9.0
+ * Optional: NVidia GPU with 8GB of Ram - GTX Titan X/1070/1080 or better 
+ * Optional: nvidia-docker2 - supporting Cuda 9.0
 
 
 ## Quick Start
