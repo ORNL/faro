@@ -1108,7 +1108,7 @@ def serve():
     sig = faro.util.sigintThread()
     sig.start()
 
-    killKeys = [27,10,13]
+    killKeys = [27,10,13,25]
     try:
         while True:
             time.sleep(1)
