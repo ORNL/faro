@@ -115,7 +115,7 @@ for any algorithm or interface please contact me at
 bolme@cs.colostate.edu
 '''
 
-__all__ = ['analysis','edge','face','optimize','other','point','types','vector']
+__all__ = ['analysis','edge','face','optimize','other','point','types','vector','data']
 
 WARN_COMMERCIAL_USE = True
 
@@ -230,11 +230,13 @@ from faro.pyvision.surveillance.kalman import KalmanFilter
 from faro.pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
 from faro.pyvision.analysis.html_report import HtmlReport
+
+from faro.pyvision.data import *
 # Import the beta components
 from . import beta
 
 import time
-
+import faro.pyvision as pv
 IMAGE_EXTENSIONS = ['.JPG','.JPEG','.GIF','.TIF','.TIFF','.PNG','.BMP','.PGM','.PPM',]
 VIDEO_EXTENSIONS = ['.MOV','.M4V','.FLV','.AVI','.MPEG','.MJPEG','.MP4','.MPG','.WMV',]
 
