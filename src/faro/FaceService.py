@@ -144,9 +144,9 @@ def worker_init(options):
     WORKER_INDEX = (int(proc.name.split('-')[-1])-1)%options.worker_count
 
     OPTIONS = options
- 
+
     assert WORKER_INDEX >= 0
-    if options.gpus is not "":
+    if options.gpus != "":
         # This should rotate through the gpus selected for each worker
         gpus = [each for each in options.gpus.split(',')]
         gpu_id = gpus[WORKER_INDEX%len(gpus)]
