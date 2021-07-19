@@ -26,5 +26,6 @@ pip install mxnet
 pip install insightface==0.1.5
 pip install h5py
 
+./download_models.sh
 
 

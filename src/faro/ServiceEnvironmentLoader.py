@@ -65,9 +65,18 @@ def startByVenv(options,service_instance_name,service_dir):
             if os.path.isdir(envdir) and os.path.exists(activateFile):
                 if options.verbose:
                     print('the environment activation script has been found')
-            cmd = ["source", activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+            if sys.platform == "linux" or sys.platform == "linux2":
+                call = ". "
+            elif sys.platform == "darwin":
+                call = "source"
+            else:
+                call = "source"
+            # cmd = ["source", activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+            cmd = [call,activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+
             print(" ".join(cmd))
             os.system(" ".join(cmd))
+            break
         elif len(buildscripts) > 0 and ntry < 1:
             if len(buildscripts) > 1:
                 if options.verbose:

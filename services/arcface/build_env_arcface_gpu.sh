@@ -26,5 +26,5 @@ pip install mxnet-cu112 #change to your version of cuda (e.g. -cu90)
 pip install insightface==0.1.5
 pip install h5py
 
-
+sh ./download_models.sh
 

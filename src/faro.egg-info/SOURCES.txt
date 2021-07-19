@@ -31,7 +31,6 @@ src/faro/command_line/cl_test.py
 src/faro/face_workers/ArcfaceFaceWorker.py
 src/faro/face_workers/DlibFaceWorker.py
 src/faro/face_workers/DlibcnnFaceWorker.py
-src/faro/face_workers/FusionFaceWorker.py
 src/faro/face_workers/InsightFaceWorker.py
 src/faro/face_workers/RankOneFaceWorker.py
 src/faro/face_workers/RcnnFaceWorker.py
