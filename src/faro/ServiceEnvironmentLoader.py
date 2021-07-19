@@ -37,8 +37,45 @@ def detectImage(serviceName):
             print('Found ', len(relevantImages), ' Docker images:')
             [print(im.attrs['RepoTags']) for im in relevantImages]
 
+def startByVenv(options,service_instance_name,service_dir):
+    prefix = "env_"
+    build_prefix = "build_env_"
+    environment_folder_path = prefix + options.algorithm
+    buildscripts = []
+    env_dirs = []
+    for ntry in range(2): #We try twice, since the first time around might be the build process
+        for d in os.listdir(service_dir):
+            fpath = os.path.join(service_dir,d)
+            if d.startswith(prefix+options.algorithm) and os.path.isdir(fpath):
+                if options.verbose:
+                    print('Found an environment directory ',d)
+                env_dirs.append(os.path.join(service_dir,d))
+            elif d.startswith(build_prefix+options.algorithm) and os.path.isfile(fpath):
+                if options.verbose:
+                    print('Found a build script to generate an environment: ', d)
+                buildscripts.append(os.path.join(service_dir,d))
 
-
+        if len(env_dirs) > 0:
+            if options.verbose:
+                if len(env_dirs) > 1:
+                    print('Found multiple environments. Choosing the first.')
+                print('Running environment located in ', env_dirs[0])
+            envdir = env_dirs[0]
+            activateFile = os.path.join(envdir,'bin','activate')
+            if os.path.isdir(envdir) and os.path.exists(activateFile):
+                if options.verbose:
+                    print('the environment activation script has been found')
+            cmd = ["source", activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+            print(" ".join(cmd))
+            os.system(" ".join(cmd))
+        elif len(buildscripts) > 0 and ntry < 1:
+            if len(buildscripts) > 1:
+                if options.verbose:
+                    print("Found multiple build files. Choosing the first.")
+            buildscript = buildscripts[0]
+            os.system("cd "+ service_dir + " && " + buildscript)
+        else:
+            print('No environments or environment build scripts found for', options.algorithm ,".  Please create a build script titled 'build_env_'", options.algorithm," and place it in the respective service directory")
 def startByDocker(options,service_instance_name,service_dir):
     prefix = "faro_"
     docker_instance_name = prefix+service_instance_name
@@ -46,6 +83,7 @@ def startByDocker(options,service_instance_name,service_dir):
     containers = getDockercontainers()
     images = getDockerImages()
     client = docker.from_env()
+
     print('looking for containers named ',docker_instance_name)
     print('looking for images named ', docker_image_name)
     if docker_image_name not in images and docker_instance_name not in containers:
@@ -64,7 +102,10 @@ def startByDocker(options,service_instance_name,service_dir):
             #we need to do nothing
             print('we are already done')
             pass
-    elif docker_image_name in images:
+    elif docker_image_name not in images:
+        print('No images by the name of',docker_image_name,' or containers were found in Docker. Building dockerfile instead')
+        buildDockerFile(os.path.join(service_dir), docker_image_name)
+    if docker_image_name in images:
         print('we found an uninstantiated docker image named ', docker_image_name)
         host = options.port.split(':')
         hostport = int(host[1])
@@ -81,8 +122,7 @@ def startByDocker(options,service_instance_name,service_dir):
         # network_mode=networkmode
         client.containers.run(docker_image_name, command,stdout=True,remove=True,name=docker_instance_name,privileged=True)
     else:
-        print('Final: No images or containers were found in Docker. Building dockerfile instead')
-        buildDockerFile(os.path.join(service_dir),docker_image_name)
+        print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
 
 
 

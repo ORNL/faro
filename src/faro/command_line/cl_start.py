@@ -52,28 +52,39 @@ def startService(options):
     else:
         available_algorithms = faro.command_line.getFaceWorkers(options,asDict=True)
         if options.algorithm in available_algorithms:
-            print('we can start the algorithm, ', options.algorithm)
             alg = available_algorithms[options.algorithm]
             startup_modes = alg['environment Type']
             startupMode = None
             if options.mode is not None:
                 if options.mode in startup_modes:
-                    print('Algorithm ', options.algorithm,' is bootable via ', options.mode)
+                    if options.verbose:
+                        print('Good news! Algorithm ', options.algorithm,' is bootable via ', options.mode)
+                    startupMode = options.mode
                 else:
                     assert False, 'Algorithm ' + options.algorithm + ' is not bootable via ' + options.mode
-            if options.mode is None:
+            elif options.mode is None:
                 if startup_modes is None or len(startup_modes) == 0:
                     startupMode = 'Native'
                 elif len(startup_modes) > 0:
                     startupMode = startup_modes[0]
-                    print('chosing startup mode ', startupMode)
+                    if options.verbose:
+                        print('choosing startup mode ', startupMode)
 
-            if startupMode is None:
+            if startupMode is None or startupMode == "native":
                 startupMode = 'native'
+                if options.verbose:
+                    print('we are starting the worker natively, without any container or environment')
 
             if startupMode.lower() == "docker":
-                print('calling docker loader...')
+                if options.verbose:
+                    print('calling docker loader...')
                 faro.ServiceEnvironmentLoader.startByDocker(options,service_name,alg["service files"])
 
+            if startupMode.lower() == "venv":
+                if options.verbose:
+                    print('calling the venv loader...')
+                faro.ServiceEnvironmentLoader.startByVenv(options,service_name,alg["service files"])
+        else:
+            print('There is no available faceWorker assigned to the algorithm ', options.algorithm)
 
 

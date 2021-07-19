@@ -234,6 +234,13 @@ def getFaceWorkers(options,asDict=False):
                 serviceLoadType.append("Conda")
             if "requirements.txt" in serviceFiles:
                 serviceLoadType.append("venv")
+            if "venv" not in serviceLoadType:
+                for sf in serviceFiles:
+                    fpath = os.path.join(serviceLocation,sf)
+                    if sf.startswith("build_env_"+name) and os.path.isfile(fpath):
+                        serviceLoadType.append("venv")
+                    elif sf.startswith("env_"+options.algorithm) and os.path.isdir(fpath):
+                        serviceLoadType.append("venv")
         if len(serviceLoadType)==0:
             serviceLoadType.append('native')
 
