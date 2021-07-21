@@ -913,8 +913,62 @@ class FaceService(fs.FaceRecognitionServicer):
             self.zeroconf.close()
         except:
             pass
-  
-def parseOptions(face_workers_list):
+
+def addServiceOptionsGroup(parser_parent):
+    face_workers_list = get_face_worker_list()
+    parser = optparse.OptionGroup(parser_parent, "Server Options",
+                                            "Control the connection to the FaRO service.")
+
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
+                      help="Decrease the verbosity of the program")
+
+    parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
+                      help="When possible run on the cpu and ignore the GPU.")
+    ALG_NAMES = list(face_workers_list.keys())
+    ALG_NAMES.sort()
+    if 'dlib' in ALG_NAMES:
+        DEFAULT_ALG_NAME = 'dlib'
+    else:  # just pick one
+        DEFAULT_ALG_NAME = ALG_NAMES[0]
+
+    parser.add_option("--algorithm", type="choice", choices=ALG_NAMES, dest="algorithm", default=DEFAULT_ALG_NAME,
+                      help="Choose an algorithm; default=%s - %s" % (DEFAULT_ALG_NAME, ALG_NAMES))
+
+    parser.add_option("--gpus", type="str", dest="gpus", default="",
+                      help="Specify the gpus to use.")
+
+    parser.add_option("-w", "--worker-count", type="int", dest="worker_count", default=1,
+                      help="Specify the number of worker processes.")
+
+    parser.add_option("--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
+                      help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d" % (
+                          faro.DEFAULT_MAX_MESSAGE_SIZE))
+    parser.add_option("-n", "--service-name", type="str", dest="service_name", default=None,
+                      help="Unique name to identify the service on the network. Default Provides a random name.")
+
+    parser.add_option("--storage", type="str", dest="storage_dir", default=faro.DEFAULT_STORAGE_DIR,
+                      help="A location to store persistant files. DEFAULT=%s" % faro.DEFAULT_STORAGE_DIR)
+
+    model_options = parser_parent.add_option_group("Options for machine learning models.")
+    model_options.add_option("--detect-model", type="str", dest="detect_model", default='default',
+                             help="A model file to use for detection.")
+
+    model_options.add_option("--extract-model", type="str", dest="extract_model", default='default',
+                             help="A model file to use for template extraction.")
+
+    model_options.add_option("--classify-model", type="str", dest="classify_model", default='default',
+                             help="A model file to use for classification.")
+    for key in face_workers_list:
+        if face_workers_list[key][1] is not None:
+            face_workers_list[key][1](parser_parent)
+
+    port = socket.gethostname() + ":50030"
+
+    parser.add_option("-p", "--port", type="str", dest="port", default=port,
+                      help="Service port.  Default=%s" % port)
+    return face_workers_list
+
+def parseOptions():
     '''
     Parse command line arguments.
     '''
@@ -928,94 +982,8 @@ def parseOptions(face_workers_list):
     
     # Setup the parser
     parser = optparse.OptionParser(usage='%s [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
-
+    face_workers_list = addServiceOptionsGroup(parser)
     # Here are some templates for standard option formats.
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-                    help="Decrease the verbosity of the program")
-    
-    parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
-                      help="When possible run on the cpu and ignore the GPU.")
-
-    #parser.add_option("-b", "--bool", action="store_true", dest="my_bool", default=False,
-    #                  help="don't print status messages to stdout")
-    
-    #parser.add_option( "-c","--choice", type="choice", choices=['c1','c2','c3'], dest="my_choice", default="c1",
-    #                  help="Choose an option.")
-
-    ALG_NAMES = list(face_workers_list.keys())
-    ALG_NAMES.sort()
-    if 'dlib' in ALG_NAMES:
-        DEFAULT_ALG_NAME = 'dlib'
-    else: # just pick one
-        DEFAULT_ALG_NAME = ALG_NAMES[0]
-        
-    parser.add_option( "--algorithm", type="choice", choices=ALG_NAMES, dest="algorithm", default=DEFAULT_ALG_NAME,
-                      help="Choose an algorithm; default=%s - %s"%(DEFAULT_ALG_NAME,ALG_NAMES))
-
-    #parser.add_option( "-f","--float", type="float", dest="my_float", default=0.0,
-    #                  help="A floating point value.")
-
-    #parser.add_option( "--match-thresh", type="float", dest="match_thresh", default=0.5218667,
-    #                  help="The threshold for a match.")
-
-    #parser.add_option( "-i","--int", type="int", dest="my_int", default=0,
-    #                  help="An integer value.")
-
-    parser.add_option( "--gpus", type="str", dest="gpus", default="",
-                      help="Specify the gpus to use.")
-
-    parser.add_option( "-w","--worker-count", type="int", dest="worker_count", default=1,
-                      help="Specify the number of worker processes.")
-
-    parser.add_option( "--max-message-size", type="int", dest="max_message_size", default=faro.DEFAULT_MAX_MESSAGE_SIZE,
-                      help="Maximum GRPC message size. Set to -1 for unlimited. Default=%d"%(faro.DEFAULT_MAX_MESSAGE_SIZE))
-    parser.add_option( "-n","--service-name", type="str", dest="service_name",default=None,help="Unique name to identify the service on the network. Default Provides a random name.")
-
-    #parser.add_option( "-n","--max-images", type="int", dest="max_images", default=None,
-    #                  help="Process at N images and then stop.")
-
-    #parser.add_option( "--min-size", type="int", dest="min_size", default=50,
-    #                  help="Faces with a height less that this will be ignored.")
-
-    #parser.add_option( "-s","--str", type="str", dest="my_str", default="default",
-    #                  help="A string value.")
-    
-    parser.add_option( "--storage", type="str", dest="storage_dir", default=faro.DEFAULT_STORAGE_DIR,
-                      help="A location to store persistant files. DEFAULT=%s"%faro.DEFAULT_STORAGE_DIR)
-
-    model_options = parser.add_option_group("Options for machine learning models.")
-    model_options.add_option( "--detect-model", type="str", dest="detect_model", default='default',
-                      help="A model file to use for detection.")
-
-    model_options.add_option( "--extract-model", type="str", dest="extract_model", default='default',
-                      help="A model file to use for template extraction.")
-
-    model_options.add_option( "--classify-model", type="str", dest="classify_model", default='default',
-                      help="A model file to use for classification.")
-
-    #parser.add_option( "--face-log", type="str", dest="face_log", default=None,
-    #                  help="A directory for faces.")
-
-    #parser.add_option( "--match-log", type="str", dest="match_log", default=None,
-    #                  help="A directory to store matching faces.")
-
-    #parser.add_option( "-d","--detect-port", type="str", dest="detect_port", default="localhost:50030",
-    #                  help="The port used for the recognition service.")
-
-    #parser.add_option( "-r","--recognition-port", type="str", dest="rec_port", default="localhost:50035",
-    #                  help="The port used for the recognition service.")
-    
-    for key in face_workers_list:
-        if face_workers_list[key][1] is not None:
-            face_workers_list[key][1](parser)
-
-
-
-    port = socket.gethostname() + ":50030"
-
-    parser.add_option( "-p","--port", type="str", dest="port", default=port,
-                      help="Service port.  Default=%s"%port)
-
 
 
     # Parse the arguments and return the results.
@@ -1030,55 +998,58 @@ def parseOptions(face_workers_list):
         
     return options,args
 
-    
-    
-def serve():
-    print('Configuring Server...')
-    cv2.setNumThreads(16) # TODO: Make this an option
-
-    print('Detecting Workers...')
+def get_face_worker_list():
     FACE_WORKER_LIST = {}
     # Scan for faro workers
     import_dir = faro.__path__[0]
-    scripts = os.listdir(os.path.join(import_dir,'face_workers'))
-    scripts = filter(lambda x: x.endswith('FaceWorker.py'),scripts)
+    scripts = os.listdir(os.path.join(import_dir, 'face_workers'))
+    scripts = filter(lambda x: x.endswith('FaceWorker.py'), scripts)
     import importlib
-    sys.path.append(os.path.join(import_dir,'face_workers'))
+    sys.path.append(os.path.join(import_dir, 'face_workers'))
     scripts = list(scripts)
     scripts.sort()
-        
+
     # Scan for other workers
     if 'FARO_WORKER_PATH' in os.environ:
         worker_dirs = os.environ['FARO_WORKER_PATH'].split(":")
-        print("Workers Dirs:",worker_dirs)
+        print("Workers Dirs:", worker_dirs)
         for worker_dir in worker_dirs:
-    
-            #import_dir = faro.__path__[0]
+
+            # import_dir = faro.__path__[0]
             try:
                 worker_scripts = os.listdir(worker_dir)
             except:
                 print("ERROR - Could not read directory in FARO_WORKER_PATH:", worker_dir)
                 raise
-            worker_scripts = list(filter(lambda x: x.endswith('FaceWorker.py'),worker_scripts))
+            worker_scripts = list(filter(lambda x: x.endswith('FaceWorker.py'), worker_scripts))
             sys.path.append(worker_dir)
             scripts += list(worker_scripts)
             scripts.sort()
-                
+
     for each in scripts:
         name = each[:-13].lower()
         try:
             module = importlib.import_module(each[:-3])
-            class_obj = getattr(module,each[:-3])
+            class_obj = getattr(module, each[:-3])
             # print("    Loaded: ",name,'-',class_obj)
-       
-            FACE_WORKER_LIST[name] = [class_obj,None,None]
+
+            FACE_WORKER_LIST[name] = [class_obj, None, None]
             if 'getOptionsGroup' in dir(module):
                 FACE_WORKER_LIST[name][1] = module.getOptionsGroup
             if 'getGalleryWorker' in dir(module):
                 FACE_WORKER_LIST[name][2] = module.getGalleryWorker
         except Exception as e:
             print("Could not load worker ", name, ": ", e)
-    options,_ = parseOptions(FACE_WORKER_LIST)
+    return FACE_WORKER_LIST
+
+def serve():
+    print('Configuring Server...')
+    cv2.setNumThreads(16) # TODO: Make this an option
+
+    print('Detecting Workers...')
+
+
+    options,_ = parseOptions()
 
     if options.verbose:
         print("storage:",os.environ['HOME'])

@@ -56,11 +56,21 @@ def startByVenv(options,service_instance_name,service_dir):
                 buildscripts.append(os.path.join(service_dir,d))
 
         if len(env_dirs) > 0:
-            if options.verbose:
-                if len(env_dirs) > 1:
-                    print('Found multiple environments. Choosing the first.')
+            envnum=0
+            if len(env_dirs) > 1:
+                print('Found multiple environments. Please select one (default 0):')
+                select_string = " ".join(["("+str(i)+")"+os.path.basename(d) for i,d in enumerate(env_dirs)])
+                print(select_string)
+                envnum = input()
+                if envnum == "":
+                    print('selecting default')
+                    envnum = "0"
+                while int(envnum) >= len(env_dirs):
+                    print('Please Select a number 0 -',len(env_dirs)-1)
+                    envnum = input()
+
                 print('Running environment located in ', env_dirs[0])
-            envdir = env_dirs[0]
+            envdir = env_dirs[int(envnum)]
             activateFile = os.path.join(envdir,'bin','activate')
             if os.path.isdir(envdir) and os.path.exists(activateFile):
                 if options.verbose:
@@ -72,16 +82,32 @@ def startByVenv(options,service_instance_name,service_dir):
             else:
                 call = "source"
             # cmd = ["source", activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+            cmd = [call, activateFile, "&&", "python", "-m", "faro.FaceService"]
+            flags = vars(options)
+            for f in flags:
+                cmd.append(f)
+                cmd.append(str(flags[f]))
+            # print(flags)
+            # print(cmd)
             cmd = [call,activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
 
             print(" ".join(cmd))
             os.system(" ".join(cmd))
             break
         elif len(buildscripts) > 0 and ntry < 1:
+            envnum=0
             if len(buildscripts) > 1:
-                if options.verbose:
-                    print("Found multiple build files. Choosing the first.")
-            buildscript = buildscripts[0]
+                print("Found multiple build files. Please select one (default 0):")
+                select_string = " ".join(["(" + str(i) + ")" + os.path.basename(d) for i, d in enumerate(buildscripts)])
+                print(select_string)
+                envnum = input()
+                if envnum == "":
+                    print('selecting default')
+                    envnum = "0"
+                while int(envnum) >= len(buildscripts):
+                    print('Please Select a number 0 -', len(buildscripts) - 1)
+                    envnum = input()
+            buildscript = buildscripts[int(envnum)]
             os.system("cd "+ service_dir + " && " + buildscript)
         else:
             print('No environments or environment build scripts found for', options.algorithm ,".  Please create a build script titled 'build_env_'", options.algorithm," and place it in the respective service directory")

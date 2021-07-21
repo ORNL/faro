@@ -24,17 +24,75 @@ SOFTWARE.
 
 import faro
 import faro.proc
+import faro.pyvision as pv
+import time
+import faro.proto.proto_types as pt
 
 def detect(options,args):
     face_client = faro.command_line.connectToFaroClient(options)
 
+    if options.stream:
+        print("Starting Stream")
+        start_stream(options,face_client)
+    else:
+        if options.verbose:
+            print("Scanning directories for images and videos.")
+
+        image_list, video_list = faro.proc.collect_files(args[1:], options)
+
+        if len(image_list) != 0:
+            faro.proc.process_images(image_list, face_client, options)
+
+        if len(video_list) != 0:
+            faro.proc.process_videos(video_list, face_client, options)
+
+def start_stream(options,fc):
+    import cv2
+    print('starting cap')
+    hasgstreamer = faro.util.getcv2info('gstreamer')
     if options.verbose:
-        print("Scanning directories for images and videos.")
+        print('has gstreamer: ', hasgstreamer)
+    # if "!" in options.stream and options.stream.endswith('appsink'):
+    #     if not hasgstreamer:
+    #         print('gstreamer is not integrated with opencv.  Please rebuild opencv with gstreamer')
+    cam = cv2.VideoCapture('udpsrc port=9078 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink',cv2.CAP_GSTREAMER)
+    # cam = cv2.VideoCapture(
+    #     'udpsrc port=9078 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264"'
+    #     ' ! rtph264depay'
+    #     ' ! avdec_h264'
+    #     ' ! videoconvert'
+    #     ' ! appsink', cv2.CAP_GSTREAMER)
+    print('finished init')
+    if cam.isOpened():
+        if options.verbose:
+            print('Stream opened')
+    else:
+        if options.verbose:
+            print('Stream could not be opened')
+        exit(1)
 
-    image_list, video_list = faro.proc.collect_files(args[1:], options)
+    while True:
+        ret_val, img = cam.read()
+        if img is not None:
+            im = faro.proc.preprocessImage(img, options)
 
-    if len(image_list) != 0:
-        faro.proc.process_images(image_list, face_client, options)
+            res = fc.detectExtract(im, best=options.best, threshold=options.detect_thresh,
+                                        min_size=options.min_size, run_async=False, frame=-1)
+            # try:
+            recs = res.face_records
+            pvim = pv.Image(im)
+            for r in recs:
+                rect = pt.rect_proto2pv(r.detection.location)
 
-    if len(video_list) != 0:
-        faro.proc.process_videos(video_list, face_client, options)
+                pvim.annotateThickRect(rect)
+            cvim = pvim.asOpenCV2()
+            if pvim.show(window="camera",delay=30) == 27:
+                break
+            # cv2.imshow("camera", cvim)
+
+            # except Exception as e:
+            #     print("could not get future for frame byeeeeeeee",e)
+            #     time.sleep(0.05)
+
+            # if cv2.waitKey(1) == 27:
+            #     break  # esc to quit

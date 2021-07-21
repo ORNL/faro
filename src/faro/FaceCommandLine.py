@@ -46,6 +46,8 @@ def addConnectionOptions(parser):
                                 help="The port used for the recognition service.")
     connection_group.add_option("--service-name",type="str",dest="service_name",default=None,help="The name of a visible service on the network (enumerate services using `faro status --active`")
 
+    connection_group.add_option("--stream", action="store_true", dest="stream", default=False,
+                                help="Process incoming frames from a camera stream. Currently only works for webcam")
     parser.add_option_group(connection_group)
 
 
@@ -345,7 +347,7 @@ def startParseOptions():
     parser.add_option("--algorithm",type="str",dest="algorithm",default=None,help="the algorithm to start up")
     parser.add_option( "--mode", type="choice", choices=['docker','venv','conda','native',None], dest="mode", default=None,
                      help="Choose an option.")
-    parser.add_option("--num-workers", type="int", dest="num_workers", default=1,
+    parser.add_option("--worker-count", type="int", dest="num_workers", default=1,
                       help="How many workers to start up for asyrconous usage. Default=1")
 
     # addConnectionOptions(parser)
@@ -359,7 +361,6 @@ def startParseOptions():
         print(("Please supply exactly %d arguments." % 0))
         print()
         exit(-1)
-
     return options, args
 
 

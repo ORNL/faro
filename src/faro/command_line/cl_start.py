@@ -61,7 +61,7 @@ def startService(options):
                         print('Good news! Algorithm ', options.algorithm,' is bootable via ', options.mode)
                     startupMode = options.mode
                 else:
-                    assert False, 'Algorithm ' + options.algorithm + ' is not bootable via ' + options.mode
+                    assert False, 'Algorithm ' + options.algorithm + ' is not bootable via ' + options.mode +" it is only bootable via these methods: " + ", ".join(startup_modes)
             elif options.mode is None:
                 if startup_modes is None or len(startup_modes) == 0:
                     startupMode = 'Native'

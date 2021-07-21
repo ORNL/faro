@@ -265,3 +265,12 @@ def setGlobalValue(key,val):
         globaldict[key] = val
     except:
         pass
+
+def getcv2info(key):
+    import cv2
+    cv2_info = cv2.getBuildInformation().split('\n')
+    for l in cv2_info:
+        if key.lower() in l.lower():
+            if 'yes' in l.lower():
+                return True
+    return False
