@@ -45,7 +45,7 @@ except:
 
 def status(options):
 
-    if not options.all and not options.active and not options.inactive:
+    if not options.all and not options.active and not options.inactive and not options.sweep:
         face_client,message = connectToFaroClient(options,return_status=True)
         print()
         print(message)
@@ -81,7 +81,7 @@ class ServiceListener:
         # print("Service %s removed" % (name,))
         del self.availableServices[name]
         del self.availableServices_tableform[name]
-    def update_service(self):
+    def update_service(self,zeroconf,type,name):
         pass
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
@@ -133,7 +133,8 @@ def getRunningWorkers(options,asDict=False,keyedOn='Name'):
         listener = ServiceListener()
         browser = ServiceBrowser(zeroconf, "_faro._tcp.local.", listener)
         localservices = None
-        if sys.platform == "darwin":
+        if 'sweep' not in vars(options): options.sweep = False
+        if sys.platform == "darwin" or options.sweep:
             localservices = getRunningLocalWorkers(copy.copy(options))
         bonjourservices = list(listener.availableServices_tableform.values())
         bonjourservicesLocations = [s['address']+str(s['port']) for s in bonjourservices]

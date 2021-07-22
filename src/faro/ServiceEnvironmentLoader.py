@@ -3,7 +3,7 @@ import sys
 import faro
 import numpy as np
 import subprocess
-import faro.FaceService
+# import faro.FaceService as ffs
 import copy
 
 try:
@@ -47,13 +47,20 @@ def buildFlags(parser,options,service_instance_name=None,ignore=[]):
     for opts in [parser._long_opt,parser._short_opt]:
         optdict = {opts[k].dest: k for k in opts}
         for f in flags:  # f will be the opt_string
-            if f not in ignore and f in optdict and optdict[f] not in ignore:
+            if f in optdict:
+                # print(f,optdict[f])
+                fs = optdict[f].replace('--','')
+                fs = fs.replace('-','_')
+            else:
+                fs = f
+            if f not in ignore and fs not in ignore and f in optdict and optdict[f] not in ignore:
                 if f in optdict:
                     op = str(flags[f])
-                    if op != "None" and op != "":
-                        cmd.append(optdict[f])
-                        if op != "True" and op != "False":  # don't add option if it is just a bool
-                            cmd.append(op)
+                    if op != "default":
+                        if op != "None" and op != "":
+                            cmd.append(optdict[f])
+                            if op != "True" and op != "False":  # don't add option if it is just a bool
+                                cmd.append(op)
     if service_instance_name is not None:
         cmd.append('--service-name')
         cmd.append(service_instance_name)
@@ -166,9 +173,9 @@ def startByDocker(options,service_instance_name,service_dir):
         face_worker_list, parser = faro.FaceService.addServiceOptionsGroup()
         # command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
         command = ["python","-m", "faro.FaceService", "--port", "0.0.0.0:50030"]
-        cmdflags = buildFlags(parser,options,service_instance_name,ignore=['port'])
+        cmdflags = buildFlags(parser,options,service_instance_name,ignore=['port','storage'])
         command.extend(cmdflags)
-
+        command = ' '.join(command)
         if options.verbose:
             print(command)
         networkmode = "host"
@@ -178,14 +185,17 @@ def startByDocker(options,service_instance_name,service_dir):
             networkmode = "bridge"
         ports={50030:hostport}
         # network_mode=networkmode
-        client.containers.run(docker_image_name, command,network_mode="bridge",ports={50030:hostport},stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        workdir = os.path.abspath(os.path.join(faro.__path__[0],'..','..'))
+        print('command:')
+        print(command)
+        client.containers.run(docker_image_name, command,network_mode="bridge",ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True)
     else:
         print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
 
 def startByNative(options,service_instance_name,service_dir):
     options_copy = copy.copy(options)
     options_copy.service_name = service_instance_name
-    faro.FaceService.serve(options)
+    ffs.serve(options)
 
 def getDockercontainers():
     if docker is not None:
@@ -216,7 +226,9 @@ def getDockerImages():
 
 def buildDockerFile(filePath,tag):
     if os.path.isdir(filePath):
-        cmd = ["docker", "build","-t", tag, filePath]
+        workdir = os.path.abspath(os.path.join(faro.__path__[0], '..', '..'))
+        print('docker build file:', filePath)
+        cmd = ["cd", workdir, " && ","docker", "build","-t", tag,'-f', os.path.join(filePath,"Dockerfile"), '.']
         print(" ".join(cmd))
         os.system(" ".join(cmd))
         # process = subprocess.Popen(["docker", "build", "--no-cache" ,"-t", tag, filePath],stdout=subprocess.PIPE,

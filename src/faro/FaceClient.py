@@ -110,9 +110,13 @@ class FaceClient(object):
         for service in serviceList:
             if service['Name'] == name:
                 return service['address']+":"+str(service['port'])
-        else:
-            print('Found no running services named \"',name,'\"')
-            return None
+
+        serviceList = command_line.getRunningWorkers(options,sweep_only=True)
+        for service in serviceList:
+            if service['Name'] == name:
+                return service['address'] + ":" + str(service['port'])
+        print('Found no running services named \"',name,'\"')
+        return None
 
     def waitOnResults(self):
         while len(self.running_async_jobs) >= self.max_async_jobs:

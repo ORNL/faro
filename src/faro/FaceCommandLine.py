@@ -311,6 +311,8 @@ def statusParseOptions():
     parser.add_option("-a", "--all", action='store_true',dest='all',default=False,help='Show all possible workers (sniffs the network), active and inactive (searches in FARO_WORKER_DIR)')
     parser.add_option("--active",action="store_true",dest="active",default=False,help='Show only worker services currently active and available on the network')
     parser.add_option("--inactive",action="store_true",dest='inactive',default=False,help="Show only worker services that are currently not loaded")
+    parser.add_option("--sweep",action="store_true",dest='sweep',default=False,help="Perform a port sweep for active workers")
+
     addConnectionOptions(parser)
 
     # Parse the arguments and return the results.
@@ -329,7 +331,6 @@ def startParseOptions():
     """
     Parse command line arguments.
     """
-    import faro.FaceService
     args = ['']  # Add the names of arguments here.
     n_args = len(args)
     args = " ".join(args)
