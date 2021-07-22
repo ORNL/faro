@@ -35,5 +35,5 @@ RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhos
 RUN mkdir -p /var/run/dbus
 ENV init /lib/systemd/systemd
 WORKDIR $PATH_TO_FARO/services/dlib/
-# RUN ./run-dlib.sh
-CMD ./download_models.sh
+RUN ./download-models.sh
+#CMD ./run-dlib.sh

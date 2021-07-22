@@ -26,6 +26,7 @@ import optparse
 import os
 import socket
 import time
+import copy
 
 import faro
 import importlib
@@ -74,6 +75,7 @@ def startService(options):
                 startupMode = 'native'
                 if options.verbose:
                     print('we are starting the worker natively, without any container or environment')
+                faro.ServiceEnvironmentLoader.startByNative(options,service_name,alg["service files"])
 
             if startupMode.lower() == "docker":
                 if options.verbose:

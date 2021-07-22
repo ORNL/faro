@@ -56,7 +56,7 @@ def addConnectionOptions(parser):
 
 
 def connectToFaroClient(options,no_exit=False,quiet=False,timeout=None,return_status=False):
-    if options.verbose:
+    if options.verbose and not quiet:
         print('Connecting to FaRO Service...')
 
     face_client = faro.FaceClient(options,timeout=timeout)

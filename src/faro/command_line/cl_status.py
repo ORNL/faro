@@ -132,23 +132,15 @@ def getRunningWorkers(options,asDict=False,keyedOn='Name'):
         zeroconf = Zeroconf()
         listener = ServiceListener()
         browser = ServiceBrowser(zeroconf, "_faro._tcp.local.", listener)
-        starttime = time.time()
-        # if tqdm is not None:
-        #     pbar = tqdm(total=100)
-        # while True:
-        #     if listener.lastUpdate > 0:
-        #         if time.time()-listener.lastUpdate >= listener.timeout or time.time()-starttime > 10:
-        #             break
-        #     elif time.time()-starttime > 1.75:
-        #         break
-        #     pbar.update(8)
-        #     time.sleep(.1)
-        localservices = getRunningLocalWorkers(copy.copy(options))
+        localservices = None
+        if sys.platform == "darwin":
+            localservices = getRunningLocalWorkers(copy.copy(options))
         bonjourservices = list(listener.availableServices_tableform.values())
         bonjourservicesLocations = [s['address']+str(s['port']) for s in bonjourservices]
-        for s in localservices:
-            if s['address']+str(s['port']) not in bonjourservicesLocations:
-                bonjourservices.append(s)
+        if localservices is not None:
+            for s in localservices:
+                if s['address']+str(s['port']) not in bonjourservicesLocations:
+                    bonjourservices.append(s)
         if asDict:
             return {s[keyedOn]:s for s in bonjourservices}
         return bonjourservices
@@ -234,10 +226,14 @@ def getFaceWorkers(options,asDict=False):
                 for sf in serviceFiles:
                     fpath = os.path.join(serviceLocation,sf)
                     if sf.startswith("build_env_"+name) and os.path.isfile(fpath):
-                        serviceLoadType.append("venv")
+                        if "venv" not in serviceLoadType:
+                            serviceLoadType.append("venv")
                     elif sf.startswith("env_"+name) and os.path.isdir(fpath):
-                        serviceLoadType.append("venv")
+                        if "venv" not in serviceLoadType:
+                            serviceLoadType.append("venv")
         if len(serviceLoadType)==0:
+            serviceLoadType.append('native')
+        else:
             serviceLoadType.append('native')
 
         row = SortedDict({"Algorithm": name, 'location': loc2, 'service files':serviceLocation,'environment Type':serviceLoadType})

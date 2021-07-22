@@ -329,6 +329,7 @@ def startParseOptions():
     """
     Parse command line arguments.
     """
+    import faro.FaceService
     args = ['']  # Add the names of arguments here.
     n_args = len(args)
     args = " ".join(args)
@@ -339,21 +340,23 @@ def startParseOptions():
 
     # Setup the parser
     parser = optparse.OptionParser(usage='%s command [OPTIONS] %s' % (sys.argv[0], args),
-                                   version=version, description=description, epilog=epilog)
+                                   version=version, description=description, epilog=epilog,conflict_handler="resolve")
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="Print out more program information.")
     # parser.add_option("--service-name",type="str",dest="service_name",default=None,help="The name to be given to the service")
-    parser.add_option("--algorithm",type="str",dest="algorithm",default=None,help="the algorithm to start up")
+    # parser.add_option("--algorithm",type="str",dest="algorithm",default=None,help="the algorithm to start up")
     parser.add_option( "--mode", type="choice", choices=['docker','venv','conda','native',None], dest="mode", default=None,
                      help="Choose an option.")
-    parser.add_option("--worker-count", type="int", dest="num_workers", default=1,
-                      help="How many workers to start up for asyrconous usage. Default=1")
+    # parser.add_option("--worker-count", type="int", dest="num_workers", default=1,
+    #                   help="How many workers to start up for asyrconous usage. Default=1")
 
     # addConnectionOptions(parser)
 
     # Parse the arguments and return the results.
+
     addConnectionOptions(parser)
+    faro.FaceService.addServiceOptionsGroup(parser)
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.print_help()

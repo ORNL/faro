@@ -914,13 +914,18 @@ class FaceService(fs.FaceRecognitionServicer):
         except:
             pass
 
-def addServiceOptionsGroup(parser_parent):
+def addServiceOptionsGroup(parser_parent=None):
+    if parser_parent is None:
+        parser_parent = optparse.OptionParser(usage='%s [OPTIONS] %s' % (sys.argv[0], []), version="0.0.0",
+                                       description="", epilog="epilog")
     face_workers_list = get_face_worker_list()
     parser = optparse.OptionGroup(parser_parent, "Server Options",
                                             "Control the connection to the FaRO service.")
 
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True,
-                      help="Decrease the verbosity of the program")
+                      help="Decrease the verbosity of the program DEPRICATED")
+
+
 
     parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
                       help="When possible run on the cpu and ignore the GPU.")
@@ -966,7 +971,8 @@ def addServiceOptionsGroup(parser_parent):
 
     parser.add_option("-p", "--port", type="str", dest="port", default=port,
                       help="Service port.  Default=%s" % port)
-    return face_workers_list
+
+    return face_workers_list,parser_parent
 
 def parseOptions():
     '''
@@ -982,13 +988,13 @@ def parseOptions():
     
     # Setup the parser
     parser = optparse.OptionParser(usage='%s [OPTIONS] %s'%(sys.argv[0],args),version=version,description=description,epilog=epilog)
-    face_workers_list = addServiceOptionsGroup(parser)
+    face_workers_list,parser_parent = addServiceOptionsGroup(parser)
     # Here are some templates for standard option formats.
 
 
     # Parse the arguments and return the results.
     (options, args) = parser.parse_args()
-    options.fwl = face_workers_list
+
     if len(args) != n_args:
         parser.print_help()
         print()
@@ -1042,14 +1048,20 @@ def get_face_worker_list():
             print("Could not load worker ", name, ": ", e)
     return FACE_WORKER_LIST
 
-def serve():
+def serve(options=None):
     print('Configuring Server...')
     cv2.setNumThreads(16) # TODO: Make this an option
 
     print('Detecting Workers...')
 
-
-    options,_ = parseOptions()
+    if options is None:
+        options,_ = parseOptions()
+    else:
+        options.fwl = get_face_worker_list()
+    try:
+        options.fwl
+    except:
+        options.fwl = get_face_worker_list()
 
     if options.verbose:
         print("storage:",os.environ['HOME'])

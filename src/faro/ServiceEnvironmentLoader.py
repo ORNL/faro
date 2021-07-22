@@ -3,6 +3,9 @@ import sys
 import faro
 import numpy as np
 import subprocess
+import faro.FaceService
+import copy
+
 try:
     import docker
 except:
@@ -36,6 +39,25 @@ def detectImage(serviceName):
         if len(relevantImages) > 0:
             print('Found ', len(relevantImages), ' Docker images:')
             [print(im.attrs['RepoTags']) for im in relevantImages]
+
+def buildFlags(parser,options,service_instance_name=None,ignore=[]):
+
+    flags = vars(options)
+    cmd =[]
+    for opts in [parser._long_opt,parser._short_opt]:
+        optdict = {opts[k].dest: k for k in opts}
+        for f in flags:  # f will be the opt_string
+            if f not in ignore and f in optdict and optdict[f] not in ignore:
+                if f in optdict:
+                    op = str(flags[f])
+                    if op != "None" and op != "":
+                        cmd.append(optdict[f])
+                        if op != "True" and op != "False":  # don't add option if it is just a bool
+                            cmd.append(op)
+    if service_instance_name is not None:
+        cmd.append('--service-name')
+        cmd.append(service_instance_name)
+    return cmd
 
 def startByVenv(options,service_instance_name,service_dir):
     prefix = "env_"
@@ -81,15 +103,11 @@ def startByVenv(options,service_instance_name,service_dir):
                 call = "source"
             else:
                 call = "source"
+            face_worker_list,parser= faro.FaceService.addServiceOptionsGroup() #Get only the service options so we know which ones to parse out
+            cmdflags = buildFlags(parser,options,service_instance_name)
             # cmd = ["source", activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
             cmd = [call, activateFile, "&&", "python", "-m", "faro.FaceService"]
-            flags = vars(options)
-            for f in flags:
-                cmd.append(f)
-                cmd.append(str(flags[f]))
-            # print(flags)
-            # print(cmd)
-            cmd = [call,activateFile, "&&", "python", "-m", "faro.FaceService", "--port="+options.port, "--worker-count="+str(options.num_workers), "--algorithm="+options.algorithm, "--max-message-size="+str(-1 ), "--service-name",service_instance_name]
+            cmd.extend(cmdflags)
 
             print(" ".join(cmd))
             os.system(" ".join(cmd))
@@ -145,7 +163,12 @@ def startByDocker(options,service_instance_name,service_dir):
         host = options.port.split(':')
         hostport = int(host[1])
         host = host[0]
-        command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
+        face_worker_list, parser = faro.FaceService.addServiceOptionsGroup()
+        # command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
+        command = ["python","-m", "faro.FaceService", "--port", "0.0.0.0:50030"]
+        cmdflags = buildFlags(parser,options,service_instance_name,ignore=['port'])
+        command.extend(cmdflags)
+
         if options.verbose:
             print(command)
         networkmode = "host"
@@ -153,14 +176,16 @@ def startByDocker(options,service_instance_name,service_dir):
             networkmode = "host"
         elif sys.platform == "darwin":
             networkmode = "bridge"
-        #     ports={50030:hostport}
+        ports={50030:hostport}
         # network_mode=networkmode
-        client.containers.run(docker_image_name, command,stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        client.containers.run(docker_image_name, command,network_mode="bridge",ports={50030:hostport},stdout=True,remove=True,name=docker_instance_name,privileged=True)
     else:
         print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
 
-
-
+def startByNative(options,service_instance_name,service_dir):
+    options_copy = copy.copy(options)
+    options_copy.service_name = service_instance_name
+    faro.FaceService.serve(options)
 
 def getDockercontainers():
     if docker is not None:
