@@ -24,13 +24,13 @@ USE_GPUS=0
 
 # Run in gpu mode.  On GPUs detection can take approximatly 0.2sec.
 docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 -it faro-vggface2
-#docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 -it faro-vggface2
+#docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 -it faro-vgg
 
 # --workers=$WORKER_COUNT 
 
 #--gpus=$USE_GPUS
 
 # Run in cpu mode.  On CPUs detection can take approximatly 25sec.
-# docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 faro-vggface2 --cpu --workers=$WORKER_COUNT
+# docker run --runtime=nvidia -p $EXTERNAL_PORT:50030 faro-vgg --cpu --workers=$WORKER_COUNT
 
 
