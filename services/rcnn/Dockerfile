@@ -13,7 +13,7 @@ ADD  face_rcnn /home/face_rcnn
 RUN conda install -c anaconda grpcio-tools opencv numpy && \
 	pip install tqdm && \
 	pip install h5py && \
-	pip install pyvision-toolkit
+	pip install --no-dependencies pyvision-toolkit
 
 #:/home/pyvision/src:$PYTHONPATH
 ENV PYTHONPATH /home/caffe-fast-rcnn/python:/home/py-faster-rcnn/lib/:/home/face_rcnn
@@ -21,7 +21,7 @@ ENV PYTHONPATH /home/caffe-fast-rcnn/python:/home/py-faster-rcnn/lib/:/home/face
 # Run the service as the entry point
 EXPOSE 50030
 WORKDIR /home/face_rcnn
-ENTRYPOINT ["python", "-m", "faro.FaceService", "--algorithm=rcnn", "--port=:50030"]
+#ENTRYPOINT ["python", "-m", "faro.FaceService", "--algorithm=rcnn", "--port=:50030"]
 
 
 
