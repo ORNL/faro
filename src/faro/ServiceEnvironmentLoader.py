@@ -195,7 +195,7 @@ def startByDocker(options,service_instance_name,service_dir):
 def startByNative(options,service_instance_name,service_dir):
     options_copy = copy.copy(options)
     options_copy.service_name = service_instance_name
-    ffs.serve(options)
+    faro.FaceService.serve(options)
 
 def getDockercontainers():
     if docker is not None:
