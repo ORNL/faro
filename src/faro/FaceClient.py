@@ -463,6 +463,7 @@ class FaceClient(object):
             if verbose:
                 status_message = "cannot connect:" + str(e)
         if verbose:
+            print('yay')
             print(type(status_message),status_message)
         if not iserror:
             self.match_threshold = status_message.match_threshold
