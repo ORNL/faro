@@ -5,7 +5,7 @@ import numpy as np
 import subprocess
 # import faro.FaceService as ffs
 import copy
-
+import cv2
 try:
     import docker
 except:
@@ -146,9 +146,11 @@ def startByDocker(options,service_instance_name,service_dir):
 
     print('looking for containers named ',docker_instance_name)
     print('looking for images named ', docker_image_name)
+    buildAttempted = False
     if docker_image_name not in images and docker_instance_name not in containers:
         print('No images or containers were found in Docker. Building dockerfile instead')
         buildDockerFile(os.path.join(service_dir), docker_image_name)
+        buildAttempted = True
     containers = getDockercontainers()
     images = getDockerImages()
     if docker_instance_name in containers:
@@ -164,7 +166,9 @@ def startByDocker(options,service_instance_name,service_dir):
             pass
     elif docker_image_name not in images:
         print('No images by the name of',docker_image_name,' or containers were found in Docker. Building dockerfile instead')
-        buildDockerFile(os.path.join(service_dir), docker_image_name)
+        if not buildAttempted:
+            buildDockerFile(os.path.join(service_dir), docker_image_name)
+            buildAttempted = True
     if docker_image_name in images:
         print('we found an uninstantiated docker image named ', docker_image_name)
         host = options.port.split(':')
@@ -184,11 +188,22 @@ def startByDocker(options,service_instance_name,service_dir):
         elif sys.platform == "darwin":
             networkmode = "bridge"
         ports={50030:hostport}
+        runtime = None
+        if options.gpus != "":
+            runtime="nvidia"
         # network_mode=networkmode
         workdir = os.path.abspath(os.path.join(faro.__path__[0],'..','..'))
         print('command:')
         print(command)
-        client.containers.run(docker_image_name, command,network_mode="bridge",ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        if runtime is None:
+            container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True)
+        else:
+            container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True,runtime=runtime)
+        print('finished running')
+        #while(True):
+            #if cv2.waitKey(1) == 27:
+                #container.stop()
+                #sys.exit(1)
     else:
         print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
 

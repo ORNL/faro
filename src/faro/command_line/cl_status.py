@@ -175,6 +175,8 @@ def getFaceWorkers(options,asDict=False):
     SERVICE_DIRS=[]
     if os.getenv('FARO') is not None:
         SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
+    elif os.getenv('FARO_PATH') is not None:
+        SERVICE_DIRS.append(os.path.join(os.getenv('FARO'), 'services'))
     else:
         try:
             scriptpath = os.path.dirname(os.path.realpath(__file__))

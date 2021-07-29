@@ -33,8 +33,8 @@ DEFAULT_MAX_SIZE = 1920
 from .FaceWorker import FaceWorker, SCORE_L1, SCORE_L2, SCORE_DOT, SCORE_SERVER, STATUS_READY
 from .util import loadKeras
 from .FaceCommandLine import face_command_line
-from .ServiceEnvironmentLoader import *
-from .FaceService import addServiceOptionsGroup
+from .ServiceEnvironmentLoader import buildFlags
+#from .FaceService import addServiceOptionsGroup
 
 from .FaceClient import FaceClient, getDefaultClientOptions
 

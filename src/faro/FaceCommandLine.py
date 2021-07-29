@@ -6,7 +6,7 @@ Created on Dec 3, 2019 at Oak Ridge National Laboratory
 import sys
 import optparse
 import os
-
+import faro.FaceService as ffs
 import faro
 import faro.proc
 import faro.pyvision as pv
@@ -357,7 +357,7 @@ def startParseOptions():
     # Parse the arguments and return the results.
 
     addConnectionOptions(parser)
-    faro.FaceService.addServiceOptionsGroup(parser)
+    ffs.addServiceOptionsGroup(parser)
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.print_help()
