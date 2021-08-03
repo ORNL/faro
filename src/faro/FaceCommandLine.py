@@ -46,8 +46,11 @@ def addConnectionOptions(parser):
                                 help="The port used for the recognition service.")
     connection_group.add_option("--service-name",type="str",dest="service_name",default=None,help="The name of a visible service on the network (enumerate services using `faro status --active`")
 
-    connection_group.add_option("--stream", action="store_true", dest="stream", default=False,
+    connection_group.add_option("--stream", type="str", dest="stream", default=None,
                                 help="Process incoming frames from a camera stream. Currently only works for webcam")
+    connection_group.add_option("-c","--certificate", type="str", dest="certificate", default=None,
+                                help="Use a secure gRPC channel. For a client, point to a .pem public key")
+
     parser.add_option_group(connection_group)
 
 
@@ -737,6 +740,8 @@ def status():
     options,args = statusParseOptions()
     command_line.status(options)
 
+def secure():
+    faro.util.generateKeys(os.path.join(faro.__path__[0],'keystore'))
 
 def start():
     options,args = startParseOptions()
@@ -757,6 +762,7 @@ COMMANDS = {
     'search' : ['Search images for faces in a gallery.',search],
     'test' : ['Process a probe and gallery directory and produce a distance matrix.',test],
     'fuse' : ['Fuse scored results from different algorithms',fuse],
+    'secure' : ['create RSA certificates for secured communication', secure]
             }
 
 def face_command_line():

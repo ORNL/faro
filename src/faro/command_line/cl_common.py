@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-
+import copy
 import optparse
 
 import faro
@@ -58,6 +58,9 @@ def addConnectionOptions(parser):
 def connectToFaroClient(options,no_exit=False,quiet=False,timeout=None,return_status=False):
     if options.verbose and not quiet:
         print('Connecting to FaRO Service...')
+    optcopy = copy.copy(options)
+    if quiet:
+        options.verbose = False
 
     face_client = faro.FaceClient(options,timeout=timeout)
     message = face_client.initial_status

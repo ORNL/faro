@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+import sys
 
 import faro
 import faro.proc
@@ -31,7 +32,7 @@ import faro.proto.proto_types as pt
 def detect(options,args):
     face_client = faro.command_line.connectToFaroClient(options)
 
-    if options.stream:
+    if options.stream is not None:
         print("Starting Stream")
         start_stream(options,face_client)
     else:
@@ -55,14 +56,14 @@ def start_stream(options,fc):
     # if "!" in options.stream and options.stream.endswith('appsink'):
     #     if not hasgstreamer:
     #         print('gstreamer is not integrated with opencv.  Please rebuild opencv with gstreamer')
-    cam = cv2.VideoCapture('udpsrc port=9078 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink',cv2.CAP_GSTREAMER)
-    # cam = cv2.VideoCapture(
-    #     'udpsrc port=9078 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264"'
-    #     ' ! rtph264depay'
-    #     ' ! avdec_h264'
-    #     ' ! videoconvert'
-    #     ' ! appsink', cv2.CAP_GSTREAMER)
-    print('finished init')
+
+    # cam = cv2.VideoCapture('udpsrc port=9078 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink',cv2.CAP_GSTREAMER)
+    faro.proc.process_stream(fc,options)
+    sys.exit(1)
+    input_val = options.stream
+    if input_val.isnumeric():
+        input_val = int(input_val)
+    cam = cv2.VideoCapture(input_val)
     if cam.isOpened():
         if options.verbose:
             print('Stream opened')
@@ -70,14 +71,14 @@ def start_stream(options,fc):
         if options.verbose:
             print('Stream could not be opened')
         exit(1)
-
     while True:
         ret_val, img = cam.read()
         if img is not None:
             im = faro.proc.preprocessImage(img, options)
 
-            res = fc.detectExtract(im, best=options.best, threshold=options.detect_thresh,
+            res = fc.detect(im, best=options.best, threshold=options.detect_thresh,
                                         min_size=options.min_size, run_async=False, frame=-1)
+            imcache[frame] = im
             # try:
             recs = res.face_records
             pvim = pv.Image(im)

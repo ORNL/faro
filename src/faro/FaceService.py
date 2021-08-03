@@ -323,8 +323,6 @@ class FaceService(fs.FaceRecognitionServicer):
         self.broadcast()
         print('broadcasting!')
         # TODO: Change this to gallery worker
-
-        print(FACE_WORKER_LIST[options.algorithm][2])
         self.gallery_passthrough = False
         if "fusion" in options.algorithm.lower():
             print("GALLERY WORKER: Using gallery passhtrough if available")
@@ -963,6 +961,10 @@ def addServiceOptionsGroup(parser_parent=None):
 
     model_options.add_option("--classify-model", type="str", dest="classify_model", default='default',
                              help="A model file to use for classification.")
+    parser.add_option("--certificate", type="str", dest="certificate", default=None,
+                                help="Use a secure gRPC channel. For a server, point to a .pem server certificate")
+    parser.add_option("--key", type="str", dest="encryption_key", default=None,
+                      help="Use a secure gRPC channel. For a server, point to a .pem private key")
     for key in face_workers_list:
         if face_workers_list[key][1] is not None:
             face_workers_list[key][1](parser_parent)
@@ -1004,7 +1006,7 @@ def parseOptions():
         
     return options,args
 
-def get_face_worker_list():
+def get_face_worker_list(algname=None,verbose=False):
     FACE_WORKER_LIST = {}
     # Scan for faro workers
     import_dir = faro.__path__[0]
@@ -1014,6 +1016,17 @@ def get_face_worker_list():
     sys.path.append(os.path.join(import_dir, 'face_workers'))
     scripts = list(scripts)
     scripts.sort()
+    shouldbequiet = True
+    for i,f in enumerate(sys.argv):
+        if i > 0:
+            if "--quiet" in f:
+                verbose=False
+                shouldbequiet = True
+            if "--verbose" in f and not shouldbequiet:
+                verbose=True
+            if "--algorithm" in f and len(sys.argv) > i+1:
+                algname = sys.argv[i+1]
+
 
     # Scan for other workers
     if 'FARO_WORKER_PATH' in os.environ:
@@ -1034,18 +1047,20 @@ def get_face_worker_list():
 
     for each in scripts:
         name = each[:-13].lower()
-        try:
-            module = importlib.import_module(each[:-3])
-            class_obj = getattr(module, each[:-3])
-            # print("    Loaded: ",name,'-',class_obj)
+        if algname is None or algname == name:
+            try:
+                module = importlib.import_module(each[:-3])
+                class_obj = getattr(module, each[:-3])
+                # print("    Loaded: ",name,'-',class_obj)
 
-            FACE_WORKER_LIST[name] = [class_obj, None, None]
-            if 'getOptionsGroup' in dir(module):
-                FACE_WORKER_LIST[name][1] = module.getOptionsGroup
-            if 'getGalleryWorker' in dir(module):
-                FACE_WORKER_LIST[name][2] = module.getGalleryWorker
-        except Exception as e:
-            print("Could not load worker ", name, ": ", e)
+                FACE_WORKER_LIST[name] = [class_obj, None, None]
+                if 'getOptionsGroup' in dir(module):
+                    FACE_WORKER_LIST[name][1] = module.getOptionsGroup
+                if 'getGalleryWorker' in dir(module):
+                    FACE_WORKER_LIST[name][2] = module.getGalleryWorker
+            except Exception as e:
+                if verbose:
+                    print("Could not load worker ", name, ": ", e)
     return FACE_WORKER_LIST
 
 def serve(options=None):
@@ -1081,7 +1096,24 @@ def serve(options=None):
 
     fs.add_FaceRecognitionServicer_to_server(face_client, server)
 
-    server.add_insecure_port(options.port)
+    if options.certificate is not None or options.encryption_key is not None:
+        if options.certificate is not None:
+            certfile = options.certificate
+        else:
+            certfile = input('Please provide a .pem encryption certificate: ')
+        if options.encryption_key is not None:
+            keyfile = options.encryption_key
+        else:
+            keyfile = input('Please provide a .pem encryption key: ')
+        private_key = open(keyfile,'rb').read()
+        certificate_chain = open(certfile,'rb').read()
+        credentials = grpc.ssl_server_credentials(
+            [(private_key, certificate_chain)]
+        )
+        print('adding secure port')
+        server.add_secure_port(options.port, credentials)
+    else:
+        server.add_insecure_port(options.port)
     print('Starting Server on port: %s'%options.port)
     server.start()
     print('To end server, press "ctl+c"')
@@ -1091,25 +1123,17 @@ def serve(options=None):
     sig = faro.util.sigintThread()
     sig.start()
 
-    killKeys = [27,10,13,25]
     try:
         while True:
             time.sleep(1)
-            # char = faro.util.readInput(60)
             shouldkill= faro.util.getGlobalValue('shouldstopserver')
             if shouldkill:
                 break
-                # print('here now',char)
-
-                # for k in killKeys:
-                #     print(killkeys)
-                #     if ord(char) == k:
-                #         shouldkill = True
-            # if shouldkill:
-            #     break
     except Exception as e:
         print('break ',e )
         pass
+
+
     print('starting the exit process')
     face_client.cleanexit()
     server.stop(0)

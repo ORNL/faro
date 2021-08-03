@@ -274,3 +274,35 @@ def getcv2info(key):
             if 'yes' in l.lower():
                 return True
     return False
+
+def generateKeys(keystore_dir,country='US',state='Tennessee',city='Knoxville',commonname='localhost',org='Oak Ridge National Laboratory',email='default@ornl.gov'):
+    import socket
+    keypath = os.path.join(keystore_dir,'server.key')
+    crtpath = os.path.join(keystore_dir,'server.crt')
+    if not os.path.exists(keystore_dir):
+        os.makedirs(keystore_dir)
+    dnsnames = ["DNS:"+socket.gethostname(),'DNS:127.0.0.1']
+    command1 = 'openssl genrsa -out ' + keypath +' 2048'
+    command2 = 'openssl req -new -x509 -sha256 -key ' + keypath + ' -out ' + crtpath + ' -days 3650 -addext "subjectAltName = ' + ",".join(dnsnames) + '"' + ' -subj "'
+    subj = ''
+    if country is not None:
+        command2 += '/C=' + country
+    if state is not None:
+        command2 += '/ST=' + state
+    if city is not None:
+        command2 += '/L=' + city
+    if org is not None:
+        command2 += '/O=' + org
+    if commonname is not None:
+        command2 += '/CN=' + commonname
+    if email is not None:
+        command2 += '/emailAddress=' + email
+    subj = subj+'"'
+    command2 += subj
+    print(command2)
+    os.system(command1)
+    os.system(command2)
+    #https://github.com/joekottke/python-grpc-ssl
+    #~/cfssl/bin/cfssl gencert -initca ca-csr.json | ~/cfssl/bin/cfssljson -bare ca
+    #~/cfssl/bin/cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname='127.0.0.1,localhost' server-csr.json | ~/cfssl/bin/cfssljson -bare server
+    #~/cfssl/bin/cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json client-csr.json | ~/cfssl/bin/cfssljson -bare client

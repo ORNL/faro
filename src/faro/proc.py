@@ -123,6 +123,89 @@ def process_image_dir(img_dir, dir_type, fc, options):
 
     return templates
 
+def process_stream(fc, options):
+    print("Processing Stream! nb")
+
+    input_val = options.stream
+    if input_val.isnumeric():
+        input_val = int(input_val)
+    cam = cv2.VideoCapture(input_val)
+    if options.verbose:
+        print("Processing Stream!")
+
+    if cam.isOpened():
+        if options.verbose:
+            print('Stream opened')
+    else:
+        if options.verbose:
+            print('Stream could not be opened')
+        exit(1)
+
+
+    image_count = 0
+    detect_queue = []
+    frame = 0
+    display_frame = 1
+    templates = {}
+    imcache = {}
+    while True:
+        ret_val, im = cam.read()
+        im = im[:, :, ::-1]
+        if im is not None:
+            im = preprocessImage(im, options)
+            results = fc.detect(im, best=options.best, threshold=options.detect_thresh,
+                                       min_size=options.min_size, run_async=True, frame=frame)
+            imcache[frame] = im
+            detect_queue.append([frame, results])
+
+            image_count += 1
+            if options.max_images is not None and image_count >= options.max_images:
+                break
+            frame += 1
+
+
+        toremove = []
+        for i,det in enumerate(detect_queue):
+            fname, res = det
+            if res.done():
+                try:
+                    recs = res.result().face_records
+                    for each_record in recs:
+                        templates[fname] = []
+                        templates[fname].append(each_record)
+                except Exception as e:
+                    print("could not get future for file ", fname, ": ", e)
+                toremove.append(i)
+            else:
+                pass
+        for index in sorted(toremove, reverse=True):
+            del detect_queue[index]
+
+
+        if display_frame in templates:
+            recs = templates[display_frame]
+            if display_frame in imcache:
+                im = imcache[display_frame]
+                pvim = pv.Image(im)
+                for r in recs:
+                    rect = pt.rect_proto2pv(r.detection.location)
+
+                    pvim.annotateThickRect(rect)
+                if pvim.show(window="camera", delay=1) == 27:
+                    break
+                del imcache[display_frame]
+
+            else:
+                pass
+            del templates[display_frame]
+        else:
+            if len(templates) > 0:
+                display_frame = max(templates.keys())
+            # else:
+            #     display_frame+=1
+
+    return templates
+
 def processAttributeFilter(face, options):
     if options.attribute_filter is None:
         return True

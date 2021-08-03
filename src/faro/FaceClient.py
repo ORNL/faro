@@ -34,6 +34,7 @@ import faro.proto.proto_types as pt
 import faro.proto.face_service_pb2 as fsd
 import time
 import faro
+import copy
 try:
     from zeroconf import ServiceInfo,Zeroconf,ServiceBrowser
 except:
@@ -88,11 +89,20 @@ class FaceClient(object):
 
         port = None
         if options.service_name is not None:
-            port = self.getAddressByName(options, options.service_name)
+            optcopy = copy.copy(options)
+            optcopy.verbose = False
+            port = self.getAddressByName(optcopy, options.service_name)
         if port is None:
             port = options.port
-        channel = grpc.insecure_channel(port,
-                                        options=channel_options)
+
+        if options.certificate is not None:
+            ca_cert = options.certificate
+            root_certs = open(ca_cert,'rb').read()
+            credentials = grpc.ssl_channel_credentials(root_certs)
+            channel = grpc.secure_channel(port, credentials=credentials,options=channel_options)
+        else:
+            channel = grpc.insecure_channel(port,
+                                            options=channel_options)
         self.service_stub = fs.FaceRecognitionStub(channel)
         #channel = grpc.insecure_channel(options.rec_port,
         #                                options=channel_options)
