@@ -78,7 +78,6 @@ def start_stream(options,fc):
 
             res = fc.detect(im, best=options.best, threshold=options.detect_thresh,
                                         min_size=options.min_size, run_async=False, frame=-1)
-            imcache[frame] = im
             # try:
             recs = res.face_records
             pvim = pv.Image(im)
@@ -86,7 +85,6 @@ def start_stream(options,fc):
                 rect = pt.rect_proto2pv(r.detection.location)
 
                 pvim.annotateThickRect(rect)
-            cvim = pvim.asOpenCV2()
             if pvim.show(window="camera",delay=30) == 27:
                 break
             # cv2.imshow("camera", cvim)

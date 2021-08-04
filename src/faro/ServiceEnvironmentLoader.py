@@ -46,6 +46,7 @@ def buildFlags(parser,options,service_instance_name=None,ignore=[]):
     cmd =[]
     for opts in [parser._long_opt,parser._short_opt]:
         optdict = {opts[k].dest: k for k in opts}
+        print(sys.argv)
         for f in flags:  # f will be the opt_string
             if f in optdict:
                 # print(f,optdict[f])
@@ -58,9 +59,16 @@ def buildFlags(parser,options,service_instance_name=None,ignore=[]):
                     op = str(flags[f])
                     if op != "default":
                         if op != "None" and op != "":
-                            cmd.append(optdict[f])
-                            if op != "True" and op != "False":  # don't add option if it is just a bool
+                            doappend = False
+                            for arg in sys.argv:
+                                if optdict[f] in arg:
+                                    doappend = True
+                                    break
+                            if doappend:
+                                cmd.append(optdict[f])
+                            if op != "True" and op != "False" and doappend:  # don't add option if it is just a bool
                                 cmd.append(op)
+    print(cmd)
     if service_instance_name is not None:
         cmd.append('--service-name')
         cmd.append(service_instance_name)
