@@ -219,7 +219,7 @@ def getFaceWorkers(options,asDict=False):
             serviceLocation = availableServices[name]
             serviceFiles = os.listdir(serviceLocation)
             loc2 = serviceLocation
-            if "Dockerfile_old" in serviceFiles:
+            if "Dockerfile" in serviceFiles:
                 serviceLoadType.append("docker")
             if "environment.yml" in serviceFiles:
                 serviceLoadType.append("conda")
