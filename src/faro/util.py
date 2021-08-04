@@ -281,7 +281,10 @@ def generateKeys(keystore_dir,country='US',state='Tennessee',city='Knoxville',co
     crtpath = os.path.join(keystore_dir,'server.crt')
     if not os.path.exists(keystore_dir):
         os.makedirs(keystore_dir)
-    dnsnames = ["DNS:"+socket.gethostname(),'DNS:127.0.0.1']
+    #method outlined in:
+    # https://stackoverflow.com/questions/23523456/how-to-give-a-multiline-certificate-name-cn-for-a-certificate-generated-using
+    # https://security.stackexchange.com/questions/74345/provide-subjectaltname-to-openssl-directly-on-the-command-line
+    dnsnames = ["DNS:"+socket.gethostname(),'DNS:127.0.0.1','DNS:localhost']
     command1 = 'openssl genrsa -out ' + keypath +' 2048'
     command2 = 'openssl req -new -x509 -sha256 -key ' + keypath + ' -out ' + crtpath + ' -days 3650 -addext "subjectAltName = ' + ",".join(dnsnames) + '"' + ' -subj "'
     subj = ''
@@ -299,9 +302,13 @@ def generateKeys(keystore_dir,country='US',state='Tennessee',city='Knoxville',co
         command2 += '/emailAddress=' + email
     subj = subj+'"'
     command2 += subj
-    print(command2)
+    print('Generating server-client SHA keys and certificates...')
     os.system(command1)
     os.system(command2)
+    if os.path.exists(keypath) and os.path.exists(crtpath):
+        print('Secure key pairs have been successfully written! Please copy "', crtpath, '" to the client machine and load via the "--certificate" flag')
+    else:
+        print('An error occured in generating the key pair')
     #https://github.com/joekottke/python-grpc-ssl
     #~/cfssl/bin/cfssl gencert -initca ca-csr.json | ~/cfssl/bin/cfssljson -bare ca
     #~/cfssl/bin/cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname='127.0.0.1,localhost' server-csr.json | ~/cfssl/bin/cfssljson -bare server

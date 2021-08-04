@@ -243,7 +243,7 @@ def buildDockerFile(filePath,tag):
     if os.path.isdir(filePath):
         workdir = os.path.abspath(os.path.join(faro.__path__[0], '..', '..'))
         print('docker build file:', filePath)
-        cmd = ["cd", workdir, " && ","docker", "build","-t", tag,'-f', os.path.join(filePath,"Dockerfile"), '.']
+        cmd = ["cd", workdir, " && ","docker", "build","-t", tag,'-f', os.path.join(filePath,"Dockerfile_old"), '.']
         print(" ".join(cmd))
         os.system(" ".join(cmd))
         # process = subprocess.Popen(["docker", "build", "--no-cache" ,"-t", tag, filePath],stdout=subprocess.PIPE,

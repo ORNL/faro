@@ -965,6 +965,9 @@ def addServiceOptionsGroup(parser_parent=None):
                                 help="Use a secure gRPC channel. For a server, point to a .pem server certificate")
     parser.add_option("--key", type="str", dest="encryption_key", default=None,
                       help="Use a secure gRPC channel. For a server, point to a .pem private key")
+    parser.add_option("--secured", action="store_true", dest="secured", default=False,
+                      help="Secure the server using the default keystore (if unpopulated, this will auto-generate)")
+
     for key in face_workers_list:
         if face_workers_list[key][1] is not None:
             face_workers_list[key][1](parser_parent)
@@ -1096,7 +1099,24 @@ def serve(options=None):
 
     fs.add_FaceRecognitionServicer_to_server(face_client, server)
 
-    if options.certificate is not None or options.encryption_key is not None:
+    if options.certificate is not None or options.encryption_key is not None or options.secured:
+        if options.secured and options.encryption_key is None and options.certificate is None:
+            for i in range(2):
+                keystore_dir = os.path.join(faro.__path__[0],'keystore')
+                keypath = os.path.join(keystore_dir, 'server.key')
+                crtpath = os.path.join(keystore_dir, 'server.crt')
+                if options.verbose:
+                    print('No certificate or encryption key specified, accessing default keystore at ')
+                if os.path.exists(keystore_dir) and os.path.isdir(keystore_dir):
+                    if os.path.exists(keypath) and os.path.isfile(keypath):
+                        options.encryption_key = keypath
+                    if os.path.exists(crtpath) and os.path.isfile(crtpath):
+                        options.certificate = crtpath
+                elif not os.path.exists(keystore_dir) or (not os.path.exists(keypath) and not os.path.exists(crtpath)):
+                    if i == 0:
+                        ans = input('There is no current keystore for this instance of FaRO. Would you like to generate secure SHA keys? (y/n)')
+                        if 'y' in ans:
+                            faro.util.generateKeys(os.path.join(faro.__path__[0],'keystore'))
         if options.certificate is not None:
             certfile = options.certificate
         else:
@@ -1138,13 +1158,13 @@ def serve(options=None):
     face_client.cleanexit()
     server.stop(0)
     print('Server Stopped.')
-    try:
-        if zcinfo is not None and Zeroconf is not None:
-            zc = Zeroconf()
-            zc.unregister_service(zcinfo)
-            zc.close()
-    except:
-        pass
+    # try:
+    #     if zcinfo is not None and Zeroconf is not None:
+    #         zc = Zeroconf()
+    #         zc.unregister_service(zcinfo)
+    #         zc.close()
+    # except:
+    #     pass
 if __name__ == '__main__': 
     serve()
     
