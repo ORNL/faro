@@ -129,6 +129,7 @@ def process_stream(fc, options):
     input_val = options.stream
     if input_val.isnumeric():
         input_val = int(input_val)
+    print(input_val)
     cam = cv2.VideoCapture(input_val)
     if options.verbose:
         print("Processing Stream!")
@@ -170,8 +171,8 @@ def process_stream(fc, options):
             if res.done():
                 try:
                     recs = res.result().face_records
+                    templates[fname] = []
                     for each_record in recs:
-                        templates[fname] = []
                         templates[fname].append(each_record)
                 except Exception as e:
                     print("could not get future for file ", fname, ": ", e)
@@ -185,7 +186,7 @@ def process_stream(fc, options):
         if display_frame in templates:
             recs = templates[display_frame]
             if display_frame in imcache:
-                im = imcache[display_frame]
+                im = imcache[display_frame][:,:,::-1]
                 pvim = pv.Image(im)
                 for r in recs:
                     rect = pt.rect_proto2pv(r.detection.location)
