@@ -5,36 +5,19 @@ ENV TZ=US/Detroit
 ARG DEBIAN_FRONTEND=noninteractive
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Basic toolchain
-RUN apt-get update && apt-get install -y software-properties-common &&add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" && apt update && apt install -y libjasper1 libjasper-dev
+#RUN apt-get update && apt-get install -y software-properties-common &&add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" && apt update && apt install -y libjasper1 libjasper-dev
 
-RUN apt-get update && \
-        apt-get install -y \
-        build-essential \
-        git \
-        wget \
-        unzip \
-        yasm \
-        pkg-config \
-        libcurl4-openssl-dev \
-        zlib1g-dev \
-	cmake \
-	glibc-source \
-        nano && \
-    apt-get autoremove -y
-
-# Getting OpenCV dependencies available with apt
-#RUN apt-get update && apt-get install -y \
-#        libswscale-dev \
-#        libtbb2 \
-#        libtbb-dev \
-#        libjpeg-dev \
-#        libpng-dev \
-#        libtiff-dev \
-#        libjasper-dev \
-#        libavformat-dev \
-#        libpq-dev \
-#        libhdf5-dev && \
-#    apt-get autoremove -y
+RUN apt-get -y update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    wget \
+    pkg-config \
+    ffmpeg \
+    libsm6 \
+    libxext6
+RUN apt-get install -y git systemd net-tools emacs avahi-daemon avahi-utils libnss-mdns
+RUN systemctl enable avahi-daemon
 
 # Using Miniconda to get Python 2.7.x and 3.6.y to get Numpy linked with Intel MKL for max performance
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
@@ -47,7 +30,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 # Create two conda env. just for the purpose of building
 RUN conda update -n base conda && conda update conda && conda config --add channels intel
-RUN conda create -y -n idp intelpython3_core python=3.6
+RUN conda create -y -n idp intelpython3_core python=3.7
 RUN conda install -y -n idp -c conda-forge opencv
 RUN conda run -n idp pip install dlib
 
@@ -68,7 +51,7 @@ RUN echo "source activate idp" > ~/.bashrc
 ENV PATH /opt/conda/envs/idp/bin:$PATH
 
 RUN python3 -m pip install --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --upgrade pip
-RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org install pyyaml grpcio grpcio.tools h5py tqdm zeroconf random-word tabulate sortedcollections docker
+RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org install pyyaml grpcio grpcio.tools h5py tqdm zeroconf random-word tabulate sortedcollections docker grpcio-tools scikit-image scikit-learn Pillow imageio
 RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org install --no-dependencies pyvision_toolkit
 RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org install --upgrade protobuf
 
@@ -80,10 +63,10 @@ ADD ./ $PATH_TO_FARO
 # RUN git clone https://github.com/ORNL/faro.git $PATH_TO_FARO &&\
 #     cd $PATH_TO_FARO &&\
 WORKDIR $PATH_TO_FARO
-RUN python3 -m grpc_tools.protoc --python_out=$PATH_TO_FARO/src --grpc_python_out=$PATH_TO_FARO/src --proto_path=$PATH_TO_FARO/proto $PATH_TO_FARO/proto/faro/proto/image.proto $PATH_TO_FARO/proto/faro/proto/geometry.proto $PATH_TO_FARO/proto/faro/proto/face_service.proto &&\
-    python3 setup.py develop
-RUN python3 -m pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org install dlib
+RUN conda run -n idp python3 -m grpc_tools.protoc --python_out=$PATH_TO_FARO/src --grpc_python_out=$PATH_TO_FARO/src --proto_path=$PATH_TO_FARO/proto $PATH_TO_FARO/proto/faro/proto/image.proto $PATH_TO_FARO/proto/faro/proto/geometry.proto $PATH_TO_FARO/proto/faro/proto/face_service.proto &&\
+    conda run -n idp python setup.py clean && conda run -n idp python setup.py develop --no-deps
 
 RUN mkdir -p /var/run/dbus
 ENV init /lib/systemd/systemd
 WORKDIR $PATH_TO_FARO/services/dlib/
+RUN ./download_models.sh
