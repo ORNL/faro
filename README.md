@@ -49,240 +49,60 @@ hardware.
  * Software: python3, venv, cmake, wget
  * Python Libraries: see requirements.txt
  * Optional: NVidia GPU with 8GB of Ram - GTX Titan X/1070/1080 or better 
- * Optional: nvidia-docker2 - supporting Cuda 9.0
+ * Optional: docker, nvidia-docker2 - supporting Cuda 9.0
 
 
 ## Quick Start
 
 This is intended to get Dlib algorithm up and running quickly.  This is a good 
 place to start and will allow you to test the FaRO interface.  A few 
-dependencies may be needed on a fresh Ubuntu installation including: cmake, 
-python2, and python3.  The install scripts will download and install many other
+dependencies may be needed on a fresh Ubuntu installation including: cmake, and python3.  The python setup.py file will download and install  other
 dependencies in the user directory as well as some large machine learning 
 models.  To get some initial dependencies install:
 
 ```
 $ sudo apt install cmake
-$ sudo apt install python2-dev
 $ sudo apt install python3-dev
-$ sudo apt install virtualenv
 $ sudo apt install wget
+$ sudo apt install protobuf-compiler
 ```
 
-First build the client environment and compile the proto interfaces.
+We recommend using either venv or conda to manage local python environments.
+
+First build the base FaRO environment and compile the proto interfaces. This should be done in a dedicated python environment of your choice. We will use Anaconda for the purposes of our example, but any environment manager can suffice.
 
 ```
-$ ./build-env-universal.sh
-#For Mac users run - $echo "export PYTHONPATH=`pwd`/src:$PYTHONPATH" >> "$HOME/.bash_profile" - after running build-env-universal.sh
-if using virtualenv,
-    $ source env_faro_server/bin/activate
-
-if using conda,
-    $ source activate env_faro_server
-    or
-    $ conda activate env_faro_server
-
+$ conda create -n faro python=3.8
+$ conda activate faro
+$ export FARO_STORAGE=~/faro_storage
+#Build the protobuf files
 $ ./build-proto.sh
-```
 
-
-In one terminal run the Dlib service.  When you do this for the first time it 
-will create a "faro-storage" directory and will download and extract the machine
-learning models.  At the end it will print out messages for each started worker:
-"Worker N Started."  By default the service is started on port localhost:50030.
-
-If using virtualenv,
-```
-$ source env_faro_server/bin/activate
-$ cd services/dlib
-$ ./run-dlib.sh
-```
-
-If using conda, 
+#To install the package in-place for development purposes
+$ python ./setup.py develop
+#To install the package in the dist-packages location
+$ python ./setup.py install
 
 ```
-$ source activate env_faro_server or conda activate env_faro_server
-$ cd services/dlib
-$ ./run_dlib.sh
+Next, check which services are available for you to start up, and make sure 'dlib' is within the list:
 ```
-
-The VGG2Resnet model can also be run using similar commands, but only run one 
-service at a time unless you carefully configure the ports and check available 
-memory, etc.
-
-If using virtualenv,
-
+$ python -m faro status --inactive
 ```
-$ source env_faro_server/bin/activate
-$ cd services/vggface2
-$ ./run-vgg2.sh
+Next, start the FaRO server running dlib as the algorithm under-the-hood. FaRO will build a virtual environment suited for running the algorithm for you:
 ```
-
-If using conda,
-
+$ python -m faro start --algorithm=dlib --worker-count=2 --service-name=faro_dlib --port=localhost:50030 --mode=venv
 ```
-$ source activate env_faro_server or conda activate env_faro_server
-$ cd services/vggface2
-$ ./run_vgg2.sh
+This will start an instance of a FaRO server and wait for instructions from a FaRO client.
+
+Finally, open a new terminal to connect to the server. 
 ```
-
-Similarly, InsightFace algorithms can be executed using similar commands.
-Face detection is performed using RetinaFace and features are extracted using ArcFace.
-Currently, InsightFace works only with 1 GPU and worker.
-
-If using virtualenv,
-
+$ conda activate faro
+$ python -m faro status -p localhost:50030
 ```
-$ source env_faro_server/bin/activate 
-$ cd services/arcface
-$ ./run_arcface.sh
+To try something fun, run a test script that downloads and enrolls presidential faces into a gallery:
 ```
-
-If using conda,
-
+$ cd ./tests
+$ bash ./test_gallery.sh
 ```
-$ source activate env_faro_server or conda activate env_faro_server    
-$ cd services/arcface
-$ ./run_arcface.sh
-```
-  
-In a second terminal run client applications. For this you can use either the 
-"env_faro" or "env_faro_server" environments.  Test scripts are available in
-the test directory to test the workings of the different functionalities in FaRO.
-
-To test the scripts,
-
-If using virtualenv,
-```
-$ source env_faro/bin/activate
-$ cd tests
-```
-
-If using conda,
-
-```
-$ source activate env_faro or conda activate env_faro
-$ cd tests
-```
-
-To test the detect functionality on images execute,
-
-```
-$./test_detect.sh
-```
-
-To test the detect functionality in videos execute,
-
-```
-$./test_detect_videos.sh
-```
-
-
-## Install With PIP
-This is a simple way to add FaRO to the environment.  It should install everything needed to run client api calls, but it may not provide all the configurations or models needed to run services.
-
-```
-$ pip install git+https://github.com/ORNL/faro.git
-```
-
-## Run a Service Command Line
-Starting python services can be done with a simple command line.  This will start the service specifying the port, the number of workers, and the algorithm.
-
-```
-$ python -m faro.FaceService --port=localhost:50030 --worker-count=2 --algorithm=dlib
-```
-
-## Using the Client API
-
-Examples can be found in the Notebooks directory.  The best place to start is the [FaRO Client Usage notebook](https://github.com/ORNL/faro/blob/master/Notebooks/FaRO%20Client%20Usage.ipynb).
-
-or 
-
-FaRO_Client_Face_Detection_Video_and_Images.ipynb
-
-The client can access the services using the FaRO command line interface. The CLI includes the following functions/commands
-
-```
-#client environment has to be activated
-$ cd bin
-$ ./faro 
-
-usage : ./faro <command> --help
-list the commands to be used
-Commands:
-    flist - List the faces in a gallery.
-    detectExtract - Run face detection and template extraction.
-    glist - List the galleries on the service.
-    test - Process a probe and gallery directory and produce a distance matrix.
-    extractOnly - Only run face extraction and attribute extraction.
-    enroll - Extract faces and enroll faces in a gallery.
-    search - Search images for faces in a gallery.
-    detect - Only run face detection.
-    
-#to run detect command and find its input options execute,
-$./faro detect --help
-
-Usage: ./faro command [OPTIONS] [image] [image_directory] [video] [...]
-
-Run detection on a collection of images.
-
-Options:
-  --version             show program's version number and exit
-  -h, --help            show this help message and exit
-  -v, --verbose         Print out more program information.
-  -n MAX_IMAGES, --max-images=MAX_IMAGES
-                        Process at N images and then stop.
-  --maximum-size=MAX_SIZE
-                        If too large, images will be scaled to have this
-                        maximum size. Default=1920
-
-  Detector Options:
-    Configuration for the face detector.
-
-    -d DETECTIONS_CSV, --detections-csv=DETECTIONS_CSV
-                        Save detection data to the file.
-    -a ATTRIBUTES_CSV, --attributes-csv=ATTRIBUTES_CSV
-                        Save attributes data to the file.
-    --detect-log=DETECT_LOG
-                        A directory for detection images.
-    --face-log=FACE_LOG
-                        A directory for faces.
-    -b, --best          Detect the 'best' highest scoring face in the image.
-    --detect-thresh=DETECT_THRESH
-                        The threshold for a detection.
-    --min-size=MIN_SIZE
-                        Faces with a height less that this will be ignored.
-    --attribute-filter=ATTRIBUTE_FILTER
-                        A comma separated list of filters example: 'Male>0.5'
-
-  Connection Options:
-    Control the connection to the FaRO service.
-
-    --max-async=MAX_ASYNC
-                        The maximum number of asyncronous call to make at a
-                        time. Default=8
-    --max-message-size=MAX_MESSAGE_SIZE
-                        Maximum GRPC message size. Set to -1 for unlimited.
-                        Default=67108864
-    -p DETECT_PORT, --port=DETECT_PORT
-                        The port used for the recognition service.
-    --detect-port=DETECT_PORT
-                        The port used for the recognition service.
-    --recognition-port=REC_PORT
-                        The port used for the recognition service.
-
-```
-
-    
-## Getting Help
-
-We currently have limited resources to support FaRO but will do our best to provide support.  If you encounter 
-problems please submit tickets to the issues list so that they can be properly tracked.
-
-https://github.com/ORNL/faro/issues
-
-We would also like to see new features or fixes submitted as pull requests.
-
-https://github.com/ORNL/faro/pulls
 
 

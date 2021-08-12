@@ -12,7 +12,6 @@ random-word
 tabulate
 sortedcollections
 opencv-python
-dlib
 protobuf
 docker
 getch

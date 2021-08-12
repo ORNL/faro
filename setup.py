@@ -10,9 +10,9 @@ import os
 setup(name='faro',
       version='1.5.0',
       description='Face Recognition From Oak Ridge.',
-      author='David Bolme',
-      author_email='dbolme@gmail.com',
-      url='https://github.com/bolme/pyvision',
+      # author='David Bolme',
+      # author_email='dbolme@gmail.com',
+      # url='https://github.com/bolme/pyvision',
       keywords = ["machine learning", "vision", "image", "face recognition", "deep learning","biometrics"],
          classifiers = [
         "Programming Language :: Python",
@@ -48,7 +48,7 @@ setup(name='faro',
           'protobuf',
           'grpcio',
           'grpcio-tools',
-          'dlib',
+          'sortedcollections',
       ],
 )
 
