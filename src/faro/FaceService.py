@@ -1050,7 +1050,7 @@ def get_face_worker_list(algname=None,verbose=False):
 
     for each in scripts:
         name = each[:-13].lower()
-        if algname is None or algname == name:
+        if True: #algname is None or algname == name:
             try:
                 module = importlib.import_module(each[:-3])
                 class_obj = getattr(module, each[:-3])

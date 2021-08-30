@@ -75,29 +75,37 @@ First build the base FaRO environment and compile the proto interfaces. This sho
 $ conda create -n faro python=3.8
 $ conda activate faro
 $ export FARO_STORAGE=~/faro_storage
-#Build the protobuf files
+#Get the repository 
+$ git clone https://github.com/ORNL/faro.git
+$ cd faro
+$ git checkout develop
+
+#Build the protobuf files (optional)ST
 $ ./build-proto.sh
 
+
+
+#Install the requirements
+$ python3 -m pip install --upgrade pip
+$ python3 -m pip install -r requirements.txt
 #To install the package in-place for development purposes
-$ python ./setup.py develop
-#To install the package in the dist-packages location
-$ python ./setup.py install
+$ python3 setup.py develop
 
 ```
 Next, check which services are available for you to start up, and make sure 'dlib' is within the list:
 ```
-$ python -m faro status --inactive
+$ python3 -m faro status --inactive
 ```
 Next, start the FaRO server running dlib as the algorithm under-the-hood. FaRO will build a virtual environment suited for running the algorithm for you:
 ```
-$ python -m faro start --algorithm=dlib --worker-count=2 --service-name=faro_dlib --port=localhost:50030 --mode=venv
+$ python3 -m faro start --algorithm=dlib --worker-count=2 --service-name=faro_dlib --port=localhost:50030 --mode=venv
 ```
 This will start an instance of a FaRO server and wait for instructions from a FaRO client.
 
 Finally, open a new terminal to connect to the server. 
 ```
 $ conda activate faro
-$ python -m faro status -p localhost:50030
+$ python3 -m faro status -p localhost:50030
 ```
 To try something fun, run a test script that downloads and enrolls presidential faces into a gallery:
 ```
