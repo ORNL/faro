@@ -1,7 +1,7 @@
 ## FARO - Installation Notes
 ------------------------------------
 
-** These notes are old and sholud bprobably be ignored for now. **
+** These notes are old and sholud probably be ignored for now. **
 
 
 1.	Clone repo
