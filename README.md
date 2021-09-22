@@ -50,6 +50,7 @@ hardware.
  * Python Libraries: see requirements.txt
  * Optional: NVidia GPU with 8GB of Ram - GTX Titan X/1070/1080 or better 
  * Optional: docker, nvidia-docker2 - supporting Cuda 9.0
+ * Optional: Anaconda
 
 
 ## Quick Start
