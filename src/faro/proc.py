@@ -148,6 +148,7 @@ def process_stream(fc, options):
     frame = 0
     display_frame = 1
     templates = {}
+    masks = {}
     imcache = {}
     while True:
         ret_val, im = cam.read()
@@ -172,6 +173,7 @@ def process_stream(fc, options):
                 try:
                     recs = res.result().face_records
                     templates[fname] = []
+                    masks[fname] = []
                     for each_record in recs:
                         templates[fname].append(each_record)
                 except Exception as e:
@@ -189,9 +191,17 @@ def process_stream(fc, options):
                 im = imcache[display_frame][:,:,::-1]
                 pvim = pv.Image(im)
                 for r in recs:
+                    mask = pt.image_proto2cv(r.view)
+                    mask = cv2.resize(mask,(mask.shape[1],mask.shape[0]))
+                    print('TYPE:', type(mask))
+                    # cv2.imshow('mask',mask)
                     rect = pt.rect_proto2pv(r.detection.location)
 
                     pvim.annotateThickRect(rect)
+
+                    maskedim = im*(1-mask)
+                    pvim = pv.Image(maskedim)
+
                 if pvim.show(window="camera", delay=1) == 27:
                     break
                 del imcache[display_frame]

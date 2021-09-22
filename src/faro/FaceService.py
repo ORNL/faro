@@ -412,7 +412,10 @@ class FaceService(fs.FaceRecognitionServicer):
             status_message = worker_result.get()
             status_message.worker_count = len(self.workers._pool);
             status_message.faro_version = str(faro.__version__)
-            status_message.instance_name = self.name
+            try:
+                status_message.instance_name = self.name
+            except:
+                status_message.instance_name = 'None'
             # print('Status Request', '<',status_message,'>')
             # print(context.peer())
             notes = None

@@ -86,7 +86,9 @@ class ServiceListener:
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
         self.availableServices[name] = info
-        props = {k.decode():info.properties[k].decode() for k in info.properties}
+        props = {}
+
+        # props = {k.decode():info.properties[k].decode() for k in info.properties}
         # row = {'algorithm':props['algorithm'],'address':socket.inet_ntoa(info.addresses[0]),'port':info.port,'FaRO version':props['version']}
         address = socket.inet_ntoa(info.addresses[0])
         if self.hostname == address:
