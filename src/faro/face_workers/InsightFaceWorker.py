@@ -70,8 +70,8 @@ class InsightFaceWorker(faro.FaceWorker):
         
         faces = self.app.get(img)
         
-       
         #print('Number of detections ', dets.shape[0])
+
         # Now process each face we found and add a face to the records list.
         idx = -1
         for face in faces:
