@@ -15,7 +15,7 @@ grpcio-tools==1.15.0
 kiwisolver==1.0.1
 matplotlib==2.2.2
 networkx==2.1
-numpy==1.14.5
+numpy==1.22.0
 opencv-python==3.4.1.15
 Pillow==5.1.0
 protobuf==3.6.0
