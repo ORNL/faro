@@ -142,8 +142,7 @@ def disableCommercialUseWarnings():
     global WARN_COMMERCIAL_USE
     WARN_COMMERCIAL_USE = False
 
-#Import basic faro.pyvision types
-
+#import basic faro.pyvision types
 #================================== Imports =====================================
 
 
@@ -154,7 +153,7 @@ try:
     HAS_CV2 = True
 except:
     pass
-
+import faro.pyvision.types
 from faro.pyvision.types.img import Image
 
 from faro.pyvision.types.Video import Video, Webcam, VideoFromImages, VideoFromFileList, VideoFromImageStack, VideoFromDirectory
@@ -179,7 +178,7 @@ from faro.pyvision.analysis.Table import Table
 from faro.pyvision.analysis.Timer import Timer
 
 from faro.pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
-
+import faro.pyvision.types
 from faro.pyvision.types.ImageBuffer import ImageBuffer
 
 from faro.pyvision.surveillance.BackgroundSubtraction import AbstractBGModel, FrameDifferencer, MedianFilter, ApproximateMedianFilter, MotionCompensatedFrameDifferencer, BG_SUBTRACT_FD, BG_SUBTRACT_MCFD, BG_SUBTRACT_MF, BG_SUBTRACT_AMF

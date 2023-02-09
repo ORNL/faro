@@ -121,7 +121,7 @@ class FaceClient(object):
             if service['Name'] == name:
                 return service['address']+":"+str(service['port'])
 
-        serviceList = command_line.getRunningWorkers(options,sweep_only=True)
+        #serviceList = command_line.getRunningWorkers(options,sweep_only=True)
         for service in serviceList:
             if service['Name'] == name:
                 return service['address'] + ":" + str(service['port'])

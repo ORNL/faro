@@ -7,6 +7,8 @@ import faro
 import csv
 import faro.proto.proto_types as pt
 import faro.proto.proto_types as pt
+import multiprocessing as mp
+WRITER = None
 
 
 
@@ -123,8 +125,64 @@ def process_image_dir(img_dir, dir_type, fc, options):
 
     return templates
 
+class FrameSaver:
+    def __init__(self,num_frames,file_name):
+        self.num_frames = num_frames
+        self.file_name = file_name
+        self.file_ext = '.avi'
+        self.writer = None
+        self.file_inc = 0
+        self.frame_count = 0
+        print('FrameSaver was initialized! with file name',self.file_name)
+    def initWriter(self,frameshape,fps): #frameshape should be (x,y) or (width,height)
+        self.writer = cv2.VideoWriter(self.file_name + "_" + str(self.file_inc) + self.file_ext,
+                                      cv2.VideoWriter_fourcc(*'MJPG'),
+                                      fps, frameshape)
+    def saveFrame(self,frame,fps):
+        if self.writer is None:
+            self.initWriter((frame.shape[1],frame.shape[0]),fps)
+
+        self.writer.write(frame)
+        # print(self.frame_count % self.num_frames,self.frame_count,self.num_frames)
+        if self.frame_count % self.num_frames == 0:
+            print('writing video to ', self.file_name)
+            self.release()
+            self.initWriter((frame.shape[1], frame.shape[0]),fps)
+            self.file_inc += 1
+        self.frame_count += 1
+    def release(self):
+        self.writer.release()
+
+
+def initialize_writer(numframes,filename):
+    global WRITER
+    WRITER = FrameSaver(numframes,filename)
+    print('WRITER is ',type(WRITER))
+
+def call_writer_saveFrame(frame,fps):
+    WRITER.saveFrame(frame,fps)
+
+def call_writer_release():
+    WRITER.release()
+#
+# def call_writer(function_name,args):
+#     func = getattr(WRITER,function_name)
+#     return func(args)
+
 def process_stream(fc, options):
     print("Processing Stream! nb")
+
+    #make a multiprocessing pool
+    num_save_workers = 1
+    save_pool = mp.Pool(num_save_workers,initializer=initialize_writer,initargs=(60*30/10,'test'))
+
+    output_file = 'test'
+    output_file_ext = '.avi'
+    output_max_frames = 60*30/10 #sixty seconds, thirty frames a second
+
+    video_writer = None# = cv2.VideoWriter(output_file+"_0"+output_file_ext,
+                         #cv2.VideoWriter_fourcc(*'MJPG'),
+                         #10, size)
 
     input_val = options.stream
     if input_val.isnumeric():
@@ -149,15 +207,18 @@ def process_stream(fc, options):
     display_frame = 1
     templates = {}
     imcache = {}
+    file_inc = 0
     while True:
         ret_val, im = cam.read()
-        im = im[:, :, ::-1]
         if im is not None:
+            im = im[:, :, ::-1]
+
             im = preprocessImage(im, options)
-            results = fc.detect(im, best=options.best, threshold=options.detect_thresh,
-                                       min_size=options.min_size, run_async=True, frame=frame)
-            imcache[frame] = im
-            detect_queue.append([frame, results])
+            if fc is not None:
+                results = fc.detect(im, best=options.best, threshold=options.detect_thresh,
+                                           min_size=options.min_size, run_async=True, frame=frame)
+                imcache[frame] = im
+                detect_queue.append([frame, results])
 
             image_count += 1
             if options.max_images is not None and image_count >= options.max_images:
@@ -194,6 +255,16 @@ def process_stream(fc, options):
                     pvim.annotateThickRect(rect)
                 if pvim.show(window="camera", delay=1) == 27:
                     break
+                saveout_im = pvim.asAnnotated(as_type="PV").asOpenCV2()
+                # if video_writer is None:
+                #     video_writer = cv2.VideoWriter(output_file + "_" + str(file_inc) + output_file_ext,
+                #                                cv2.VideoWriter_fourcc(*'MJPG'),
+                #                                30, (saveout_im.shape[1],saveout_im.shape[0]))
+                fps = cam.get(cv2.CAP_PROP_FPS)
+                save_pool.apply_async(call_writer_saveFrame,[saveout_im,fps,])
+
+                # video_writer.write(saveout_im)
+
                 del imcache[display_frame]
 
             else:
@@ -205,6 +276,15 @@ def process_stream(fc, options):
             # else:
             #     display_frame+=1
 
+        # if frame % output_max_frames == 0:
+        #     # we need to save the video and start a new one
+        #     video_writer.release()
+        #     video_writer = cv2.VideoWriter(output_file+"_"+str(file_inc)+output_file_ext,
+        #                                    cv2.VideoWriter_fourcc(*'MJPG'),
+        #                                    30, (saveout_im.shape[1],saveout_im.shape[0]))
+        #     file_inc += 1
+    # video_writer.release()
+    save_pool.apply_async(call_writer_release)
     return templates
 
 def processAttributeFilter(face, options):

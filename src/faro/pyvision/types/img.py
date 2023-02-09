@@ -1101,7 +1101,7 @@ class Image:
 
                 global _MATPLOTLIB_FIGURES
                 
-                if not _MATPLOTLIB_FIGURES.has_key(window):
+                if window not in _MATPLOTLIB_FIGURES:
                     idx = len(_MATPLOTLIB_FIGURES) + 1
                     _MATPLOTLIB_FIGURES[window] = idx
                 

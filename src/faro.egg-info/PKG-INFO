@@ -1,14 +1,8 @@
-Metadata-Version: 1.1
+Metadata-Version: 2.1
 Name: faro
 Version: 1.5.0
 Summary: Face Recognition From Oak Ridge.
-Home-page: https://github.com/bolme/pyvision
-Author: David Bolme
-Author-email: dbolme@gmail.com
-License: UNKNOWN
-Description: A computer vision library for python.
 Keywords: machine learning,vision,image,face recognition,deep learning,biometrics
-Platform: UNKNOWN
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 2.7
 Classifier: Programming Language :: Python :: 3
@@ -22,3 +16,6 @@ Classifier: Operating System :: OS Independent
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Classifier: Topic :: Scientific/Engineering :: Image Recognition
+License-File: LICENSE
+
+A computer vision library for python.

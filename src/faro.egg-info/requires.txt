@@ -5,6 +5,6 @@ scipy
 scikit-image
 scikit-learn
 protobuf
-grpcio
 grpcio-tools
-dlib
+sortedcollections
+h5py
