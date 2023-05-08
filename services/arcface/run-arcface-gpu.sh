@@ -7,7 +7,8 @@ HOST=localhost
 PORT=50030
 WORKER_COUNT=1
 USE_GPUS='0'
-
+export MXNET_CUDNN_AUTOTUNE_DEFAULT=0
+MXNET_CUDNN_AUTOTUNE_DEFAULT=0 
 if lsof -i:$PORT
 then
     echo ERROR - Port $PORT is in use.

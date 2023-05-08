@@ -48,6 +48,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         '''
         Constructor
         '''
+        os.environ['MXNET_CUDNN_AUTOTUNE_DEFAULT'] = '0'
         import insightface
         os.environ['MXNET_CUDNN_AUTOTUNE_DEFAULT'] = '0'
         kwargs = {'root':os.path.join(options.storage_dir,'models')}
@@ -75,6 +76,9 @@ class ArcfaceFaceWorker(faro.FaceWorker):
         dets, lpts = self.detector.detect(img, threshold=options.threshold, scale=1)
         #print('Number of detections ', dets.shape[0])
         # Now process each face we found and add a face to the records list.
+        if dets.shape[0] == 0:
+            dets = np.array([[1,1,img.shape[1]-2,img.shape[0]-2],0])
+            lmark = np.array([])
         for idx in range(0,dets.shape[0]):
             face_record = face_records.face_records.add()
             try: # todo: this seems to be different depending on mxnet version
@@ -93,7 +97,7 @@ class ArcfaceFaceWorker(faro.FaceWorker):
                 lmark.landmark_id = "point_%02d"%ldx
                 lmark.location.x = lmarkloc[ldx][0]
                 lmark.location.y = lmarkloc[ldx][1]
-
+            
         if options.best:
             face_records.face_records.sort(key = lambda x: -x.detection.score)
             

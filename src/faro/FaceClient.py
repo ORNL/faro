@@ -114,7 +114,10 @@ class FaceClient(object):
             print (self.status)
 
     def getAddressByName(self,options,name):
-        self.zeroconf = Zeroconf()
+        try:
+            self.zeroconf = Zeroconf()
+        except:
+            return None
         import faro.command_line as command_line
         serviceList = command_line.getRunningWorkers(options)
         for service in serviceList:
