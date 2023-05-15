@@ -418,8 +418,10 @@ class FaceService(fs.FaceRecognitionServicer):
             notes = None
             stop = time.time()
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"status()",notes,context.peer())))
-
+            if context is not None:
+                print(( LOG_FORMAT%(pv.timestamp(),stop-start,"status()",notes,context.peer())))
+            else:
+                print((LOG_FORMAT % (pv.timestamp(), stop - start, "status()", notes, 'local context')))
             return status_message
         except:
             traceback.print_exc()
@@ -469,7 +471,10 @@ class FaceService(fs.FaceRecognitionServicer):
 
             stop = time.time()
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes,context.peer())))
+            if context is not None:
+                print(( LOG_FORMAT%(pv.timestamp(),stop-start,"detect()",notes,context.peer())))
+            else:
+                print((LOG_FORMAT % (pv.timestamp(), stop - start, "detect()", notes, "local context")))
     
             #print (face_records_list)
             return face_records_list
@@ -498,8 +503,10 @@ class FaceService(fs.FaceRecognitionServicer):
             stop = time.time()
             
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"extract()",notes,context.peer())))
-
+            if context is not None:
+                print(( LOG_FORMAT%(pv.timestamp(),stop-start,"extract()",notes,context.peer())))
+            else:
+                print((LOG_FORMAT % (pv.timestamp(), stop - start, "extract()", notes, "local context")))
             return face_records_list
     
         except:
@@ -580,8 +587,10 @@ class FaceService(fs.FaceRecognitionServicer):
             notes += "Matrix %s - %s"%(size,speed)
 
             global LOG_FORMAT
-            print(( LOG_FORMAT%(pv.timestamp(),stop-start,"score()",notes,context.peer())))
-
+            if context is not None:
+                print(( LOG_FORMAT%(pv.timestamp(),stop-start,"score()",notes,context.peer())))
+            else:
+                print((LOG_FORMAT % (pv.timestamp(), stop - start, "score()", notes, "local context")))
             return dist_mat
     
         except:
@@ -939,7 +948,8 @@ def addServiceOptionsGroup(parser_parent=None):
 
     parser.add_option("--gpus", type="str", dest="gpus", default="",
                       help="Specify the gpus to use.")
-
+    parser.add_option("--test",action="store_true", dest="test", default=True,
+                      help="Run panel of unit tests against the service to check for correct implementation")
     parser.add_option("-w", "--worker-count", type="int", dest="worker_count", default=1,
                       help="Specify the number of worker processes.")
 
@@ -955,6 +965,7 @@ def addServiceOptionsGroup(parser_parent=None):
     model_options = parser_parent.add_option_group("Options for machine learning models.")
     model_options.add_option("--detect-model", type="str", dest="detect_model", default='default',
                              help="A model file to use for detection.")
+
 
     model_options.add_option("--extract-model", type="str", dest="extract_model", default='default',
                              help="A model file to use for template extraction.")
@@ -1091,73 +1102,80 @@ def serve(options=None):
     if options.verbose:
         print('starting Face Service')
     face_client = FaceService(options)
+    print('Loaded FaceService')
     zcinfo = None
     if Zeroconf is not None:
         zcinfo = face_client.wsInfo
     print("Batch loading a watchlist.")
     #face_client.batchLoad("../tests/watchlist.csv", 'authorized')
+    if not options.test:
+        fs.add_FaceRecognitionServicer_to_server(face_client, server)
 
-    fs.add_FaceRecognitionServicer_to_server(face_client, server)
+        if options.certificate is not None or options.encryption_key is not None or options.secured:
+            if options.secured and options.encryption_key is None and options.certificate is None:
+                for i in range(2):
+                    keystore_dir = os.path.join(faro.__path__[0],'keystore')
+                    keypath = os.path.join(keystore_dir, 'server.key')
+                    crtpath = os.path.join(keystore_dir, 'server.crt')
+                    if options.verbose:
+                        print('No certificate or encryption key specified, accessing default keystore at ')
+                    if os.path.exists(keystore_dir) and os.path.isdir(keystore_dir):
+                        if os.path.exists(keypath) and os.path.isfile(keypath):
+                            options.encryption_key = keypath
+                        if os.path.exists(crtpath) and os.path.isfile(crtpath):
+                            options.certificate = crtpath
+                    elif not os.path.exists(keystore_dir) or (not os.path.exists(keypath) and not os.path.exists(crtpath)):
+                        if i == 0:
+                            ans = input('There is no current keystore for this instance of FaRO. Would you like to generate secure SHA keys? (y/n)')
+                            if 'y' in ans:
+                                faro.util.generateKeys(os.path.join(faro.__path__[0],'keystore'))
+            if options.certificate is not None:
+                certfile = options.certificate
+            else:
+                certfile = input('Please provide a .pem encryption certificate: ')
+            if options.encryption_key is not None:
+                keyfile = options.encryption_key
+            else:
+                keyfile = input('Please provide a .pem encryption key: ')
+            private_key = open(keyfile,'rb').read()
+            certificate_chain = open(certfile,'rb').read()
+            credentials = grpc.ssl_server_credentials(
+                [(private_key, certificate_chain)]
+            )
+            print('adding secure port')
+            server.add_secure_port(options.port, credentials)
+        else:
+            server.add_insecure_port(options.port)
+    if not options.test:
+        print('Starting Server on port: %s'%options.port)
+        server.start()
+        print('To end server, press "ctl+c"')
 
-    if options.certificate is not None or options.encryption_key is not None or options.secured:
-        if options.secured and options.encryption_key is None and options.certificate is None:
-            for i in range(2):
-                keystore_dir = os.path.join(faro.__path__[0],'keystore')
-                keypath = os.path.join(keystore_dir, 'server.key')
-                crtpath = os.path.join(keystore_dir, 'server.crt')
-                if options.verbose:
-                    print('No certificate or encryption key specified, accessing default keystore at ')
-                if os.path.exists(keystore_dir) and os.path.isdir(keystore_dir):
-                    if os.path.exists(keypath) and os.path.isfile(keypath):
-                        options.encryption_key = keypath
-                    if os.path.exists(crtpath) and os.path.isfile(crtpath):
-                        options.certificate = crtpath
-                elif not os.path.exists(keystore_dir) or (not os.path.exists(keypath) and not os.path.exists(crtpath)):
-                    if i == 0:
-                        ans = input('There is no current keystore for this instance of FaRO. Would you like to generate secure SHA keys? (y/n)')
-                        if 'y' in ans:
-                            faro.util.generateKeys(os.path.join(faro.__path__[0],'keystore'))
-        if options.certificate is not None:
-            certfile = options.certificate
-        else:
-            certfile = input('Please provide a .pem encryption certificate: ')
-        if options.encryption_key is not None:
-            keyfile = options.encryption_key
-        else:
-            keyfile = input('Please provide a .pem encryption key: ')
-        private_key = open(keyfile,'rb').read()
-        certificate_chain = open(certfile,'rb').read()
-        credentials = grpc.ssl_server_credentials(
-            [(private_key, certificate_chain)]
-        )
-        print('adding secure port')
-        server.add_secure_port(options.port, credentials)
+        #this allows us to listen for ctl+c sigint so that we terminate peacefully
+        faro.util.setGlobalValue('shouldstopserver',0)
+        sig = faro.util.sigintThread()
+        sig.start()
+
+        try:
+            while True:
+                time.sleep(1)
+                shouldkill= faro.util.getGlobalValue('shouldstopserver')
+                if shouldkill:
+                    break
+        except Exception as e:
+            print('break ',e )
+            pass
+
+
+        print('starting the exit process')
+        face_client.cleanexit()
+        server.stop(0)
+        print('Server Stopped.')
     else:
-        server.add_insecure_port(options.port)
-    print('Starting Server on port: %s'%options.port)
-    server.start()
-    print('To end server, press "ctl+c"')
-
-    #this allows us to listen for ctl+c sigint so that we terminate peacefully
-    faro.util.setGlobalValue('shouldstopserver',0)
-    sig = faro.util.sigintThread()
-    sig.start()
-
-    try:
-        while True:
-            time.sleep(1)
-            shouldkill= faro.util.getGlobalValue('shouldstopserver')
-            if shouldkill:
-                break
-    except Exception as e:
-        print('break ',e )
-        pass
-
-
-    print('starting the exit process')
-    face_client.cleanexit()
-    server.stop(0)
-    print('Server Stopped.')
+        #perform unit tests instead
+        print('Performing integration tests and unit tests on server!')
+        from faro.face_workers.WorkerTests import run_local_tests
+        run_local_tests(face_client)
     # try:
     #     if zcinfo is not None and Zeroconf is not None:
     #         zc = Zeroconf()

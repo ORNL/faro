@@ -69,7 +69,7 @@ class FaceClient(object):
     '''
     
     '''
-    def __init__(self,options,max_message_length=-1,timeout=None):
+    def __init__(self,options,max_message_length=-1,timeout=None,local_service=None):
         
         self.options = options
 
@@ -86,24 +86,28 @@ class FaceClient(object):
         self.max_async_jobs = max(self.max_async_jobs,1)
         self.async_sleep_time = 0.001
         self.running_async_jobs = []
-
-        port = None
-        if options.service_name is not None:
-            optcopy = copy.copy(options)
-            optcopy.verbose = False
-            port = self.getAddressByName(optcopy, options.service_name)
-        if port is None:
-            port = options.port
-
-        if options.certificate is not None:
-            ca_cert = options.certificate
-            root_certs = open(ca_cert,'rb').read()
-            credentials = grpc.ssl_channel_credentials(root_certs)
-            channel = grpc.secure_channel(port, credentials=credentials,options=channel_options)
+        self.is_local = False
+        if local_service:
+            self.service_stub = local_service
+            self.is_local = True
         else:
-            channel = grpc.insecure_channel(port,
-                                            options=channel_options)
-        self.service_stub = fs.FaceRecognitionStub(channel)
+            port = None
+            if options.service_name is not None:
+                optcopy = copy.copy(options)
+                optcopy.verbose = False
+                port = self.getAddressByName(optcopy, options.service_name)
+            if port is None:
+                port = options.port
+
+            if options.certificate is not None:
+                ca_cert = options.certificate
+                root_certs = open(ca_cert,'rb').read()
+                credentials = grpc.ssl_channel_credentials(root_certs)
+                channel = grpc.secure_channel(port, credentials=credentials,options=channel_options)
+            else:
+                channel = grpc.insecure_channel(port,
+                                                options=channel_options)
+            self.service_stub = fs.FaceRecognitionStub(channel)
         #channel = grpc.insecure_channel(options.rec_port,
         #                                options=channel_options)
         #self.rec_stub = fs.FaceRecognitionStub(channel)
@@ -160,6 +164,7 @@ class FaceClient(object):
         request.detect_options.downsample=downsample
         
         if threshold == None:
+            print('INFO:',self.info)
             request.detect_options.threshold = self.info.detection_threshold
         else: 
             request.detect_options.threshold = float(threshold)
@@ -469,7 +474,10 @@ class FaceClient(object):
         request = fsd.FaceStatusRequest()
         iserror = False
         try:
-            status_message = self.service_stub.status(request,timeout=timeout)
+            if not self.is_local:
+                status_message = self.service_stub.status(request,timeout=timeout)
+            else:
+                status_message = self.service_stub.status(request, None)
         except Exception as e:
             iserror = True
             status_message = "cannot connect"

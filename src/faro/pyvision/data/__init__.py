@@ -2,14 +2,14 @@
 This package contains some standard tests that can be performed with
 the test data distributed with pyvision.
 '''
-import faro.pyvision as pv
+import pyvision as pv
 import os
-from faro.pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
+from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
 import csv
 import numpy as np
 
-SCRAPS_EYES = None
-''' The path to a text file containing coordinates to the scrapshots dataset. '''
+# SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt'))
+# ''' The path to a text file containing coordinates to the scrapshots dataset. '''
 
 
 
@@ -29,27 +29,26 @@ LENA      = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
 LOGO      = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
 ''' The path to a commonly use test image of a butterfly used as the pyvision logo.'''
 
-TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
-''' The path to a commonly use test image of a butterfly used as the pyvision logo.'''
+# TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
+# ''' The path to a commonly use test image of a butterfly used as the pyvision logo.'''
+#
+# TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+# ''' The path to a test video of a Loony Tunes Taz stuffed animal.'''
+#
+# CAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+# ''' The path to a test video of a small moving car.'''
+#
+# BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
+# ''' The path to a test video sequence of bugs crawling through weeds.'''
 
-TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
-''' The path to a test video of a Loony Tunes Taz stuffed animal.'''
 
-CAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
-''' The path to a test video of a small moving car.'''
+# FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
+# ''' The path to a file containing the Arial true type font. '''
 
-BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
-''' The path to a test video sequence of bugs crawling through weeds.'''
-
-
-FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
-
-''' The path to a file containing the Arial true type font. '''
-
-IRIS_PATH = os.path.join(pv.__path__[0],'data','ml','iris.csv')
-IRIS_DATA = None
-IRIS_LABELS = None
-IRIS_DATA = None
+# IRIS_PATH = os.path.join(pv.__path__[0],'data','ml','iris.csv')
+# IRIS_DATA = np.array(list(csv.reader(open(IRIS_PATH,'r'))))
+# IRIS_LABELS = IRIS_DATA[1:,5]
+# IRIS_DATA = np.array(IRIS_DATA[1:,1:5],dtype=np.float32)
 
 
 
@@ -118,17 +117,17 @@ def genderClassifier(clsfy, ilog=None):
 
     if ilog: ilog.table(table)
     return rate
-
-if __name__ == "__main__":
-    from faro.pyvision.vector.SVM import SVM
-    
-    svm = SVM(kernel='LINEAR',random_seed=30)
-    ilog = pv.ImageLog()
-    print("SVM rate:",genderClassifier(svm,ilog=None))
-    
-    svm = SVM(kernel='RBF',random_seed=30)
-    ilog = pv.ImageLog()
-    print("SVM rate:",genderClassifier(svm,ilog=None))
-    
-    ilog.show()
-    
+#
+# if __name__ == "__main__":
+#     from pyvision.vector.SVM import SVM
+#
+#     svm = SVM(kernel='LINEAR',random_seed=30)
+#     ilog = pv.ImageLog()
+#     print("SVM rate:",genderClassifier(svm,ilog=None))
+#
+#     svm = SVM(kernel='RBF',random_seed=30)
+#     ilog = pv.ImageLog()
+#     print("SVM rate:",genderClassifier(svm,ilog=None))
+#
+#     ilog.show()
+#

@@ -35,6 +35,7 @@ src/faro/face_workers/InsightFaceWorker.py
 src/faro/face_workers/RankOneFaceWorker.py
 src/faro/face_workers/RcnnFaceWorker.py
 src/faro/face_workers/VggFaceWorker.py
+src/faro/face_workers/WorkerTests.py
 src/faro/face_workers/__init__.py
 src/faro/proto/__init__.py
 src/faro/proto/face_service_pb2.py
