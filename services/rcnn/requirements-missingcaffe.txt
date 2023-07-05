@@ -10,7 +10,7 @@ enum34==1.1.6
 fast-rcnn==0.0.0
 futures==3.2.0
 googleapis-common-protos==1.5.3
-grpcio==1.15.0
+grpcio==1.53.0
 grpcio-tools==1.15.0
 kiwisolver==1.0.1
 matplotlib==2.2.2
