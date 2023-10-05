@@ -948,7 +948,7 @@ def addServiceOptionsGroup(parser_parent=None):
 
     parser.add_option("--gpus", type="str", dest="gpus", default="",
                       help="Specify the gpus to use.")
-    parser.add_option("--test",action="store_true", dest="test", default=True,
+    parser.add_option("--test",action="store_true", dest="test", default=False,
                       help="Run panel of unit tests against the service to check for correct implementation")
     parser.add_option("-w", "--worker-count", type="int", dest="worker_count", default=1,
                       help="Specify the number of worker processes.")
