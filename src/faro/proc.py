@@ -610,7 +610,7 @@ def processSearchResults(each):
                                              ]),
             if options.search_log is not None:
 
-
+                if len(face.search_results.face_records) > 0:
                     im.annotateThickRect(face_detect_rect, width=3, color='yellow')
                     im.annotateLabel(pv.Point(face_detect_rect.x, face_detect_rect.y + face_detect_rect.h + 5),
                                      "%s - %s" % (gal_sub_id, gal_name), font=16, color='yellow')
