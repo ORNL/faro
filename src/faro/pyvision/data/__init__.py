@@ -42,8 +42,8 @@ LOGO      = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
 # ''' The path to a test video sequence of bugs crawling through weeds.'''
 
 
-# FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
-# ''' The path to a file containing the Arial true type font. '''
+FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
+''' The path to a file containing the Arial true type font. '''
 
 # IRIS_PATH = os.path.join(pv.__path__[0],'data','ml','iris.csv')
 # IRIS_DATA = np.array(list(csv.reader(open(IRIS_PATH,'r'))))
