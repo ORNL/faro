@@ -719,7 +719,6 @@ def sdelete():
     
 def search():
     options, args = searchParseOptions()
-    options.search_log = options.search_csv
     faro.command_line.search(options,args)
 
 def test():

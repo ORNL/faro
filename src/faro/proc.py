@@ -588,29 +588,28 @@ def processSearchResults(each):
                     SEARCH_CSV.writerow(['face_source', 'face_detect_id',
                                          'gal_sub_id', 'gal_name', 'gal_source',
                                          'gal_score', 'gal_key', 'x', 'y', 'w', 'h'])
+                    if len(face.search_results.face_records) > 0:
+                        gal = face.search_results.face_records[0]
+                        gal_name = gal.name
+                        gal_sub_id = gal.subject_id
+                        gal_source = gal.source
+                        gal_score = gal.score
+                        gal_key = gal.gallery_key
 
+                        # face.search_results.face_records
+                        # string subject_id = 1;
+                        # string name = 5;
+                        # string source = 4;
+                        # int64 frame = 14;
+                        # string notes = 6;
+                        # string gallery_key = 15;
+
+                        SEARCH_CSV.writerow([face_source, face_detect_id,
+                                             gal_sub_id, gal_name, gal_source, gal_score, gal_key, face_detect_rect.x,
+                                             face_detect_rect.y, face_detect_rect.w, face_detect_rect.h
+                                             ]),
             if options.search_log is not None:
 
-                if len(face.search_results.face_records) > 0:
-                    gal = face.search_results.face_records[0]
-                    gal_name = gal.name
-                    gal_sub_id = gal.subject_id
-                    gal_source = gal.source
-                    gal_score = gal.score
-                    gal_key = gal.gallery_key
-
-                    # face.search_results.face_records
-                    # string subject_id = 1;
-                    # string name = 5;
-                    # string source = 4;
-                    # int64 frame = 14;
-                    # string notes = 6;
-                    # string gallery_key = 15;
-
-                    SEARCH_CSV.writerow([face_source, face_detect_id,
-                                         gal_sub_id, gal_name, gal_source, gal_score, gal_key, face_detect_rect.x,
-                                         face_detect_rect.y, face_detect_rect.w, face_detect_rect.h
-                                         ]),
 
                     im.annotateThickRect(face_detect_rect, width=3, color='yellow')
                     im.annotateLabel(pv.Point(face_detect_rect.x, face_detect_rect.y + face_detect_rect.h + 5),
