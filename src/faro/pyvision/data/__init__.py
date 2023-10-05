@@ -2,9 +2,9 @@
 This package contains some standard tests that can be performed with
 the test data distributed with pyvision.
 '''
-import pyvision as pv
+import faro.pyvision as pv
 import os
-from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
+from faro.pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
 import csv
 import numpy as np
 

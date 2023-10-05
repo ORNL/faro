@@ -40,7 +40,7 @@ __version__ = "$Revision$"
 # PIL Imports
 import PIL.ImageDraw
 import PIL.Image
-from PIL.Image import BICUBIC, ANTIALIAS
+from PIL.Image import BICUBIC, LANCZOS
 import PIL.ImageFont as ImageFont
 
 # Imaging imports
@@ -952,7 +952,7 @@ class Image:
         tmp = self.asPIL()
         if newSize[0] < self.size[0] or newSize[1] < self.size[1]:
             #because at least one dimension is being shrinked, we need to use ANTIALIAS filter
-            tmp = tmp.resize(newSize, ANTIALIAS)        
+            tmp = tmp.resize(newSize, LANCZOS)        
         else:
             #use bicubic interpolation
             tmp = tmp.resize(newSize, BICUBIC)
