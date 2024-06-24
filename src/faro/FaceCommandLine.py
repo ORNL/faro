@@ -62,8 +62,8 @@ def addDetectorOptions(parser):
     detector_group = optparse.OptionGroup(parser, "Detector Options",
                                           "Configuration for the face detector.")
 
-    detector_group.add_option("-d", "--detections-csv", type="str", dest="detections_csv", default=None,
-                              help="Save detection data to the file.")
+    # detector_group.add_option("-d", "--detections-csv", type="str", dest="detections_csv", default=None,
+    #                           help="Save detection data to the file.")
 
     detector_group.add_option("-d", "--templates-csv", type="str", dest="templates_csv", default=None,
                               help="Save template data to the file.")
