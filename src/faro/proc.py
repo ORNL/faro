@@ -14,6 +14,8 @@ WRITER = None
 
 DETECTIONS_FILE = None
 DETECTIONS_CSV = None
+TEMPLATES_FILE = None
+TEMPLATES_CSV = None
 ATTRIBUTES_FILE = None
 ATTRIBUTES_CSV = None
 
@@ -357,7 +359,11 @@ def processDetections(each):
             if options.detections_csv is not None:
                 global DETECTIONS_CSV
                 global DETECTIONS_FILE
+                global TEMPLATES_CSV
+                global TEMPLATES_FILE
                 import csv
+
+
                 if DETECTIONS_CSV == None:
                     DETECTIONS_FILE = open(options.detections_csv, 'w')
                     DETECTIONS_CSV = csv.writer(DETECTIONS_FILE)

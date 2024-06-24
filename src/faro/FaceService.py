@@ -320,6 +320,7 @@ class FaceService(fs.FaceRecognitionServicer):
             sys.exit(1)
         self.setup_zeroconf(options)
         print('starting broadcast...')
+
         self.broadcast()
         print('broadcasting!')
         # TODO: Change this to gallery worker
@@ -408,7 +409,13 @@ class FaceService(fs.FaceRecognitionServicer):
 
     def broadcast(self):
         if Zeroconf is not None and self.zeroconf is not None:
-            self.zeroconf.register_service(self.wsInfo)
+            try:
+                self.zeroconf.register_service(self.wsInfo)
+            except Exception as e:
+                print("Could not broadcast on zeroconf")
+                print(e)
+                # Zeroconf = None
+                self.zeroconf = None
 
 
 

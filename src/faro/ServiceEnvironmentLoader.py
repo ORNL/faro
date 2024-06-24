@@ -145,76 +145,78 @@ def startByVenv(options,service_instance_name,service_dir):
         else:
             print('No environments or environment build scripts found for', options.algorithm ,".  Please create a build script titled 'build_env_'", options.algorithm," and place it in the respective service directory")
 def startByDocker(options,service_instance_name,service_dir):
-    prefix = "faro_"
-    docker_instance_name = prefix+service_instance_name
-    docker_image_name = prefix+options.algorithm
-    containers = getDockercontainers()
-    images = getDockerImages()
-    client = docker.from_env()
+    if docker is not None:
+        prefix = "faro_"
+        docker_instance_name = prefix+service_instance_name
+        docker_image_name = prefix+options.algorithm
+        containers = getDockercontainers()
+        images = getDockerImages()
+        client = docker.from_env()
 
-    print('looking for containers named ',docker_instance_name)
-    print('looking for images named ', docker_image_name)
-    buildAttempted = False
-    if docker_image_name not in images and docker_instance_name not in containers:
-        print('No images or containers were found in Docker. Building dockerfile instead')
-        buildDockerFile(os.path.join(service_dir), docker_image_name)
-        buildAttempted = True
-    containers = getDockercontainers()
-    images = getDockerImages()
-    if docker_instance_name in containers:
-        print('we found a container called ', docker_instance_name)
-        containerstatus = containers[docker_instance_name].attrs['State']['Status']
-        if containerstatus.lower() == "paused":
-            #we need to start the container
-            print('we should start the container')
-            pass
-        else:
-            #we need to do nothing
-            print('we are already done')
-            pass
-    elif docker_image_name not in images:
-        print('No images by the name of',docker_image_name,' or containers were found in Docker. Building dockerfile instead')
-        if not buildAttempted:
+        print('looking for containers named ',docker_instance_name)
+        print('looking for images named ', docker_image_name)
+        buildAttempted = False
+        if docker_image_name not in images and docker_instance_name not in containers:
+            print('No images or containers were found in Docker. Building dockerfile instead')
             buildDockerFile(os.path.join(service_dir), docker_image_name)
             buildAttempted = True
-    if docker_image_name in images:
-        print('we found an uninstantiated docker image named ', docker_image_name)
-        host = options.port.split(':')
-        hostport = int(host[1])
-        host = host[0]
-        face_worker_list, parser = faro.FaceService.addServiceOptionsGroup()
-        # command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
-        command = ["python","-m", "faro.FaceService", "--port", "0.0.0.0:50030"]
-        cmdflags = buildFlags(parser,options,service_instance_name,ignore=['port','storage'])
-        command.extend(cmdflags)
-        command = ' '.join(command)
-        if options.verbose:
-            print(command)
-        networkmode = "host"
-        if sys.platform == "linux" or sys.platform == "linux2":
+        containers = getDockercontainers()
+        images = getDockerImages()
+        if docker_instance_name in containers:
+            print('we found a container called ', docker_instance_name)
+            containerstatus = containers[docker_instance_name].attrs['State']['Status']
+            if containerstatus.lower() == "paused":
+                #we need to start the container
+                print('we should start the container')
+                pass
+            else:
+                #we need to do nothing
+                print('we are already done')
+                pass
+        elif docker_image_name not in images:
+            print('No images by the name of',docker_image_name,' or containers were found in Docker. Building dockerfile instead')
+            if not buildAttempted:
+                buildDockerFile(os.path.join(service_dir), docker_image_name)
+                buildAttempted = True
+        if docker_image_name in images:
+            print('we found an uninstantiated docker image named ', docker_image_name)
+            host = options.port.split(':')
+            hostport = int(host[1])
+            host = host[0]
+            face_worker_list, parser = faro.FaceService.addServiceOptionsGroup()
+            # command = "python -m faro.FaceService --port=" + "0.0.0.0:50030" + " --service-name="+ service_instance_name + " --worker-count="+ str(options.num_workers) + " --algorithm=" + options.algorithm
+            command = ["python","-m", "faro.FaceService", "--port", "0.0.0.0:50030"]
+            cmdflags = buildFlags(parser,options,service_instance_name,ignore=['port','storage'])
+            command.extend(cmdflags)
+            command = ' '.join(command)
+            if options.verbose:
+                print(command)
             networkmode = "host"
-        elif sys.platform == "darwin":
-            networkmode = "bridge"
-        ports={50030:hostport}
-        runtime = None
-        if options.gpus != "":
-            runtime="nvidia"
-        # network_mode=networkmode
-        workdir = os.path.abspath(os.path.join(faro.__path__[0],'..','..'))
-        print('command:')
-        print(command)
-        if runtime is None:
-            container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True)
+            if sys.platform == "linux" or sys.platform == "linux2":
+                networkmode = "host"
+            elif sys.platform == "darwin":
+                networkmode = "bridge"
+            ports={50030:hostport}
+            runtime = None
+            if options.gpus != "":
+                runtime="nvidia"
+            # network_mode=networkmode
+            workdir = os.path.abspath(os.path.join(faro.__path__[0],'..','..'))
+            print('command:')
+            print(command)
+            if runtime is None:
+                container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True)
+            else:
+                container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True,runtime=runtime)
+            print('finished running')
+            #while(True):
+                #if cv2.waitKey(1) == 27:
+                    #container.stop()
+                    #sys.exit(1)
         else:
-            container = client.containers.run(docker_image_name, command,network_mode="bridge",stdin_open=True,stderr=True,ports={50030:hostport},stop_signal="SIGINT", stdout=True,remove=True,name=docker_instance_name,privileged=True,runtime=runtime)
-        print('finished running')
-        #while(True):
-            #if cv2.waitKey(1) == 27:
-                #container.stop()
-                #sys.exit(1)
+            print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
     else:
-        print('Even after building, no images were found in Docker by the name of', docker_image_name,', or containers by the name of ',docker_instance_name,'. Are you sure you named the docker worker correctly?')
-
+        print('Docker is not installed to python.  Perform pip install docker, then try again, or chose a different loading mode via the --mode flag (e.g. --mode venv)')
 def startByNative(options,service_instance_name,service_dir):
     options_copy = copy.copy(options)
     options_copy.service_name = service_instance_name
