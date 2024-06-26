@@ -141,7 +141,7 @@ def startByVenv(options,service_instance_name,service_dir):
                     print('Please Select a number 0 -', len(buildscripts) - 1)
                     envnum = input()
             buildscript = buildscripts[int(envnum)]
-            os.system("cd "+ service_dir + " && " + buildscript)
+            os.system("cd "+ service_dir + " && " + buildscript + ' 1')
         else:
             print('No environments or environment build scripts found for', options.algorithm ,".  Please create a build script titled 'build_env_'", options.algorithm," and place it in the respective service directory")
 def startByDocker(options,service_instance_name,service_dir):
