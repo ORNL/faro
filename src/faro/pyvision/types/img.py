@@ -40,7 +40,11 @@ __version__ = "$Revision$"
 # PIL Imports
 import PIL.ImageDraw
 import PIL.Image
-from PIL.Image import BICUBIC, LANCZOS
+from PIL.Image import BICUBIC
+try:
+    from PIL.Image import LANCZOS as ANTIALIAS
+except:
+    from PIL.Image import ANTIALIAS
 import PIL.ImageFont as ImageFont
 
 # Imaging imports
@@ -623,7 +627,13 @@ class Image:
             font = ImageFont.truetype(pv.FONT_ARIAL, font)
         
         # Compute the size
-        tw,th = draw.textsize(label, font=font)
+        # Pillow deprecated textsize in 9.5.0 and replaced it with textbbox
+        if hasattr(draw, 'textbbox'):
+            left, top, right, bottom = draw.textbbox(xy=(0, 0), text=label, font=font)
+            tw = right - left
+            th = bottom - top
+        elif hasattr(draw, 'textsize'):
+            tw, th = draw.textsize(label, font=font)
         
         # Select the position relative to the point
         if mark in [True, 'right']:
