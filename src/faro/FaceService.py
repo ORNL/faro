@@ -953,6 +953,7 @@ def addServiceOptionsGroup(parser_parent=None):
     parser.add_option("--cpu", action="store_true", dest="cpu_mode", default=False,
                       help="When possible run on the cpu and ignore the GPU.")
     ALG_NAMES = list(face_workers_list.keys())
+    print('ALGNAMES:',ALG_NAMES)
     ALG_NAMES.sort()
     if 'dlib' in ALG_NAMES:
         DEFAULT_ALG_NAME = 'dlib'
@@ -1089,7 +1090,7 @@ def get_face_worker_list(algname=None,verbose=False):
                 if 'getGalleryWorker' in dir(module):
                     FACE_WORKER_LIST[name][2] = module.getGalleryWorker
             except Exception as e:
-                if verbose:
+                # if verbose:
                     print("Could not load worker ", name, ": ", e)
     return FACE_WORKER_LIST
 

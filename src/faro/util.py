@@ -34,6 +34,8 @@ import threading
 import time
 
 import faro.util
+from PIL import Image
+import cv2
 
 _keras = None
 _K = None
@@ -45,31 +47,31 @@ def loadKeras(gpu_id = None):
     '''
     Use this function to load keras in a safe way that limits gpu memory usage
     and allows multiple workerns on a single gpu.
-    '''        
+    '''
     global _keras
     global _K
-    
+
     if _keras is None:
-        global FACE_ALG 
+        global FACE_ALG
         import keras.backend as K
-        
+
         config = K.tf.ConfigProto()
         config.gpu_options.allow_growth = True
         session = K.tf.Session(config=config)
         K.set_session(session)
-        
+
         import keras
-        
+
         _keras = keras
         _K = K
-    
+
     return _keras, _K
 
 def getTensorflowSession(gpu_id = None):
-    
+
     global _tf
     global _tf_sess
-    
+
     if _tf == None:
         import tensorflow as tf
         _tf = tf
@@ -77,7 +79,7 @@ def getTensorflowSession(gpu_id = None):
         config.gpu_options.allow_growth = True
         #config.gpu_options.per_process_gpu_memory_fraction = 0.2
         _tf_sess = tf.Session(config=config)
-        
+
     return _tf, _tf_sess
 
 def optionalImport(libname):
@@ -313,3 +315,6 @@ def generateKeys(keystore_dir,country='US',state='Tennessee',city='Knoxville',co
     #~/cfssl/bin/cfssl gencert -initca ca-csr.json | ~/cfssl/bin/cfssljson -bare ca
     #~/cfssl/bin/cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname='127.0.0.1,localhost' server-csr.json | ~/cfssl/bin/cfssljson -bare server
     #~/cfssl/bin/cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json client-csr.json | ~/cfssl/bin/cfssljson -bare client
+
+def cv2_to_pil(cv2_image):
+    return Image.fromarray(cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB))

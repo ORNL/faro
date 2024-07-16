@@ -17,5 +17,16 @@ Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Classifier: Topic :: Scientific/Engineering :: Image Recognition
 License-File: LICENSE
+Requires-Dist: opencv-python==3.4.18.65
+Requires-Dist: pillow>9.3.0
+Requires-Dist: numpy<=1.24.0,>=1.21.0
+Requires-Dist: scipy
+Requires-Dist: scikit-image
+Requires-Dist: scikit-learn
+Requires-Dist: protobuf>3.18.3
+Requires-Dist: grpcio-tools
+Requires-Dist: sortedcollections
+Requires-Dist: h5py
+Requires-Dist: tqdm
 
 A computer vision library for python.
